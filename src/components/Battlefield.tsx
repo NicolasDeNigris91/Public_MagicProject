@@ -6,10 +6,11 @@ export interface BattlefieldProps {
   label: string;
   cards: ICard[];
   onCardActivate?: (card: ICard) => void;
+  onCardInspect?: (card: ICard) => void;
   selectedId?: string | null;
 }
 
-export function Battlefield({ label, cards, onCardActivate, selectedId }: BattlefieldProps) {
+export function Battlefield({ label, cards, onCardActivate, onCardInspect, selectedId }: BattlefieldProps) {
   return (
     <section
       aria-label={`${label}. ${cards.length} creature${cards.length === 1 ? '' : 's'} on the battlefield.`}
@@ -32,6 +33,7 @@ export function Battlefield({ label, cards, onCardActivate, selectedId }: Battle
               animateEntry
               selected={card.id === selectedId}
               onActivate={onCardActivate}
+              onInspect={onCardInspect}
             />
           </li>
         ))}
