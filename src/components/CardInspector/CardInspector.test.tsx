@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import { CardInspector } from './CardInspector';
 import type { ICard } from '@/engine/types';
@@ -79,5 +79,35 @@ describe('CardInspector', () => {
     );
     expect(screen.getByRole('button', { name: 'Play to field' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Cancel' })).toBeInTheDocument();
+  });
+
+  it('renders CardFallback when card.imageUrl is empty', () => {
+    render(
+      <CardInspector
+        card={{ ...sampleCard, imageUrl: '' }}
+        actions={[{ label: 'Close', variant: 'primary', onClick: vi.fn() }]}
+        onClose={vi.fn()}
+      />,
+    );
+    // The CardFallback rerenders the card name visibly.
+    const headings = screen.getAllByText('Shivan Dragon');
+    // Title (h2) + fallback name -> at least 2.
+    expect(headings.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('swaps to CardFallback when the image fires onError', () => {
+    render(
+      <CardInspector
+        card={sampleCard}
+        actions={[{ label: 'Close', variant: 'primary', onClick: vi.fn() }]}
+        onClose={vi.fn()}
+      />,
+    );
+    const img = document.querySelector('img');
+    expect(img).not.toBeNull();
+    fireEvent.error(img!);
+    // After error, fallback renders the card name a second time.
+    const headings = screen.getAllByText('Shivan Dragon');
+    expect(headings.length).toBeGreaterThanOrEqual(2);
   });
 });
