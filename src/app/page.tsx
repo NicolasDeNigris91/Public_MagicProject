@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Hand } from '@/components/Hand';
 import { Battlefield } from '@/components/Battlefield';
 import { Footer } from '@/components/Footer';
@@ -15,8 +15,6 @@ import {
 interface InspectedRef {
   card: ICard;
   source: InspectorSource;
-  /** Element to restore focus to when the inspector closes. */
-  origin: HTMLElement | null;
 }
 
 export default function GamePage() {
@@ -91,18 +89,17 @@ export default function GamePage() {
     }
   }, [inspected, player.hand, player.battlefield, opponent.battlefield, announce]);
 
-  const closeInspector = () => {
+  const closeInspector = useCallback(() => {
     const originId = inspected?.card.id ?? null;
     setInspected(null);
-    // Restore focus on the next frame so the portal has unmounted.
     requestAnimationFrame(() => {
       if (!originId) return;
       document.querySelector<HTMLElement>(`[data-card-id="${originId}"]`)?.focus();
     });
-  };
+  }, [inspected]);
 
   const openInspector = (card: ICard, src: InspectorSource) => {
-    setInspected({ card, source: src, origin: document.activeElement as HTMLElement | null });
+    setInspected({ card, source: src });
   };
 
   const onPlayFromHand = (card: ICard) => openInspector(card, 'hand');
@@ -166,7 +163,7 @@ export default function GamePage() {
       },
       onClose: closeInspector,
     });
-  }, [inspected, selectedAttacker, turn, announce, playCardToField]);
+  }, [inspected, selectedAttacker, turn, announce, playCardToField, closeInspector]);
 
   if (!initialized) {
     return (
