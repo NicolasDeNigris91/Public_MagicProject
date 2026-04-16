@@ -43,6 +43,9 @@ export function buildInspectorActions(args: BuildInspectorActionsArgs): Inspecto
     ];
   }
 
-  // opponent-field
-  return [{ label: 'Close', variant: 'primary', onClick: onClose }];
+  if (source === 'opponent-field') {
+    return [{ label: 'Close', variant: 'primary', onClick: onClose }];
+  }
+  const _exhaustive: never = source;
+  throw new Error(`Unhandled InspectorSource: ${_exhaustive}`);
 }

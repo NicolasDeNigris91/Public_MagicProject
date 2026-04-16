@@ -60,6 +60,8 @@ describe('buildInspectorActions', () => {
     actions[0]!.onClick();
     expect(callbacks.onPlay).toHaveBeenCalledTimes(1);
     expect(callbacks.onClose).toHaveBeenCalledTimes(1);
+    expect(callbacks.onPlay.mock.invocationCallOrder[0]!)
+      .toBeLessThan(callbacks.onClose.mock.invocationCallOrder[0]!);
   });
 
   it('Cancel action invokes only onClose', () => {
@@ -86,6 +88,8 @@ describe('buildInspectorActions', () => {
     actions[0]!.onClick();
     expect(callbacks.onSelectAttacker).toHaveBeenCalledTimes(1);
     expect(callbacks.onClose).toHaveBeenCalledTimes(1);
+    expect(callbacks.onSelectAttacker.mock.invocationCallOrder[0]!)
+      .toBeLessThan(callbacks.onClose.mock.invocationCallOrder[0]!);
   });
 
   it('Deselect attacker invokes onDeselectAttacker then onClose', () => {
@@ -99,5 +103,7 @@ describe('buildInspectorActions', () => {
     actions[0]!.onClick();
     expect(callbacks.onDeselectAttacker).toHaveBeenCalledTimes(1);
     expect(callbacks.onClose).toHaveBeenCalledTimes(1);
+    expect(callbacks.onDeselectAttacker.mock.invocationCallOrder[0]!)
+      .toBeLessThan(callbacks.onClose.mock.invocationCallOrder[0]!);
   });
 });
