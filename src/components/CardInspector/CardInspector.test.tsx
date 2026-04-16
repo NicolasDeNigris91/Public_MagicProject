@@ -1,5 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
+import userEvent from '@testing-library/user-event';
 import { CardInspector } from './CardInspector';
 import type { ICard } from '@/engine/types';
 
@@ -109,5 +110,45 @@ describe('CardInspector', () => {
     // After error, fallback renders the card name a second time.
     const headings = screen.getAllByText('Shivan Dragon');
     expect(headings.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('invokes onClose when Escape is pressed', async () => {
+    const onClose = vi.fn();
+    render(
+      <CardInspector
+        card={sampleCard}
+        actions={[{ label: 'Close', variant: 'primary', onClick: onClose }]}
+        onClose={onClose}
+      />,
+    );
+    await userEvent.keyboard('{Escape}');
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('invokes onClose when the backdrop is clicked', async () => {
+    const onClose = vi.fn();
+    const { container } = render(
+      <CardInspector
+        card={sampleCard}
+        actions={[{ label: 'Close', variant: 'primary', onClick: onClose }]}
+        onClose={onClose}
+      />,
+    );
+    const backdrop = container.firstElementChild as HTMLElement;
+    await userEvent.click(backdrop);
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('does NOT invoke onClose when the dialog interior is clicked', async () => {
+    const onClose = vi.fn();
+    render(
+      <CardInspector
+        card={sampleCard}
+        actions={[{ label: 'Close', variant: 'primary', onClick: onClose }]}
+        onClose={onClose}
+      />,
+    );
+    await userEvent.click(screen.getByRole('heading', { name: 'Shivan Dragon' }));
+    expect(onClose).not.toHaveBeenCalled();
   });
 });

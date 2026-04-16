@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { ICard } from '@/engine/types';
 import { CardFallback } from '../Card/CardFallback';
 import type { InspectorAction } from '@/utils/buildInspectorActions';
@@ -41,13 +41,27 @@ export interface CardInspectorProps {
   onClose: () => void;
 }
 
-export function CardInspector({ card, actions, onClose: _onClose }: CardInspectorProps) {
+export function CardInspector({ card, actions, onClose }: CardInspectorProps) {
   const [imgFailed, setImgFailed] = useState(!card.imageUrl);
   const isCreature = /creature/i.test(card.typeLine);
   const manaText = humanizeManaCostInline(card.manaCost);
 
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.stopPropagation();
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onClose]);
+
   return (
-    <div className={styles.backdrop}>
+    <div
+      className={styles.backdrop}
+      onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
       <div
         role="dialog"
         aria-modal="true"
