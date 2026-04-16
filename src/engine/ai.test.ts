@@ -1,0 +1,47 @@
+import { describe, expect, it } from 'vitest';
+import type { ICard, IPlayer } from './types';
+import { pickCardToPlay, planAttacks } from './ai';
+
+const makeCard = (id: string, power = 2, toughness = 2, typeLine = 'Creature'): ICard => ({
+  id, name: id, power, toughness, manaCost: '{1}', typeLine,
+  oracleText: '', imageUrl: '', imageUrlSmall: '', accessibilityDescription: id,
+});
+
+const makePlayer = (o: Partial<IPlayer> = {}): IPlayer => ({
+  id: 'opponent', life: 20, hand: [], battlefield: [], deck: [],
+  playsRemaining: 1, ...o,
+});
+
+describe('pickCardToPlay', () => {
+  it('picks highest-power creature', () => {
+    const hand = [makeCard('a', 1, 1), makeCard('b', 4, 2), makeCard('c', 2, 2)];
+    expect(pickCardToPlay(hand)?.id).toBe('b');
+  });
+  it('ignores non-creatures', () => {
+    expect(pickCardToPlay([makeCard('land', 0, 0, 'Land')])).toBeNull();
+  });
+  it('returns null on empty hand', () => {
+    expect(pickCardToPlay([])).toBeNull();
+  });
+});
+
+describe('planAttacks', () => {
+  it('attacks directly when opponent has no blockers', () => {
+    const me = makePlayer({ battlefield: [makeCard('a', 3, 3)] });
+    const plans = planAttacks(me, makePlayer());
+    expect(plans).toEqual([{ attackerId: 'a', blockerId: null }]);
+  });
+
+  it('picks a safe kill over direct attack', () => {
+    const me = makePlayer({ battlefield: [makeCard('big', 5, 5)] });
+    const opp = makePlayer({ battlefield: [makeCard('weak', 1, 1)] });
+    const plans = planAttacks(me, opp);
+    expect(plans[0]).toEqual({ attackerId: 'big', blockerId: 'weak' });
+  });
+
+  it('skips attacking into a bigger wall', () => {
+    const me = makePlayer({ battlefield: [makeCard('small', 1, 1)] });
+    const opp = makePlayer({ battlefield: [makeCard('wall', 0, 10)] });
+    expect(planAttacks(me, opp)).toHaveLength(0);
+  });
+});

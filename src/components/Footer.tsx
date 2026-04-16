@@ -1,0 +1,34 @@
+export function Footer() {
+  return (
+    <footer
+      lang="pt-BR"
+      style={{
+        marginTop: 48,
+        padding: '24px 16px',
+        borderTop: '1px solid #263238',
+        color: '#b0bec5',
+        fontSize: 13,
+        lineHeight: 1.5,
+        maxWidth: 1100,
+        marginInline: 'auto',
+      }}
+    >
+      <p>
+        <strong>Aviso Legal:</strong> Este é um projeto de portfólio não oficial, sem fins lucrativos.
+        {' '}<em>Magic: The Gathering</em>, nomes de cartas, arte e marcas registradas são propriedade da{' '}
+        <strong>Wizards of the Coast LLC</strong>, subsidiária da Hasbro, Inc. Este projeto não é produzido,
+        endossado, apoiado ou afiliado à Wizards of the Coast. Dados e imagens das cartas são fornecidos pela
+        API pública <a href="https://scryfall.com" rel="noreferrer noopener" target="_blank" style={{ color: '#4dd0e1' }}>Scryfall</a>,
+        a quem agradecemos. Este conteúdo de fã é permitido sob a{' '}
+        <a
+          href="https://company.wizards.com/en/legal/fancontentpolicy"
+          rel="noreferrer noopener"
+          target="_blank"
+          style={{ color: '#4dd0e1' }}
+        >
+          Política de Conteúdo de Fãs da Wizards of the Coast
+        </a>.
+      </p>
+    </footer>
+  );
+}
