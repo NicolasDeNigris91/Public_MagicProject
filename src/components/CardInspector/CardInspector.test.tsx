@@ -56,7 +56,7 @@ describe('CardInspector', () => {
     expect(screen.getByText(/Flying\./)).toBeInTheDocument();
   });
 
-  it('uses the card accessibilityDescription as the dialog aria-label', () => {
+  it('labels the dialog by the inspector-title heading id', () => {
     render(
       <CardInspector
         card={sampleCard}
@@ -64,7 +64,8 @@ describe('CardInspector', () => {
         onClose={vi.fn()}
       />,
     );
-    expect(screen.getByRole('dialog')).toHaveAttribute('aria-label', sampleCard.accessibilityDescription);
+    expect(screen.getByRole('dialog')).toHaveAttribute('aria-labelledby', 'inspector-title');
+    expect(document.getElementById('inspector-title')?.textContent).toBe(sampleCard.name);
   });
 
   it('renders one button per action with the correct labels', () => {

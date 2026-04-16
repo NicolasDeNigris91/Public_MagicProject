@@ -99,7 +99,7 @@ export function CardInspector({ card, actions, onClose }: CardInspectorProps) {
         ref={dialogRef}
         role="dialog"
         aria-modal="true"
-        aria-label={card.accessibilityDescription}
+        aria-labelledby="inspector-title"
         className={styles.dialog}
       >
         <div className={styles.imageCell}>

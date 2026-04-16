@@ -62,56 +62,51 @@ export function Card({ card, selected = false, onActivate, onInspect, animateEnt
     : card.accessibilityDescription;
 
   return (
-    <motion.button
-      type="button"
-      layoutId={card.id}
-      data-card-id={card.id}
-      className={`${styles.card}${card.summoningSick ? ` ${styles.sick}` : ''}`}
-      aria-label={ariaLabel}
-      aria-pressed={selected}
-      onClick={() => onActivate?.(card)}
-      onKeyDown={handleKey}
-      transition={{ duration: 0.45, ease: 'easeOut' }}
-      whileHover={reduceMotion ? undefined : { y: -6 }}
-      {...entry}
-    >
-      {!imgFailed && card.imageUrl ? (
-        // Intentional <img>: we need direct onError control for the
-        // accessible fallback flow. next/image's error surface is less
-        // predictable across remote domains. alt="" because the full
-        // semantic description is already on the button's aria-label.
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={card.imageUrl}
-          alt=""
-          className={styles.img}
-          onError={() => setImgFailed(true)}
-          loading="lazy"
-        />
-      ) : (
-        <CardFallback card={card} />
-      )}
-      {card.summoningSick && (
-        <span aria-hidden="true" className={styles.sickBadge}>Summoning sickness</span>
-      )}
+    <div className={styles.cardWrapper}>
+      <motion.button
+        type="button"
+        layoutId={card.id}
+        data-card-id={card.id}
+        className={`${styles.card}${card.summoningSick ? ` ${styles.sick}` : ''}`}
+        aria-label={ariaLabel}
+        aria-pressed={selected}
+        onClick={() => onActivate?.(card)}
+        onKeyDown={handleKey}
+        transition={{ duration: 0.45, ease: 'easeOut' }}
+        whileHover={reduceMotion ? undefined : { y: -6 }}
+        {...entry}
+      >
+        {!imgFailed && card.imageUrl ? (
+          // Intentional <img>: we need direct onError control for the
+          // accessible fallback flow. next/image's error surface is less
+          // predictable across remote domains. alt="" because the full
+          // semantic description is already on the button's aria-label.
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={card.imageUrl}
+            alt=""
+            className={styles.img}
+            onError={() => setImgFailed(true)}
+            loading="lazy"
+          />
+        ) : (
+          <CardFallback card={card} />
+        )}
+        {card.summoningSick && (
+          <span aria-hidden="true" className={styles.sickBadge}>Summoning sickness</span>
+        )}
+      </motion.button>
       {onInspect && (
-        <span
-          role="button"
-          tabIndex={0}
+        <button
+          type="button"
+          tabIndex={-1}
           aria-label={`Inspect ${card.name}`}
           className={styles.inspectBtn}
-          onClick={(e) => { e.stopPropagation(); onInspect(card); }}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault();
-              e.stopPropagation();
-              onInspect(card);
-            }
-          }}
+          onClick={() => onInspect(card)}
         >
           ⓘ
-        </span>
+        </button>
       )}
-    </motion.button>
+    </div>
   );
 }
