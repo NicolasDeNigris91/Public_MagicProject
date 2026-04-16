@@ -26,11 +26,15 @@ export interface CardProps {
   card: ICard;
   selected?: boolean;
   onActivate?: (card: ICard) => void;
+  /** Opens the detailed inspector for this card. When supplied,
+   *  pressing `i` while focused and clicking the visible-on-hover/focus
+   *  "ⓘ" button both fire this callback. */
+  onInspect?: (card: ICard) => void;
   /** If true, the card plays its "enter the battlefield" flip animation. */
   animateEntry?: boolean;
 }
 
-export function Card({ card, selected = false, onActivate, animateEntry = false }: CardProps) {
+export function Card({ card, selected = false, onActivate, onInspect, animateEntry = false }: CardProps) {
   const [imgFailed, setImgFailed] = useState(!card.imageUrl);
   const reduceMotion = useReducedMotion();
 
@@ -38,6 +42,11 @@ export function Card({ card, selected = false, onActivate, animateEntry = false 
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
       onActivate?.(card);
+      return;
+    }
+    if (onInspect && (e.key === 'i' || e.key === 'I')) {
+      e.preventDefault();
+      onInspect(card);
     }
   };
 
@@ -84,6 +93,24 @@ export function Card({ card, selected = false, onActivate, animateEntry = false 
       )}
       {card.summoningSick && (
         <span aria-hidden="true" className={styles.sickBadge}>Summoning sickness</span>
+      )}
+      {onInspect && (
+        <span
+          role="button"
+          tabIndex={0}
+          aria-label="Inspect"
+          className={styles.inspectBtn}
+          onClick={(e) => { e.stopPropagation(); onInspect(card); }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              e.stopPropagation();
+              onInspect(card);
+            }
+          }}
+        >
+          ⓘ
+        </span>
       )}
     </motion.button>
   );

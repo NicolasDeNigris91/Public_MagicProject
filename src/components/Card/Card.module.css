@@ -105,6 +105,37 @@
   }
 }
 
+.inspectBtn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.78);
+  color: #4dd0e1;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.card:hover .inspectBtn,
+.card:focus-within .inspectBtn,
+.inspectBtn:focus-visible {
+  opacity: 1;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(77, 208, 225, 0.45);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .inspectBtn { transition: none !important; }
+}
+
 .sr-only {
   position: absolute;
   width: 1px;
