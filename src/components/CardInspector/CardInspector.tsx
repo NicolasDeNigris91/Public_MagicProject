@@ -69,6 +69,8 @@ export function CardInspector({ card, actions, onClose }: CardInspectorProps) {
       const first = items[0]!;
       const last = items[items.length - 1]!;
       const active = document.activeElement as HTMLElement | null;
+      const isInside = !!active && root.contains(active);
+      if (!isInside) { e.preventDefault(); first.focus(); return; }
       if (e.shiftKey && active === first) { e.preventDefault(); last.focus(); }
       else if (!e.shiftKey && active === last) { e.preventDefault(); first.focus(); }
     };

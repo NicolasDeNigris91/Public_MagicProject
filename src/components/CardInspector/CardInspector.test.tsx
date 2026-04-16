@@ -183,6 +183,24 @@ describe('CardInspector', () => {
     expect(screen.getByRole('button', { name: 'Play to field' })).toHaveFocus();
   });
 
+  it('redirects Tab to the first focusable when focus is outside the dialog', async () => {
+    render(
+      <CardInspector
+        card={sampleCard}
+        actions={[
+          { label: 'Play to field', variant: 'primary', onClick: vi.fn() },
+          { label: 'Cancel', variant: 'secondary', onClick: vi.fn() },
+        ]}
+        onClose={vi.fn()}
+      />,
+    );
+    // Move focus to body (simulates focus loss to a backdrop click or DOM mutation).
+    (document.activeElement as HTMLElement | null)?.blur();
+    expect(document.body).toHaveFocus();
+    await userEvent.tab();
+    expect(screen.getByRole('button', { name: 'Play to field' })).toHaveFocus();
+  });
+
   it('Shift+Tab from the first focusable wraps to the last', async () => {
     render(
       <CardInspector
