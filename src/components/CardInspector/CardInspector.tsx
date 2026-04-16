@@ -1,9 +1,12 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { ICard } from '@/engine/types';
 import { CardFallback } from '../Card/CardFallback';
 import type { InspectorAction } from '@/utils/buildInspectorActions';
 import styles from './CardInspector.module.css';
+
+const focusableSelector =
+  'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
 const MANA_SYMBOLS: Record<string, string> = {
   W: 'white', U: 'blue', B: 'black', R: 'red', G: 'green',
@@ -46,6 +49,33 @@ export function CardInspector({ card, actions, onClose }: CardInspectorProps) {
   const isCreature = /creature/i.test(card.typeLine);
   const manaText = humanizeManaCostInline(card.manaCost);
 
+  const dialogRef = useRef<HTMLDivElement>(null);
+
+  // Initial focus: primary action (first focusable).
+  useEffect(() => {
+    const first = dialogRef.current?.querySelector<HTMLElement>(focusableSelector);
+    first?.focus();
+  }, []);
+
+  // Manual focus trap: Tab / Shift+Tab cycles within the dialog.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Tab') return;
+      const root = dialogRef.current;
+      if (!root) return;
+      const items = Array.from(root.querySelectorAll<HTMLElement>(focusableSelector))
+        .filter((el) => !el.hasAttribute('disabled'));
+      if (items.length === 0) return;
+      const first = items[0]!;
+      const last = items[items.length - 1]!;
+      const active = document.activeElement as HTMLElement | null;
+      if (e.shiftKey && active === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && active === last) { e.preventDefault(); first.focus(); }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -63,6 +93,7 @@ export function CardInspector({ card, actions, onClose }: CardInspectorProps) {
       onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
       <div
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-label={card.accessibilityDescription}

@@ -151,4 +151,51 @@ describe('CardInspector', () => {
     await userEvent.click(screen.getByRole('heading', { name: 'Shivan Dragon' }));
     expect(onClose).not.toHaveBeenCalled();
   });
+
+  it('puts initial focus on the first (primary) action button', () => {
+    render(
+      <CardInspector
+        card={sampleCard}
+        actions={[
+          { label: 'Play to field', variant: 'primary', onClick: vi.fn() },
+          { label: 'Cancel', variant: 'secondary', onClick: vi.fn() },
+        ]}
+        onClose={vi.fn()}
+      />,
+    );
+    expect(screen.getByRole('button', { name: 'Play to field' })).toHaveFocus();
+  });
+
+  it('Tab from the last focusable wraps to the first', async () => {
+    render(
+      <CardInspector
+        card={sampleCard}
+        actions={[
+          { label: 'Play to field', variant: 'primary', onClick: vi.fn() },
+          { label: 'Cancel', variant: 'secondary', onClick: vi.fn() },
+        ]}
+        onClose={vi.fn()}
+      />,
+    );
+    const cancel = screen.getByRole('button', { name: 'Cancel' });
+    cancel.focus();
+    await userEvent.tab();
+    expect(screen.getByRole('button', { name: 'Play to field' })).toHaveFocus();
+  });
+
+  it('Shift+Tab from the first focusable wraps to the last', async () => {
+    render(
+      <CardInspector
+        card={sampleCard}
+        actions={[
+          { label: 'Play to field', variant: 'primary', onClick: vi.fn() },
+          { label: 'Cancel', variant: 'secondary', onClick: vi.fn() },
+        ]}
+        onClose={vi.fn()}
+      />,
+    );
+    screen.getByRole('button', { name: 'Play to field' }).focus();
+    await userEvent.tab({ shift: true });
+    expect(screen.getByRole('button', { name: 'Cancel' })).toHaveFocus();
+  });
 });
