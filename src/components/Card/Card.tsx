@@ -98,7 +98,7 @@ export function Card({ card, selected = false, onActivate, onInspect, animateEnt
         <span
           role="button"
           tabIndex={0}
-          aria-label="Inspect"
+          aria-label={`Inspect ${card.name}`}
           className={styles.inspectBtn}
           onClick={(e) => { e.stopPropagation(); onInspect(card); }}
           onKeyDown={(e) => {

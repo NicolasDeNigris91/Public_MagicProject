@@ -21,7 +21,10 @@ describe('Card — onInspect', () => {
     const onActivate = vi.fn();
     const onInspect = vi.fn();
     render(<Card card={sample} onActivate={onActivate} onInspect={onInspect} />);
-    const btn = screen.getByRole('button', { name: /Test Goblin/ });
+    // Anchor: the outer card button's accessible name starts with "Test Goblin."
+    // (the card.accessibilityDescription); the inspect span's aria-label is
+    // "Inspect Test Goblin" — different leading character.
+    const btn = screen.getByRole('button', { name: /^Test Goblin\./ });
     btn.focus();
     await userEvent.keyboard('i');
     expect(onInspect).toHaveBeenCalledTimes(1);
