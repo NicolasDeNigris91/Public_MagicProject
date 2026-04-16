@@ -6,19 +6,21 @@ import { Card } from './Card/Card';
 /**
  * The player's hand is a listbox-like keyboard group:
  * - Tab enters the group, focus lands on first card.
- * - ArrowLeft / ArrowRight move focus between cards (roving tabindex
- *   would be more idiomatic but with <button>s inside a <ul> the AT
- *   already exposes the count, so we keep Tab-per-card for simplicity).
- * - Enter / Space on a card calls onPlay — the same contract as click.
+ * - ArrowLeft / ArrowRight move focus between cards.
+ * - Enter / Space on a card calls onActivate — the same contract as click.
+ *
+ * onActivate semantics changed: clicking a card no longer plays it
+ * directly. The page wires onActivate to "open the inspector", and the
+ * inspector's primary button is what actually plays the card.
  */
 export interface HandProps {
   hand: ICard[];
   label: string;
-  onPlay: (card: ICard) => void;
+  onActivate: (card: ICard) => void;
   hidden?: boolean;
 }
 
-export function Hand({ hand, label, onPlay, hidden = false }: HandProps) {
+export function Hand({ hand, label, onActivate, hidden = false }: HandProps) {
   const ref = useRef<HTMLUListElement>(null);
 
   const onKeyDown = (e: KeyboardEvent<HTMLUListElement>) => {
@@ -60,7 +62,7 @@ export function Hand({ hand, label, onPlay, hidden = false }: HandProps) {
                 }}
               />
             ) : (
-              <Card card={card} onActivate={onPlay} />
+              <Card card={card} onActivate={onActivate} />
             )}
           </li>
         ))}
