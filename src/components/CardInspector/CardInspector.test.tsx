@@ -127,14 +127,16 @@ describe('CardInspector', () => {
 
   it('invokes onClose when the backdrop is clicked', async () => {
     const onClose = vi.fn();
-    const { container } = render(
+    render(
       <CardInspector
         card={sampleCard}
         actions={[{ label: 'Close', variant: 'primary', onClick: onClose }]}
         onClose={onClose}
       />,
     );
-    const backdrop = container.firstElementChild as HTMLElement;
+    // The component renders via a portal into document.body, so we query there.
+    const backdrop = document.querySelector<HTMLElement>('[role="dialog"]')
+      ?.parentElement as HTMLElement;
     await userEvent.click(backdrop);
     expect(onClose).toHaveBeenCalledTimes(1);
   });
@@ -215,5 +217,23 @@ describe('CardInspector', () => {
     screen.getByRole('button', { name: 'Play to field' }).focus();
     await userEvent.tab({ shift: true });
     expect(screen.getByRole('button', { name: 'Cancel' })).toHaveFocus();
+  });
+
+  it('renders into document.body via a portal (not inside its parent)', () => {
+    const { container } = render(
+      <div data-testid="parent-host">
+        <CardInspector
+          card={sampleCard}
+          actions={[{ label: 'Close', variant: 'primary', onClick: vi.fn() }]}
+          onClose={vi.fn()}
+        />
+      </div>,
+    );
+    const parent = container.querySelector('[data-testid="parent-host"]');
+    expect(parent).not.toBeNull();
+    // Dialog should NOT be a descendant of the test wrapper.
+    expect(parent!.querySelector('[role="dialog"]')).toBeNull();
+    // It should exist somewhere in the document though.
+    expect(document.querySelector('[role="dialog"]')).not.toBeNull();
   });
 });

@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import type { ICard } from '@/engine/types';
 import { CardFallback } from '../Card/CardFallback';
 import type { InspectorAction } from '@/utils/buildInspectorActions';
@@ -89,7 +90,7 @@ export function CardInspector({ card, actions, onClose }: CardInspectorProps) {
     return () => window.removeEventListener('keydown', onKey);
   }, [onClose]);
 
-  return (
+  return createPortal(
     <div
       className={styles.backdrop}
       onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}
@@ -138,6 +139,7 @@ export function CardInspector({ card, actions, onClose }: CardInspectorProps) {
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
