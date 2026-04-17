@@ -46,7 +46,8 @@ src/
 ├── adapters/        # ScryfallCard -> ICard (the ONLY file that knows about Scryfall)
 ├── services/        # Axios client + offline fallback deck
 ├── store/           # Zustand — delegates to engine, owns the game log
-├── hooks/           # useAnnouncer — debounced live-region feed
+├── hooks/           # useAnnouncer (live regions), useDeck, useInspector,
+│                   # useAttackerSelection, useInertWhile, usePostPlayFocus
 ├── components/      # Card (focusable + animated), Hand, Battlefield, LiveRegion, …
 └── app/             # Next.js App Router entry
 ```
@@ -83,11 +84,15 @@ npm run typecheck
 
 ## Deploying
 
-Deploy target: **Vercel**.
+Deploy target: **Railway** (Nixpacks builder).
 
 1. Push to GitHub.
-2. Import the repo in the Vercel dashboard — defaults work (Next.js auto-detected).
-3. No env vars required. Scryfall is an unauthenticated public API.
+2. In Railway, **New Project → Deploy from GitHub repo**, pick this repo.
+3. Railway reads [`railway.json`](./railway.json) and runs `npm ci && npm run build` then `npm run start`. Node version is pinned via [`.nvmrc`](./.nvmrc) and `engines.node` in `package.json`.
+4. No env vars required. Scryfall is an unauthenticated public API. Railway injects `PORT` automatically — `next start` honors it.
+5. Generate a public domain in **Settings → Networking** once the first deploy is green.
+
+Security headers (`X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`, etc.) are emitted by Next.js itself via [`next.config.mjs`](./next.config.mjs), so they apply on any host — Railway, Vercel, or self-hosted.
 
 If Scryfall is unreachable at runtime, the UI announces the switch and plays with a built-in 10-card offline deck so the demo still works.
 

@@ -1,21 +1,16 @@
 'use client';
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { Hand } from '@/components/Hand';
 import { Battlefield } from '@/components/Battlefield';
 import { Footer } from '@/components/Footer';
 import { CardInspector } from '@/components/CardInspector/CardInspector';
 import { useGameStore } from '@/store/useGameStore';
-import { fetchRandomCreatures } from '@/services/scryfall.client';
-import type { ICard } from '@/engine/types';
-import {
-  buildInspectorActions,
-  type InspectorSource,
-} from '@/utils/buildInspectorActions';
-
-interface InspectedRef {
-  card: ICard;
-  source: InspectorSource;
-}
+import { useDeck } from '@/hooks/useDeck';
+import { useInspector } from '@/hooks/useInspector';
+import { useAttackerSelection } from '@/hooks/useAttackerSelection';
+import { useInertWhile } from '@/hooks/useInertWhile';
+import { usePostPlayFocus } from '@/hooks/usePostPlayFocus';
+import { buildInspectorActions } from '@/utils/buildInspectorActions';
 
 export default function GamePage() {
   const player = useGameStore((s) => s.player);
@@ -24,117 +19,41 @@ export default function GamePage() {
   const turnNumber = useGameStore((s) => s.turnNumber);
   const winner = useGameStore((s) => s.winner);
   const initialized = useGameStore((s) => s.initialized);
-  const initGame = useGameStore((s) => s.initGame);
   const playCardToField = useGameStore((s) => s.playCardToField);
-  const attack = useGameStore((s) => s.attack);
   const endTurn = useGameStore((s) => s.endTurn);
   const announce = useGameStore((s) => s.announce);
 
-  const [source, setSource] = useState<'scryfall' | 'fallback' | null>(null);
-  const [selectedAttacker, setSelectedAttacker] = useState<string | null>(null);
-  const [deckCache, setDeckCache] = useState<ICard[] | null>(null);
-  const [inspected, setInspected] = useState<InspectedRef | null>(null);
+  const { source, restart } = useDeck();
+  const {
+    inspected,
+    open: openInspector,
+    close: closeInspector,
+    clear: clearInspector,
+  } = useInspector();
+  const {
+    selected: selectedAttacker,
+    handleBattlefieldActivate,
+    attackDirectly,
+    select: selectAttacker,
+    deselect: deselectAttacker,
+    clear: clearAttacker,
+  } = useAttackerSelection();
+  const postPlayFocus = usePostPlayFocus();
 
-  const gameOverRef = useRef<HTMLDivElement>(null);
   const mainRef = useRef<HTMLElement>(null);
-  const pendingFocusId = useRef<string | null>(null);
+  const gameOverRef = useRef<HTMLDivElement>(null);
+  useInertWhile(mainRef, inspected !== null);
 
   useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      const result = await fetchRandomCreatures(40);
-      if (cancelled) return;
-      setDeckCache(result.cards);
-      initGame(result.cards);
-      setSource(result.source);
-      if (result.source === 'fallback') {
-        announce(
-          'Could not reach Scryfall. Playing with the built-in offline deck.',
-          'assertive',
-        );
-      }
-    })();
-    return () => { cancelled = true; };
-  }, [initGame, announce]);
+    if (!winner) return;
+    clearInspector();
+    gameOverRef.current?.focus();
+  }, [winner, clearInspector]);
 
-  useEffect(() => {
-    if (winner) {
-      setInspected(null);
-      gameOverRef.current?.focus();
-    }
-  }, [winner]);
-
-  // Toggle `inert` on <main> while the inspector is open. We use direct
-  // DOM manipulation (not a React prop) to avoid React 18 warnings about
-  // unknown DOM attributes.
-  useEffect(() => {
-    const m = mainRef.current;
-    if (!m) return;
-    if (inspected) m.setAttribute('inert', '');
-    else m.removeAttribute('inert');
-    return () => { m.removeAttribute('inert'); };
-  }, [inspected]);
-
-  // Auto-close the inspector if the inspected card disappears from
-  // every zone we render (e.g. combat resolves while the modal is open).
-  useEffect(() => {
-    if (!inspected) return;
-    const stillExists =
-      player.hand.some((c) => c.id === inspected.card.id) ||
-      player.battlefield.some((c) => c.id === inspected.card.id) ||
-      opponent.battlefield.some((c) => c.id === inspected.card.id);
-    if (!stillExists) {
-      setInspected(null);
-      announce('Card is no longer in play.', 'polite');
-    }
-  }, [inspected, player.hand, player.battlefield, opponent.battlefield, announce]);
-
-  const closeInspector = useCallback(() => {
-    const originId = inspected?.card.id ?? null;
-    setInspected(null);
-    requestAnimationFrame(() => {
-      if (!originId) return;
-      document.querySelector<HTMLElement>(`[data-card-id="${originId}"]`)?.focus();
-    });
-  }, [inspected]);
-
-  const openInspector = (card: ICard, src: InspectorSource) => {
-    setInspected({ card, source: src });
-  };
-
-  const onPlayFromHand = (card: ICard) => openInspector(card, 'hand');
-
-  useLayoutEffect(() => {
-    const target = pendingFocusId.current;
-    if (!target) return;
-    if (!player.battlefield.some((c) => c.id === target)) return;
-    document.querySelector<HTMLElement>(`[data-card-id="${target}"]`)?.focus();
-    pendingFocusId.current = null;
-  }, [player.battlefield]);
-
-  const onBattlefieldCardActivate = (card: ICard) => {
-    const mine = player.battlefield.some((c) => c.id === card.id);
-    if (mine) {
-      const isDeselecting = selectedAttacker === card.id;
-      setSelectedAttacker(isDeselecting ? null : card.id);
-      announce(
-        isDeselecting
-          ? `${card.name} deselected.`
-          : `${card.name} selected as attacker. Press a creature on the opponent's side to attack it, or press Attack Directly.`,
-        'polite',
-      );
-      return;
-    }
-    if (selectedAttacker) {
-      attack(selectedAttacker, card.id);
-      setSelectedAttacker(null);
-    }
-  };
-
-  const attackDirectly = () => {
-    if (!selectedAttacker) return;
-    attack(selectedAttacker, null);
-    setSelectedAttacker(null);
+  const onPlayAgain = () => {
+    clearAttacker();
+    postPlayFocus.clear();
+    restart();
   };
 
   const inspectorActions = useMemo(() => {
@@ -147,23 +66,24 @@ export default function GamePage() {
           announce("It's not your turn.", 'polite');
           return;
         }
-        pendingFocusId.current = inspected.card.id;
+        postPlayFocus.schedule(inspected.card.id);
         playCardToField('player', inspected.card.id);
       },
-      onSelectAttacker: () => {
-        setSelectedAttacker(inspected.card.id);
-        announce(
-          `${inspected.card.name} selected as attacker. Press a creature on the opponent's side to attack it, or press Attack Directly.`,
-          'polite',
-        );
-      },
-      onDeselectAttacker: () => {
-        setSelectedAttacker(null);
-        announce(`${inspected.card.name} deselected.`, 'polite');
-      },
+      onSelectAttacker: () => selectAttacker(inspected.card),
+      onDeselectAttacker: () => deselectAttacker(inspected.card),
       onClose: closeInspector,
     });
-  }, [inspected, selectedAttacker, turn, announce, playCardToField, closeInspector]);
+  }, [
+    inspected,
+    selectedAttacker,
+    turn,
+    announce,
+    playCardToField,
+    postPlayFocus,
+    selectAttacker,
+    deselectAttacker,
+    closeInspector,
+  ]);
 
   if (!initialized) {
     return (
@@ -211,15 +131,7 @@ export default function GamePage() {
             <strong id="game-over-title" style={{ fontSize: 18 }}>
               {winner === 'player' ? 'Victory — you defeated the opponent.' : 'Defeat — your life reached zero.'}
             </strong>
-            <button
-              onClick={() => {
-                if (!deckCache) return;
-                setSelectedAttacker(null);
-                pendingFocusId.current = null;
-                initGame(deckCache);
-              }}
-              style={controlStyle}
-            >
+            <button onClick={onPlayAgain} style={controlStyle}>
               Play again
             </button>
           </div>
@@ -233,7 +145,7 @@ export default function GamePage() {
           <Battlefield
             label="Opponent battlefield"
             cards={opponent.battlefield}
-            onCardActivate={onBattlefieldCardActivate}
+            onCardActivate={handleBattlefieldActivate}
             onCardInspect={(card) => openInspector(card, 'opponent-field')}
           />
         </section>
@@ -264,11 +176,15 @@ export default function GamePage() {
           <Battlefield
             label="Your battlefield"
             cards={player.battlefield}
-            onCardActivate={onBattlefieldCardActivate}
+            onCardActivate={handleBattlefieldActivate}
             onCardInspect={(card) => openInspector(card, 'own-field')}
             selectedId={selectedAttacker}
           />
-          <Hand hand={player.hand} label="Your hand" onActivate={onPlayFromHand} />
+          <Hand
+            hand={player.hand}
+            label="Your hand"
+            onActivate={(card) => openInspector(card, 'hand')}
+          />
         </section>
 
         <Footer />
