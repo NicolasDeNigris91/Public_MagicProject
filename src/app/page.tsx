@@ -4,6 +4,7 @@ import { Hand } from '@/components/Hand';
 import { Battlefield } from '@/components/Battlefield';
 import { Footer } from '@/components/Footer';
 import { CardInspector } from '@/components/CardInspector/CardInspector';
+import { CombatLayer } from '@/components/CombatLayer/CombatLayer';
 import { LifeDisplay } from '@/components/LifeDisplay';
 import { useGameStore } from '@/store/useGameStore';
 import { useDeck } from '@/hooks/useDeck';
@@ -192,6 +193,8 @@ export default function GamePage() {
 
         <Footer />
       </main>
+
+      <CombatLayer />
 
       {inspected && (
         <CardInspector
