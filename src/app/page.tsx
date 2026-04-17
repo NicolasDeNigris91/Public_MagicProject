@@ -184,6 +184,7 @@ export default function GamePage() {
             onClick={endTurn}
             disabled={turn !== 'player' || !!winner}
             aria-disabled={turn !== 'player' || !!winner}
+            aria-label="End turn"
             style={controlStyle}
           >
             End turn

@@ -57,6 +57,24 @@ export function useAttackerSelection() {
       });
 
       attack(attackerId, blockerId);
+
+      requestAnimationFrame(() => {
+        const nextState = useGameStore.getState();
+        const attackerStillPresent = nextState.player.battlefield.some((c) => c.id === attackerId);
+        if (attackerStillPresent) {
+          document
+            .querySelector<HTMLElement>(`[data-card-id="${attackerId}"]`)
+            ?.focus();
+          return;
+        }
+        const survivors = nextState.player.battlefield.filter((c) => canAttack(c));
+        const nextTarget =
+          (survivors[0]
+            ? document.querySelector<HTMLElement>(`[data-card-id="${survivors[0].id}"]`)
+            : null) ??
+          document.querySelector<HTMLButtonElement>('button[aria-label="End turn"]');
+        nextTarget?.focus();
+      });
     },
     [attack],
   );
