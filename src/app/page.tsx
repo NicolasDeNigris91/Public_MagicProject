@@ -4,6 +4,7 @@ import { Hand } from '@/components/Hand';
 import { Battlefield } from '@/components/Battlefield';
 import { Footer } from '@/components/Footer';
 import { CardInspector } from '@/components/CardInspector/CardInspector';
+import { LifeDisplay } from '@/components/LifeDisplay';
 import { useGameStore } from '@/store/useGameStore';
 import { useDeck } from '@/hooks/useDeck';
 import { useInspector } from '@/hooks/useInspector';
@@ -139,7 +140,7 @@ export default function GamePage() {
 
         <section aria-label="Opponent">
           <h2 style={{ fontSize: 15, margin: '12px 0' }}>
-            Opponent — life {opponent.life}, hand {opponent.hand.length}
+            Opponent — life <LifeDisplay value={opponent.life} />, hand {opponent.hand.length}
           </h2>
           <Hand hand={opponent.hand} label="Opponent hand" onActivate={() => undefined} hidden />
           <Battlefield
@@ -171,7 +172,7 @@ export default function GamePage() {
 
         <section aria-label="Player">
           <h2 style={{ fontSize: 15, margin: '12px 0' }}>
-            You — life {player.life}, hand {player.hand.length}
+            You — life <LifeDisplay value={player.life} />, hand {player.hand.length}
           </h2>
           <Battlefield
             label="Your battlefield"
