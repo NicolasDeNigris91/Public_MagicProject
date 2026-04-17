@@ -4,7 +4,6 @@ import {
   PLAYS_PER_TURN, applyDamage, beginTurn, canAttack, canPlay,
   drawCard, playCardToField, removeFromField, resolveCombat,
 } from '@/engine/rules';
-import { pickCardToPlay, planAttacks } from '@/engine/ai';
 import { shortCardLabel } from '@/utils/describeCard';
 
 interface GameActions {
@@ -211,57 +210,5 @@ export const useGameStore = create<GameStore>((set, get) => ({
       'polite',
     );
     get().drawCard(next);
-    if (next === 'opponent') {
-      const gen = get().generation;
-      setTimeout(() => runOpponentTurn(gen), 900);
-    }
   },
 }));
-
-/**
- * `gen` captures the match generation at schedule time. Every tick
- * aborts if the store's generation has advanced (Play again pressed
- * during the AI tail) or if the game has ended. This prevents stale
- * timers from mutating a fresh match.
- */
-function runOpponentTurn(gen: number) {
-  const stillLive = () => {
-    const s = useGameStore.getState();
-    return s.generation === gen && !s.winner;
-  };
-
-  if (!stillLive()) return;
-  const state = useGameStore.getState();
-  if (canPlay(state.opponent)) {
-    const pick = pickCardToPlay(state.opponent.hand);
-    if (pick) state.playCardToField('opponent', pick.id);
-  }
-
-  setTimeout(() => {
-    if (!stillLive()) return;
-    // Only non-sick creatures may attack.
-    const opp = useGameStore.getState().opponent;
-    const readyAttackers: IPlayer = {
-      ...opp,
-      battlefield: opp.battlefield.filter((c) => !c.summoningSick),
-    };
-    const plans = planAttacks(readyAttackers, useGameStore.getState().player);
-    let i = 0;
-    const attackTick = () => {
-      if (!stillLive()) return;
-      const plan = plans[i++];
-      if (!plan) {
-        setTimeout(() => {
-          if (!stillLive()) return;
-          const store = useGameStore.getState();
-          store.announce('Opponent ends their turn.', 'polite');
-          store.endTurn();
-        }, 600);
-        return;
-      }
-      useGameStore.getState().attack(plan.attackerId, plan.blockerId);
-      setTimeout(attackTick, 1100);
-    };
-    attackTick();
-  }, 900);
-}

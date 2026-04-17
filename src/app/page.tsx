@@ -11,6 +11,7 @@ import { useInspector } from '@/hooks/useInspector';
 import { useAttackerSelection } from '@/hooks/useAttackerSelection';
 import { useInertWhile } from '@/hooks/useInertWhile';
 import { usePostPlayFocus } from '@/hooks/usePostPlayFocus';
+import { useAIOrchestrator } from '@/hooks/useAIOrchestrator';
 import { buildInspectorActions } from '@/utils/buildInspectorActions';
 
 export default function GamePage() {
@@ -40,6 +41,7 @@ export default function GamePage() {
     clear: clearAttacker,
   } = useAttackerSelection();
   const postPlayFocus = usePostPlayFocus();
+  useAIOrchestrator();
 
   const mainRef = useRef<HTMLElement>(null);
   const gameOverRef = useRef<HTMLDivElement>(null);
