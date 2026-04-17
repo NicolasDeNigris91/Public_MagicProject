@@ -21,6 +21,7 @@ import { useState, type KeyboardEvent } from 'react';
 import type { ICard } from '@/engine/types';
 import { CardFallback } from './CardFallback';
 import styles from './Card.module.css';
+import { useCombatStore } from '@/store/useCombatStore';
 
 export interface CardProps {
   card: ICard;
@@ -37,6 +38,7 @@ export interface CardProps {
 export function Card({ card, selected = false, onActivate, onInspect, animateEntry = false }: CardProps) {
   const [imgFailed, setImgFailed] = useState(!card.imageUrl);
   const reduceMotion = useReducedMotion();
+  const inFlight = useCombatStore((s) => s.flight?.attackerId === card.id);
 
   const handleKey = (e: KeyboardEvent<HTMLButtonElement>) => {
     if (e.key === 'Enter' || e.key === ' ') {
@@ -50,9 +52,10 @@ export function Card({ card, selected = false, onActivate, onInspect, animateEnt
     }
   };
 
+  const targetOpacity = inFlight ? 0.3 : 1;
   const entry = animateEntry && !reduceMotion
-    ? { initial: { rotateY: 180, y: -30, opacity: 0 }, animate: { rotateY: 0, y: 0, opacity: 1 } }
-    : { initial: false, animate: { rotateY: 0, y: 0, opacity: 1 } };
+    ? { initial: { rotateY: 180, y: -30, opacity: 0 }, animate: { rotateY: 0, y: 0, opacity: targetOpacity } }
+    : { initial: false, animate: { rotateY: 0, y: 0, opacity: targetOpacity } };
 
   // The summoning-sickness state is part of the game-relevant
   // description a screen-reader user needs, so we append it to the

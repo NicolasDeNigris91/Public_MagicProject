@@ -25,6 +25,10 @@ const KEYFRAMES_CSS = `
   0%   { transform: rotate(0); opacity: 1; }
   100% { transform: rotate(12deg); opacity: 0; }
 }
+@keyframes combat-travel {
+  0%   { transform: translate(0, 0); }
+  100% { transform: translate(var(--tx), var(--ty)); }
+}
 `;
 
 /**
@@ -61,6 +65,7 @@ export function CombatLayer() {
       {damageNumbers.map((n) => (
         <DamageNumber key={n.id} anchorId={n.anchorId} value={n.value} />
       ))}
+      {flight && <FlightClone flight={flight} />}
     </div>,
     document.body,
   );
@@ -98,5 +103,47 @@ function DamageNumber({ anchorId, value }: { anchorId: string; value: number }) 
     >
       -{value}
     </span>
+  );
+}
+
+function FlightClone({
+  flight,
+}: {
+  flight: NonNullable<ReturnType<typeof useCombatStore.getState>['flight']>;
+}) {
+  const [rects, setRects] = useState<{ from: DOMRect; to: DOMRect } | null>(null);
+
+  useEffect(() => {
+    const src = document.querySelector<HTMLElement>(`[data-card-id="${flight.attackerId}"]`);
+    const dst = document.querySelector<HTMLElement>(
+      flight.targetKind === 'creature'
+        ? `[data-card-id="${flight.targetId}"]`
+        : `[data-life-anchor="${flight.targetId}"]`,
+    );
+    if (src && dst) setRects({ from: src.getBoundingClientRect(), to: dst.getBoundingClientRect() });
+  }, [flight]);
+
+  if (!rects) return null;
+  const dx = rects.to.left + rects.to.width / 2 - (rects.from.left + rects.from.width / 2);
+  const dy = rects.to.top + rects.to.height / 2 - (rects.from.top + rects.from.height / 2);
+
+  return (
+    <div
+      data-combat-clone
+      style={{
+        position: 'fixed',
+        left: rects.from.left,
+        top: rects.from.top,
+        width: rects.from.width,
+        height: rects.from.height,
+        background: 'rgba(69, 90, 100, 0.95)',
+        border: '1px solid #90a4ae',
+        borderRadius: 8,
+        pointerEvents: 'none',
+        animation: `combat-travel 350ms cubic-bezier(0.4, 0, 0.2, 1) forwards`,
+        ['--tx' as string]: `${dx}px`,
+        ['--ty' as string]: `${dy}px`,
+      }}
+    />
   );
 }

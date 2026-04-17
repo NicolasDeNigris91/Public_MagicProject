@@ -34,4 +34,24 @@ describe('CombatLayer', () => {
 
     anchor.remove();
   });
+
+  it('renders a flight clone while flight is active', () => {
+    // Seed a fake card anchor in the DOM so getBoundingClientRect works.
+    const anchor = document.createElement('div');
+    anchor.setAttribute('data-card-id', 'att-1');
+    anchor.textContent = 'Goblin';
+    document.body.appendChild(anchor);
+    const target = document.createElement('div');
+    target.setAttribute('data-card-id', 'def-1');
+    document.body.appendChild(target);
+
+    useCombatStore.setState({
+      flight: { attackerId: 'att-1', targetId: 'def-1', targetKind: 'creature' },
+    });
+    render(<CombatLayer />);
+    expect(document.querySelector('[data-combat-clone]')).not.toBeNull();
+
+    anchor.remove();
+    target.remove();
+  });
 });
