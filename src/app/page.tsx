@@ -56,6 +56,14 @@ export default function GamePage() {
     gameOverRef.current?.focus();
   }, [winner, clearInspector]);
 
+  useEffect(() => {
+    const mql = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const apply = () => useCombatStore.setState({ reducedMotion: mql.matches });
+    apply();
+    mql.addEventListener('change', apply);
+    return () => mql.removeEventListener('change', apply);
+  }, []);
+
   const onPlayAgain = () => {
     clearAttacker();
     postPlayFocus.clear();
