@@ -27,6 +27,7 @@ export default function GamePage() {
   const endTurn = useGameStore((s) => s.endTurn);
   const announce = useGameStore((s) => s.announce);
   const lifePulse = useCombatStore((s) => s.lifePulse);
+  const isAnimating = useCombatStore((s) => s.isAnimating);
 
   const { source, restart } = useDeck();
   const {
@@ -174,16 +175,16 @@ export default function GamePage() {
         <div style={{ display: 'flex', gap: 12, justifyContent: 'center', margin: '20px 0' }}>
           <button
             onClick={attackDirectly}
-            disabled={!selectedAttacker || !!winner}
-            aria-disabled={!selectedAttacker || !!winner}
+            disabled={!selectedAttacker || !!winner || isAnimating}
+            aria-disabled={!selectedAttacker || !!winner || isAnimating}
             style={controlStyle}
           >
             Attack opponent directly
           </button>
           <button
             onClick={endTurn}
-            disabled={turn !== 'player' || !!winner}
-            aria-disabled={turn !== 'player' || !!winner}
+            disabled={turn !== 'player' || !!winner || isAnimating}
+            aria-disabled={turn !== 'player' || !!winner || isAnimating}
             aria-label="End turn"
             style={controlStyle}
           >
