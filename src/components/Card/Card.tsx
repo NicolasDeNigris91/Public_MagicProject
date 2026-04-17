@@ -39,6 +39,8 @@ export function Card({ card, selected = false, onActivate, onInspect, animateEnt
   const [imgFailed, setImgFailed] = useState(!card.imageUrl);
   const reduceMotion = useReducedMotion();
   const inFlight = useCombatStore((s) => s.flight?.attackerId === card.id);
+  const isImpacting = useCombatStore((s) => s.impactIds.includes(card.id));
+  const isDying = useCombatStore((s) => s.deathIds.includes(card.id));
 
   const handleKey = (e: KeyboardEvent<HTMLButtonElement>) => {
     if (e.key === 'Enter' || e.key === ' ') {
@@ -56,6 +58,15 @@ export function Card({ card, selected = false, onActivate, onInspect, animateEnt
   const entry = animateEntry && !reduceMotion
     ? { initial: { rotateY: 180, y: -30, opacity: 0 }, animate: { rotateY: 0, y: 0, opacity: targetOpacity } }
     : { initial: false, animate: { rotateY: 0, y: 0, opacity: targetOpacity } };
+
+  // Impact/dying animations are driven by CSS keyframes defined in
+  // CombatLayer's KEYFRAMES_CSS. `isDying` takes precedence over
+  // `isImpacting` so a creature that dies doesn't also shake.
+  const combatAnimation = isDying
+    ? 'combat-tilt-fade 350ms ease-in forwards'
+    : isImpacting
+      ? 'combat-shake 150ms ease-in-out, combat-flash 150ms ease-in-out'
+      : undefined;
 
   // The summoning-sickness state is part of the game-relevant
   // description a screen-reader user needs, so we append it to the
@@ -77,6 +88,7 @@ export function Card({ card, selected = false, onActivate, onInspect, animateEnt
         onKeyDown={handleKey}
         transition={{ duration: 0.45, ease: 'easeOut' }}
         whileHover={reduceMotion ? undefined : { y: -6 }}
+        style={combatAnimation ? { animation: combatAnimation } : undefined}
         {...entry}
       >
         {!imgFailed && card.imageUrl ? (

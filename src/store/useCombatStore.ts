@@ -99,7 +99,9 @@ export const useCombatStore = create<CombatStore>((set, get) => {
     set({
       impactIds,
       damageNumbers,
-      lifePulse: intent.targetKind === 'face' ? 'opponent' : null,
+      lifePulse: intent.targetKind === 'face'
+        ? (intent.targetId === 'player-life' ? 'player' : 'opponent')
+        : null,
     });
     await sleep(IMPACT_MS);
 
@@ -117,7 +119,9 @@ export const useCombatStore = create<CombatStore>((set, get) => {
         ? [intent.attackerId, intent.targetId]
         : [intent.attackerId],
       damageNumbers,
-      lifePulse: intent.targetKind === 'face' ? 'opponent' : null,
+      lifePulse: intent.targetKind === 'face'
+        ? (intent.targetId === 'player-life' ? 'player' : 'opponent')
+        : null,
     });
     await sleep(REDUCED_FLASH_MS);
     set({ impactIds: [] });

@@ -8,11 +8,8 @@ function prefersReducedMotion(): boolean {
   return window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches ?? false;
 }
 
-interface Props {
+interface Props extends React.HTMLAttributes<HTMLElement> {
   value: number;
-  /** Optional label read by screen readers in place of the number. If
-   *  omitted, the number itself is read. */
-  'aria-label'?: string;
 }
 
 /**

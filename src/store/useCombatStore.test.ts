@@ -55,6 +55,53 @@ describe('useCombatStore', () => {
     expect(Date.now() - start).toBeLessThanOrEqual(650);
   });
 
+  it('sets lifePulse to player when AI face-hits the player', async () => {
+    const { playCombat } = useCombatStore.getState();
+    const statesSeen: Array<'player' | 'opponent' | null> = [];
+    const unsubscribe = useCombatStore.subscribe((state) => {
+      statesSeen.push(state.lifePulse);
+    });
+
+    const p = playCombat(intent({
+      targetId: 'player-life',
+      targetKind: 'face',
+      faceDamage: 3,
+      attackerDamage: 0,
+      targetDamage: 0,
+      attackerDies: false,
+      targetDies: false,
+    }));
+    await vi.advanceTimersByTimeAsync(1200);
+    await p;
+    unsubscribe();
+
+    // At some point during the animation the pulse should have been 'player'.
+    expect(statesSeen).toContain('player');
+  });
+
+  it('sets lifePulse to opponent when player face-hits the opponent', async () => {
+    const { playCombat } = useCombatStore.getState();
+    const statesSeen: Array<'player' | 'opponent' | null> = [];
+    const unsubscribe = useCombatStore.subscribe((state) => {
+      statesSeen.push(state.lifePulse);
+    });
+
+    const p = playCombat(intent({
+      targetId: 'opponent-life',
+      targetKind: 'face',
+      faceDamage: 3,
+      attackerDamage: 0,
+      targetDamage: 0,
+      attackerDies: false,
+      targetDies: false,
+    }));
+    await vi.advanceTimersByTimeAsync(1200);
+    await p;
+    unsubscribe();
+
+    expect(statesSeen).toContain('opponent');
+  });
+
   it('full-motion path resolves within 1100ms', async () => {
     const { playCombat } = useCombatStore.getState();
     const start = Date.now();

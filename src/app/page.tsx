@@ -7,6 +7,7 @@ import { CardInspector } from '@/components/CardInspector/CardInspector';
 import { CombatLayer } from '@/components/CombatLayer/CombatLayer';
 import { LifeDisplay } from '@/components/LifeDisplay';
 import { useGameStore } from '@/store/useGameStore';
+import { useCombatStore } from '@/store/useCombatStore';
 import { useDeck } from '@/hooks/useDeck';
 import { useInspector } from '@/hooks/useInspector';
 import { useAttackerSelection } from '@/hooks/useAttackerSelection';
@@ -25,6 +26,7 @@ export default function GamePage() {
   const playCardToField = useGameStore((s) => s.playCardToField);
   const endTurn = useGameStore((s) => s.endTurn);
   const announce = useGameStore((s) => s.announce);
+  const lifePulse = useCombatStore((s) => s.lifePulse);
 
   const { source, restart } = useDeck();
   const {
@@ -143,7 +145,14 @@ export default function GamePage() {
 
         <section aria-label="Opponent">
           <h2 style={{ fontSize: 15, margin: '12px 0' }}>
-            Opponent — life <LifeDisplay value={opponent.life} />, hand {opponent.hand.length}
+            Opponent — life <LifeDisplay
+              value={opponent.life}
+              data-life-anchor="opponent-life"
+              style={lifePulse === 'opponent' ? {
+                animation: 'combat-flash 150ms ease-in-out, combat-shake 150ms ease-in-out',
+                color: '#ef5350',
+              } : undefined}
+            />, hand {opponent.hand.length}
           </h2>
           <Hand hand={opponent.hand} label="Opponent hand" onActivate={() => undefined} hidden />
           <Battlefield
@@ -175,7 +184,14 @@ export default function GamePage() {
 
         <section aria-label="Player">
           <h2 style={{ fontSize: 15, margin: '12px 0' }}>
-            You — life <LifeDisplay value={player.life} />, hand {player.hand.length}
+            You — life <LifeDisplay
+              value={player.life}
+              data-life-anchor="player-life"
+              style={lifePulse === 'player' ? {
+                animation: 'combat-flash 150ms ease-in-out, combat-shake 150ms ease-in-out',
+                color: '#ef5350',
+              } : undefined}
+            />, hand {player.hand.length}
           </h2>
           <Battlefield
             label="Your battlefield"
