@@ -44,4 +44,11 @@ describe('planAttacks', () => {
     const opp = makePlayer({ battlefield: [makeCard('wall', 0, 10)] });
     expect(planAttacks(me, opp)).toHaveLength(0);
   });
+
+  it('never attacks face when defender has creatures, even with a huge attacker', () => {
+    const me = makePlayer({ battlefield: [makeCard('huge', 10, 10)] });
+    const opp = makePlayer({ battlefield: [makeCard('chump', 1, 1)] });
+    const plans = planAttacks(me, opp);
+    expect(plans.every((p) => p.blockerId !== null)).toBe(true);
+  });
 });

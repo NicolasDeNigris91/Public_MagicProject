@@ -45,6 +45,15 @@ export function canAttack(card: ICard): boolean {
 }
 
 /**
+ * House rule: an attacker can only hit the defender's life total when
+ * the defender has no creatures on the battlefield. Any creature acts
+ * as an implicit blocker-of-last-resort.
+ */
+export function canAttackFace(defender: IPlayer): boolean {
+  return defender.battlefield.length === 0;
+}
+
+/**
  * One-on-one MTG combat resolution. If no blocker, attacker hits the
  * player directly. Damage is simultaneous (both sides deal damage
  * before death).

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { ICard, IPlayer } from './types';
 import {
-  PLAYS_PER_TURN, applyDamage, beginTurn, canAttack, canPlay,
+  PLAYS_PER_TURN, applyDamage, beginTurn, canAttack, canAttackFace, canPlay,
   drawCard, playCardToField, resolveCombat,
 } from './rules';
 
@@ -66,6 +66,16 @@ describe('canPlay / canAttack', () => {
 
   it('blocks attacks for creatures that already attacked this turn', () => {
     expect(canAttack({ ...makeCard('a'), attackedThisTurn: true })).toBe(false);
+  });
+});
+
+describe('canAttackFace', () => {
+  it('allows face damage when defender has no creatures', () => {
+    expect(canAttackFace(makePlayer())).toBe(true);
+  });
+
+  it('blocks face damage when defender has any creature', () => {
+    expect(canAttackFace(makePlayer({ battlefield: [makeCard('wall')] }))).toBe(false);
   });
 });
 

@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import type { AnnouncePriority, GameResult, ICard, IGameState, IPlayer, LogEntry, PlayerId } from '@/engine/types';
 import {
-  PLAYS_PER_TURN, applyDamage, beginTurn, canAttack, canPlay,
+  PLAYS_PER_TURN, applyDamage, beginTurn, canAttack, canAttackFace, canPlay,
   drawCard, playCardToField, removeFromField, resolveCombat,
 } from '@/engine/rules';
 import { shortCardLabel } from '@/utils/describeCard';
@@ -149,6 +149,16 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const blocker = blockerId
       ? s[defendingSide].battlefield.find((c) => c.id === blockerId) ?? null
       : null;
+
+    if (!blocker && !canAttackFace(s[defendingSide])) {
+      if (attackingSide === 'player') {
+        get().announce(
+          'Cannot attack directly while the opponent has creatures on the battlefield.',
+          'polite',
+        );
+      }
+      return;
+    }
 
     const result = resolveCombat(attacker, blocker);
 

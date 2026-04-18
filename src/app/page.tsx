@@ -175,12 +175,18 @@ export default function GamePage() {
         <div style={{ display: 'flex', gap: 12, justifyContent: 'center', margin: '20px 0' }}>
           <button
             onClick={attackDirectly}
-            disabled={!selectedAttacker || !!winner || isAnimating}
-            aria-disabled={!selectedAttacker || !!winner || isAnimating}
+            disabled={!selectedAttacker || !!winner || isAnimating || opponent.battlefield.length > 0}
+            aria-disabled={!selectedAttacker || !!winner || isAnimating || opponent.battlefield.length > 0}
+            aria-describedby={opponent.battlefield.length > 0 ? 'attack-direct-blocked' : undefined}
             style={controlStyle}
           >
             Attack opponent directly
           </button>
+          {opponent.battlefield.length > 0 && (
+            <span id="attack-direct-blocked" className="sr-only">
+              Blocked while the opponent has creatures on the battlefield.
+            </span>
+          )}
           <button
             onClick={endTurn}
             disabled={turn !== 'player' || !!winner || isAnimating}

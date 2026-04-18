@@ -34,6 +34,7 @@ A stripped-down MTG combat subset, just enough to make decisions matter:
 - **One creature play per turn.** You pick *which* card to commit — no dumping the hand on turn 1.
 - **Summoning sickness.** A creature that entered this turn cannot attack. It gets one full round before it can swing. Shown visually (desaturated + badge) and in the card's `aria-label`.
 - **Combat is direct-pick.** Select one of your creatures, then click/Enter a target: an opponent creature (fight) or the opponent directly (face damage). Damage is simultaneous.
+- **Face damage only when the board is clear.** While the opponent has any creature on the battlefield, direct attacks are blocked — every creature acts as an implicit blocker-of-last-resort. The "Attack opponent directly" button is disabled and announced as such for screen readers.
 - **Two loss conditions**: life reaches zero, or you try to draw from an empty deck (deck-out).
 - **Turn counter** visible in the header along with plays remaining.
 
