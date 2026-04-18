@@ -49,6 +49,11 @@ a { color: #4dd0e1; }
 }
 .skip-link:focus { top: 0; }
 
+@keyframes pulse-dot {
+  0%, 100% { opacity: 0.35; transform: scale(1); }
+  50%      { opacity: 1;    transform: scale(1.35); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;

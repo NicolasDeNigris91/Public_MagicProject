@@ -190,6 +190,32 @@ export default function GamePage() {
         </section>
 
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, margin: '20px 0' }}>
+          {turn === 'opponent' && !winner && (
+            <p
+              aria-hidden="true"
+              style={{
+                margin: 0,
+                fontSize: 12,
+                letterSpacing: 0.5,
+                color: '#90a4ae',
+                textTransform: 'uppercase',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+              }}
+            >
+              <span
+                style={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: '50%',
+                  background: '#4dd0e1',
+                  animation: 'pulse-dot 1200ms ease-in-out infinite',
+                }}
+              />
+              Opponent thinking…
+            </p>
+          )}
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
             <button
               onClick={tryAttackDirectly}
