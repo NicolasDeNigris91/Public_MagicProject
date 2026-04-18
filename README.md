@@ -2,6 +2,8 @@
 
 A keyboard-first, screen-reader-first TCG portfolio demo built on top of the [Scryfall API](https://scryfall.com). Real *Magic: The Gathering* cards power a tiny combat engine, but the whole experience is designed so that a blind player and a sighted player receive **informationally equivalent** experiences — every visual cue (art, layout, flip animation) has a textual counterpart routed through ARIA live regions.
 
+![Tabuleiro com uma criatura selecionada como atacante](docs/screenshots/combat.png)
+
 > **Fan content notice.** Not affiliated with Wizards of the Coast. Built under the [WotC Fan Content Policy](https://company.wizards.com/en/legal/fancontentpolicy). Card data courtesy of Scryfall.
 
 ---
