@@ -172,30 +172,36 @@ export default function GamePage() {
           />
         </section>
 
-        <div style={{ display: 'flex', gap: 12, justifyContent: 'center', margin: '20px 0' }}>
-          <button
-            onClick={attackDirectly}
-            disabled={!selectedAttacker || !!winner || isAnimating || opponent.battlefield.length > 0}
-            aria-disabled={!selectedAttacker || !!winner || isAnimating || opponent.battlefield.length > 0}
-            aria-describedby={opponent.battlefield.length > 0 ? 'attack-direct-blocked' : undefined}
-            style={controlStyle}
-          >
-            Attack opponent directly
-          </button>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, margin: '20px 0' }}>
+          <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
+            <button
+              onClick={attackDirectly}
+              disabled={!selectedAttacker || !!winner || isAnimating || opponent.battlefield.length > 0}
+              aria-disabled={!selectedAttacker || !!winner || isAnimating || opponent.battlefield.length > 0}
+              aria-describedby={opponent.battlefield.length > 0 ? 'attack-direct-blocked' : undefined}
+              style={controlStyle}
+            >
+              Attack opponent directly
+            </button>
+            <button
+              onClick={endTurn}
+              disabled={turn !== 'player' || !!winner || isAnimating}
+              aria-disabled={turn !== 'player' || !!winner || isAnimating}
+              aria-label="End turn"
+              style={controlStyle}
+            >
+              End turn
+            </button>
+          </div>
           {opponent.battlefield.length > 0 && (
-            <span id="attack-direct-blocked" className="sr-only">
-              Blocked while the opponent has creatures on the battlefield.
-            </span>
+            <p
+              id="attack-direct-blocked"
+              role="note"
+              style={{ margin: 0, fontSize: 12, color: '#ffb74d', textAlign: 'center' }}
+            >
+              Cannot attack directly while the opponent has creatures on the battlefield.
+            </p>
           )}
-          <button
-            onClick={endTurn}
-            disabled={turn !== 'player' || !!winner || isAnimating}
-            aria-disabled={turn !== 'player' || !!winner || isAnimating}
-            aria-label="End turn"
-            style={controlStyle}
-          >
-            End turn
-          </button>
         </div>
 
         <section aria-label="Player">
