@@ -5,14 +5,11 @@ import { useCombatStore } from '@/store/useCombatStore';
 import { canPlay, resolveCombat } from '@/engine/rules';
 import { pickCardToPlay, planAttacks } from '@/engine/ai';
 import type { IPlayer } from '@/engine/types';
-
-const PLAY_DELAY_MS = 900;
-// playCombat itself runs ~900ms, so total beat per AI attack is ~2s.
-// Intentional baseline: preserves the pre-animator 1100ms cadence so
-// live-region announcements keep breathing room. Tune in manual QA
-// if AI turns feel too slow.
-const ATTACK_DELAY_MS = 1100;
-const END_DELAY_MS = 600;
+import {
+  AI_ATTACK_DELAY_MS,
+  AI_END_DELAY_MS,
+  AI_PLAY_DELAY_MS,
+} from '@/constants/timings';
 
 /**
  * Runs the opponent's turn from the UI layer. Fires when `turn`
@@ -78,7 +75,7 @@ export function useAIOrchestrator() {
               const store = useGameStore.getState();
               store.announce('Opponent ends their turn.', 'polite');
               store.endTurn();
-            }, END_DELAY_MS);
+            }, AI_END_DELAY_MS);
             return;
           }
 
@@ -105,13 +102,13 @@ export function useAIOrchestrator() {
           }
 
           useGameStore.getState().attack(plan.attackerId, plan.blockerId);
-          schedule(attackTick, ATTACK_DELAY_MS);
+          schedule(attackTick, AI_ATTACK_DELAY_MS);
         };
         Promise.resolve(attackTick()).catch((err) =>
           console.error('[ai] attackTick failed', err),
         );
-      }, PLAY_DELAY_MS);
-    }, PLAY_DELAY_MS);
+      }, AI_PLAY_DELAY_MS);
+    }, AI_PLAY_DELAY_MS);
 
     return () => {
       timers.forEach(clearTimeout);

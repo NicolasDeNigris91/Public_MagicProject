@@ -1,4 +1,11 @@
 import { create } from 'zustand';
+import {
+  IMPACT_MS,
+  REDUCED_FLASH_MS,
+  REDUCED_HOLD_MS,
+  RETURN_MS,
+  TRAVEL_MS,
+} from '@/constants/timings';
 
 export type TargetKind = 'creature' | 'face';
 
@@ -45,15 +52,6 @@ const INITIAL: CombatVisualState = {
   isAnimating: false,
   reducedMotion: false,
 };
-
-// Full-motion phase budgets (ms). Sum <= 1100 (announcer cadence).
-const TRAVEL_MS = 350;
-const IMPACT_MS = 150;
-const RETURN_MS = 400;
-
-// Reduced-motion budget.
-const REDUCED_FLASH_MS = 100;
-const REDUCED_HOLD_MS = 500;
 
 const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 

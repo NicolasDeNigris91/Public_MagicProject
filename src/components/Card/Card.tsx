@@ -22,6 +22,7 @@ import type { ICard } from '@/engine/types';
 import { CardFallback } from './CardFallback';
 import styles from './Card.module.css';
 import { useCombatStore } from '@/store/useCombatStore';
+import { IMPACT_MS, TILT_FADE_MS } from '@/constants/timings';
 
 export interface CardProps {
   card: ICard;
@@ -63,9 +64,9 @@ export function Card({ card, selected = false, onActivate, onInspect, animateEnt
   // CombatLayer's KEYFRAMES_CSS. `isDying` takes precedence over
   // `isImpacting` so a creature that dies doesn't also shake.
   const combatAnimation = isDying
-    ? 'combat-tilt-fade 350ms ease-in forwards'
+    ? `combat-tilt-fade ${TILT_FADE_MS}ms ease-in forwards`
     : isImpacting
-      ? 'combat-shake 150ms ease-in-out, combat-flash 150ms ease-in-out'
+      ? `combat-shake ${IMPACT_MS}ms ease-in-out, combat-flash ${IMPACT_MS}ms ease-in-out`
       : undefined;
 
   // Attack-availability state is part of the game-relevant description

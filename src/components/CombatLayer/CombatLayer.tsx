@@ -2,6 +2,7 @@
 import { createPortal } from 'react-dom';
 import { useEffect, useState } from 'react';
 import { useCombatStore } from '@/store/useCombatStore';
+import { DAMAGE_FLOAT_MS, TRAVEL_MS } from '@/constants/timings';
 
 const Z = 9000;
 
@@ -98,7 +99,7 @@ function DamageNumber({ anchorId, value }: { anchorId: string; value: number }) 
         fontSize: 28,
         fontWeight: 900,
         textShadow: '0 2px 6px rgba(0,0,0,0.9)',
-        animation: 'combat-float 600ms ease-out forwards',
+        animation: `combat-float ${DAMAGE_FLOAT_MS}ms ease-out forwards`,
       }}
     >
       -{value}
@@ -140,7 +141,7 @@ function FlightClone({
         border: '1px solid #90a4ae',
         borderRadius: 8,
         pointerEvents: 'none',
-        animation: `combat-travel 350ms cubic-bezier(0.4, 0, 0.2, 1) forwards`,
+        animation: `combat-travel ${TRAVEL_MS}ms cubic-bezier(0.4, 0, 0.2, 1) forwards`,
         ['--tx' as string]: `${dx}px`,
         ['--ty' as string]: `${dy}px`,
       }}

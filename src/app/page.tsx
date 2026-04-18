@@ -15,6 +15,11 @@ import { useInertWhile } from '@/hooks/useInertWhile';
 import { usePostPlayFocus } from '@/hooks/usePostPlayFocus';
 import { useAIOrchestrator } from '@/hooks/useAIOrchestrator';
 import { buildInspectorActions } from '@/utils/buildInspectorActions';
+import {
+  FACE_BLOCKED_NOTE_MS,
+  IMPACT_MS,
+  OPPONENT_PULSE_MS,
+} from '@/constants/timings';
 
 export default function GamePage() {
   const player = useGameStore((s) => s.player);
@@ -53,7 +58,7 @@ export default function GamePage() {
     if (opponent.battlefield.length > 0) {
       setShowFaceBlockedNote(true);
       if (faceBlockedTimer.current) clearTimeout(faceBlockedTimer.current);
-      faceBlockedTimer.current = setTimeout(() => setShowFaceBlockedNote(false), 3000);
+      faceBlockedTimer.current = setTimeout(() => setShowFaceBlockedNote(false), FACE_BLOCKED_NOTE_MS);
       return;
     }
     setShowFaceBlockedNote(false);
@@ -175,7 +180,7 @@ export default function GamePage() {
               value={opponent.life}
               data-life-anchor="opponent-life"
               style={lifePulse === 'opponent' ? {
-                animation: 'combat-flash 150ms ease-in-out, combat-shake 150ms ease-in-out',
+                animation: `combat-flash ${IMPACT_MS}ms ease-in-out, combat-shake ${IMPACT_MS}ms ease-in-out`,
                 color: '#ef5350',
               } : undefined}
             />, hand {opponent.hand.length}
@@ -210,7 +215,7 @@ export default function GamePage() {
                   height: 8,
                   borderRadius: '50%',
                   background: '#4dd0e1',
-                  animation: 'pulse-dot 1200ms ease-in-out infinite',
+                  animation: `pulse-dot ${OPPONENT_PULSE_MS}ms ease-in-out infinite`,
                 }}
               />
               Opponent thinking…
@@ -253,7 +258,7 @@ export default function GamePage() {
               value={player.life}
               data-life-anchor="player-life"
               style={lifePulse === 'player' ? {
-                animation: 'combat-flash 150ms ease-in-out, combat-shake 150ms ease-in-out',
+                animation: `combat-flash ${IMPACT_MS}ms ease-in-out, combat-shake ${IMPACT_MS}ms ease-in-out`,
                 color: '#ef5350',
               } : undefined}
             />, hand {player.hand.length}
