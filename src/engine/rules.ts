@@ -41,7 +41,7 @@ export function canPlay(player: IPlayer): boolean {
 }
 
 export function canAttack(card: ICard): boolean {
-  return !card.summoningSick;
+  return !card.summoningSick && !card.attackedThisTurn;
 }
 
 /**
@@ -78,13 +78,16 @@ export function removeFromField(player: IPlayer, cardId: string): IPlayer {
 
 /**
  * Begin-of-turn housekeeping for the player whose turn is starting:
- * clear summoning sickness on all their creatures and refill plays.
+ * clear summoning sickness and attack-lock on all their creatures,
+ * and refill plays.
  */
 export function beginTurn(player: IPlayer): IPlayer {
   return {
     ...player,
     battlefield: player.battlefield.map((c) =>
-      c.summoningSick ? { ...c, summoningSick: false } : c,
+      c.summoningSick || c.attackedThisTurn
+        ? { ...c, summoningSick: false, attackedThisTurn: false }
+        : c,
     ),
     playsRemaining: PLAYS_PER_TURN,
   };

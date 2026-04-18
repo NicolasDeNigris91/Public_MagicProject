@@ -139,7 +139,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
     if (!attacker) return;
     if (!canAttack(attacker)) {
       if (attackingSide === 'player') {
-        get().announce(`${attacker.name} has summoning sickness and cannot attack this turn.`, 'polite');
+        const reason = attacker.summoningSick
+          ? 'has summoning sickness'
+          : 'has already attacked this turn';
+        get().announce(`${attacker.name} ${reason} and cannot attack.`, 'polite');
       }
       return;
     }
@@ -152,7 +155,16 @@ export const useGameStore = create<GameStore>((set, get) => ({
     let attackerPlayer = s[attackingSide];
     let defenderPlayer = s[defendingSide];
 
-    if (result.attackerDies) attackerPlayer = removeFromField(attackerPlayer, attacker.id);
+    if (result.attackerDies) {
+      attackerPlayer = removeFromField(attackerPlayer, attacker.id);
+    } else {
+      attackerPlayer = {
+        ...attackerPlayer,
+        battlefield: attackerPlayer.battlefield.map((c) =>
+          c.id === attacker.id ? { ...c, attackedThisTurn: true } : c,
+        ),
+      };
+    }
     if (result.blockerDies && blocker) defenderPlayer = removeFromField(defenderPlayer, blocker.id);
     if (result.playerDamage > 0) defenderPlayer = applyDamage(defenderPlayer, result.playerDamage);
 

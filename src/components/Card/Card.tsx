@@ -68,12 +68,16 @@ export function Card({ card, selected = false, onActivate, onInspect, animateEnt
       ? 'combat-shake 150ms ease-in-out, combat-flash 150ms ease-in-out'
       : undefined;
 
-  // The summoning-sickness state is part of the game-relevant
-  // description a screen-reader user needs, so we append it to the
-  // base description at render time rather than polluting the adapter.
+  // Attack-availability state is part of the game-relevant description
+  // a screen-reader user needs, so we append it at render time rather
+  // than polluting the adapter. Summoning sickness takes precedence
+  // since a just-played creature hasn't had the chance to attack.
+  const exhausted = card.attackedThisTurn && !card.summoningSick;
   const ariaLabel = card.summoningSick
     ? `${card.accessibilityDescription} Summoning sickness: cannot attack this turn.`
-    : card.accessibilityDescription;
+    : exhausted
+      ? `${card.accessibilityDescription} Already attacked this turn.`
+      : card.accessibilityDescription;
 
   return (
     <div className={styles.cardWrapper}>
@@ -81,7 +85,7 @@ export function Card({ card, selected = false, onActivate, onInspect, animateEnt
         type="button"
         layoutId={card.id}
         data-card-id={card.id}
-        className={`${styles.card}${card.summoningSick ? ` ${styles.sick}` : ''}`}
+        className={`${styles.card}${card.summoningSick || exhausted ? ` ${styles.sick}` : ''}`}
         aria-label={ariaLabel}
         aria-pressed={selected}
         onClick={() => onActivate?.(card)}
@@ -109,6 +113,9 @@ export function Card({ card, selected = false, onActivate, onInspect, animateEnt
         )}
         {card.summoningSick && (
           <span aria-hidden="true" className={styles.sickBadge}>Summoning sickness</span>
+        )}
+        {exhausted && (
+          <span aria-hidden="true" className={styles.sickBadge}>Already attacked</span>
         )}
       </motion.button>
       {onInspect && (

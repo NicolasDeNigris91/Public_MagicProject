@@ -27,6 +27,9 @@ export interface ICard {
    *  turn and therefore cannot attack). Cleared at start of its
    *  controller's next turn. */
   summoningSick?: boolean;
+  /** True once the creature has attacked this turn. Cleared at the
+   *  start of its controller's next turn. Prevents re-attacking. */
+  attackedThisTurn?: boolean;
 }
 
 export interface IPlayer {

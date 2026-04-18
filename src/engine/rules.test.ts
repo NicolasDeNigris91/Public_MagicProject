@@ -63,6 +63,10 @@ describe('canPlay / canAttack', () => {
     expect(canAttack({ ...makeCard('a'), summoningSick: true })).toBe(false);
     expect(canAttack(makeCard('a'))).toBe(true);
   });
+
+  it('blocks attacks for creatures that already attacked this turn', () => {
+    expect(canAttack({ ...makeCard('a'), attackedThisTurn: true })).toBe(false);
+  });
 });
 
 describe('beginTurn', () => {
@@ -74,6 +78,14 @@ describe('beginTurn', () => {
     const after = beginTurn(p);
     expect(after.playsRemaining).toBe(PLAYS_PER_TURN);
     expect(after.battlefield.every((c) => !c.summoningSick)).toBe(true);
+  });
+
+  it('clears attackedThisTurn so creatures can attack again', () => {
+    const p = makePlayer({
+      battlefield: [{ ...makeCard('a'), attackedThisTurn: true }],
+    });
+    const after = beginTurn(p);
+    expect(after.battlefield.every((c) => !c.attackedThisTurn)).toBe(true);
   });
 });
 
