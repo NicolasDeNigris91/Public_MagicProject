@@ -41,9 +41,13 @@ function makePlayer(id: PlayerId, deck: ICard[]): IPlayer {
   };
 }
 
+// Monotonic sequence guarantees unique log ids even when several entries
+// are appended in the same millisecond. The announcer uses id as its
+// cursor, so any collision would cause a message to be re-spoken.
+let logSeq = 0;
 function log(msg: string, priority: AnnouncePriority): LogEntry {
   return {
-    id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+    id: `log-${++logSeq}`,
     message: msg, priority, timestamp: Date.now(),
   };
 }
