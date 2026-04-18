@@ -1,3 +1,7 @@
+// Regenerate README/portfolio screenshots.
+//   npm i -D playwright && npx playwright install chromium
+//   npm run dev       # in another terminal, note the port
+//   MAGIC_URL=http://localhost:3002 node scripts/screenshots.mjs
 import { chromium } from 'playwright';
 import { mkdir } from 'node:fs/promises';
 import { resolve } from 'node:path';

@@ -1,3 +1,5 @@
+// Companion to screenshots.mjs — captures the "attacker selected" frame.
+// See screenshots.mjs for setup.
 import { chromium } from 'playwright';
 import { resolve } from 'node:path';
 
