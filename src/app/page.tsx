@@ -1,7 +1,8 @@
 'use client';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { Hand } from '@/components/Hand';
 import { Battlefield } from '@/components/Battlefield';
+import { ControlBar } from '@/components/ControlBar';
 import { Footer } from '@/components/Footer';
 import { CardInspector } from '@/components/CardInspector/CardInspector';
 import { CombatLayer } from '@/components/CombatLayer/CombatLayer';
@@ -15,11 +16,7 @@ import { useInertWhile } from '@/hooks/useInertWhile';
 import { usePostPlayFocus } from '@/hooks/usePostPlayFocus';
 import { useAIOrchestrator } from '@/hooks/useAIOrchestrator';
 import { buildInspectorActions } from '@/utils/buildInspectorActions';
-import {
-  FACE_BLOCKED_NOTE_MS,
-  IMPACT_MS,
-  OPPONENT_PULSE_MS,
-} from '@/constants/timings';
+import { IMPACT_MS } from '@/constants/timings';
 
 export default function GamePage() {
   const player = useGameStore((s) => s.player);
@@ -51,23 +48,6 @@ export default function GamePage() {
   } = useAttackerSelection();
   const postPlayFocus = usePostPlayFocus();
   useAIOrchestrator();
-  const [showFaceBlockedNote, setShowFaceBlockedNote] = useState(false);
-  const faceBlockedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const tryAttackDirectly = () => {
-    if (opponent.battlefield.length > 0) {
-      setShowFaceBlockedNote(true);
-      if (faceBlockedTimer.current) clearTimeout(faceBlockedTimer.current);
-      faceBlockedTimer.current = setTimeout(() => setShowFaceBlockedNote(false), FACE_BLOCKED_NOTE_MS);
-      return;
-    }
-    setShowFaceBlockedNote(false);
-    attackDirectly();
-  };
-
-  useEffect(() => () => {
-    if (faceBlockedTimer.current) clearTimeout(faceBlockedTimer.current);
-  }, []);
 
   const mainRef = useRef<HTMLElement>(null);
   const gameOverRef = useRef<HTMLDivElement>(null);
@@ -194,63 +174,15 @@ export default function GamePage() {
           />
         </section>
 
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, margin: '20px 0' }}>
-          {turn === 'opponent' && !winner && (
-            <p
-              aria-hidden="true"
-              style={{
-                margin: 0,
-                fontSize: 12,
-                letterSpacing: 0.5,
-                color: '#90a4ae',
-                textTransform: 'uppercase',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8,
-              }}
-            >
-              <span
-                style={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: '50%',
-                  background: '#4dd0e1',
-                  animation: `pulse-dot ${OPPONENT_PULSE_MS}ms ease-in-out infinite`,
-                }}
-              />
-              Opponent thinking…
-            </p>
-          )}
-          <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
-            <button
-              onClick={tryAttackDirectly}
-              disabled={!selectedAttacker || !!winner || isAnimating}
-              aria-disabled={!selectedAttacker || !!winner || isAnimating}
-              aria-describedby={showFaceBlockedNote ? 'attack-direct-blocked' : undefined}
-              style={controlStyle}
-            >
-              Attack opponent directly
-            </button>
-            <button
-              onClick={endTurn}
-              disabled={turn !== 'player' || !!winner || isAnimating}
-              aria-disabled={turn !== 'player' || !!winner || isAnimating}
-              aria-label="End turn"
-              style={controlStyle}
-            >
-              End turn
-            </button>
-          </div>
-          {showFaceBlockedNote && (
-            <p
-              id="attack-direct-blocked"
-              role="alert"
-              style={{ margin: 0, fontSize: 12, color: '#ffb74d', textAlign: 'center' }}
-            >
-              Cannot attack directly while the opponent has creatures on the battlefield.
-            </p>
-          )}
-        </div>
+        <ControlBar
+          turn={turn}
+          winner={winner}
+          isAnimating={isAnimating}
+          selectedAttacker={selectedAttacker}
+          opponentCreatureCount={opponent.battlefield.length}
+          onAttackDirectly={attackDirectly}
+          onEndTurn={endTurn}
+        />
 
         <section aria-label="Player">
           <h2 style={{ fontSize: 15, margin: '12px 0' }}>
