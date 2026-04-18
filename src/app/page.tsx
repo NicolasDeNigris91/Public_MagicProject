@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Hand } from '@/components/Hand';
 import { Battlefield } from '@/components/Battlefield';
 import { Footer } from '@/components/Footer';
@@ -46,6 +46,23 @@ export default function GamePage() {
   } = useAttackerSelection();
   const postPlayFocus = usePostPlayFocus();
   useAIOrchestrator();
+  const [showFaceBlockedNote, setShowFaceBlockedNote] = useState(false);
+  const faceBlockedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const tryAttackDirectly = () => {
+    if (opponent.battlefield.length > 0) {
+      setShowFaceBlockedNote(true);
+      if (faceBlockedTimer.current) clearTimeout(faceBlockedTimer.current);
+      faceBlockedTimer.current = setTimeout(() => setShowFaceBlockedNote(false), 3000);
+      return;
+    }
+    setShowFaceBlockedNote(false);
+    attackDirectly();
+  };
+
+  useEffect(() => () => {
+    if (faceBlockedTimer.current) clearTimeout(faceBlockedTimer.current);
+  }, []);
 
   const mainRef = useRef<HTMLElement>(null);
   const gameOverRef = useRef<HTMLDivElement>(null);
@@ -175,10 +192,10 @@ export default function GamePage() {
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, margin: '20px 0' }}>
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
             <button
-              onClick={attackDirectly}
-              disabled={!selectedAttacker || !!winner || isAnimating || opponent.battlefield.length > 0}
-              aria-disabled={!selectedAttacker || !!winner || isAnimating || opponent.battlefield.length > 0}
-              aria-describedby={opponent.battlefield.length > 0 ? 'attack-direct-blocked' : undefined}
+              onClick={tryAttackDirectly}
+              disabled={!selectedAttacker || !!winner || isAnimating}
+              aria-disabled={!selectedAttacker || !!winner || isAnimating}
+              aria-describedby={showFaceBlockedNote ? 'attack-direct-blocked' : undefined}
               style={controlStyle}
             >
               Attack opponent directly
@@ -193,10 +210,10 @@ export default function GamePage() {
               End turn
             </button>
           </div>
-          {opponent.battlefield.length > 0 && (
+          {showFaceBlockedNote && (
             <p
               id="attack-direct-blocked"
-              role="note"
+              role="alert"
               style={{ margin: 0, fontSize: 12, color: '#ffb74d', textAlign: 'center' }}
             >
               Cannot attack directly while the opponent has creatures on the battlefield.
