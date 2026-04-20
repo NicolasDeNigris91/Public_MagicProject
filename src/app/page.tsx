@@ -118,18 +118,13 @@ export default function GamePage() {
 
   return (
     <>
-      <main
-        id="main"
-        ref={mainRef}
-        style={{ maxWidth: 1100, margin: '0 auto', padding: '24px 16px' }}
-      >
-        <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 16 }}>
-          <h1 style={{ margin: 0, fontSize: 22 }}>MTG — Accessible Combat Demo</h1>
-          <div style={{ fontSize: 13, color: '#90a4ae' }}>
+      <main id="main" ref={mainRef} style={MAIN_STYLE}>
+        <header style={HEADER_STYLE}>
+          <h1 style={{ margin: 0, fontSize: 'clamp(14px, 3.5vw, 18px)' }}>MTG Combat Demo</h1>
+          <div style={{ fontSize: 'clamp(11px, 2.6vw, 13px)', color: '#90a4ae' }}>
             Turn <strong>{turnNumber}</strong>
-            {' · '}<strong>{turn === 'player' ? 'Your move' : "Opponent's move"}</strong>
-            {' · '}Plays left: <strong>{player.playsRemaining}</strong>
-            {' · '}Source: {source ?? '…'}
+            {' · '}<strong>{turn === 'player' ? 'Your move' : "Opponent"}</strong>
+            {' · '}Plays: <strong>{player.playsRemaining}</strong>
           </div>
         </header>
 
@@ -139,14 +134,14 @@ export default function GamePage() {
             tabIndex={-1}
             aria-labelledby="game-over-title"
             style={{
-              padding: 16, marginBottom: 16, borderRadius: 12,
+              padding: 12, borderRadius: 12,
               border: `2px solid ${winner === 'player' ? '#66bb6a' : '#ef5350'}`,
               background: 'rgba(0,0,0,0.4)',
               display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12,
             }}
           >
-            <strong id="game-over-title" style={{ fontSize: 18 }}>
-              {winner === 'player' ? 'Victory — you defeated the opponent.' : 'Defeat — your life reached zero.'}
+            <strong id="game-over-title" style={{ fontSize: 16 }}>
+              {winner === 'player' ? 'Victory, you defeated the opponent.' : 'Defeat, your life reached zero.'}
             </strong>
             <button onClick={onPlayAgain} style={controlStyle}>
               Play again
@@ -154,9 +149,9 @@ export default function GamePage() {
           </div>
         )}
 
-        <section aria-label="Opponent">
-          <h2 style={{ fontSize: 15, margin: '12px 0' }}>
-            Opponent — life <LifeDisplay
+        <section aria-label="Opponent" style={ZONE_STYLE}>
+          <h2 style={ZONE_HEADING_STYLE}>
+            Opponent, life <LifeDisplay
               value={opponent.life}
               data-life-anchor="opponent-life"
               style={lifePulse === 'opponent' ? {
@@ -165,7 +160,7 @@ export default function GamePage() {
               } : undefined}
             />, hand {opponent.hand.length}
           </h2>
-          <Hand hand={opponent.hand} label="Opponent hand" onActivate={() => undefined} hidden />
+          <Hand hand={opponent.hand} label="Opponent hand" onActivate={() => undefined} hidden compact />
           <Battlefield
             label="Opponent battlefield"
             cards={opponent.battlefield}
@@ -184,9 +179,9 @@ export default function GamePage() {
           onEndTurn={endTurn}
         />
 
-        <section aria-label="Player">
-          <h2 style={{ fontSize: 15, margin: '12px 0' }}>
-            You — life <LifeDisplay
+        <section aria-label="Player" style={ZONE_STYLE}>
+          <h2 style={ZONE_HEADING_STYLE}>
+            You, life <LifeDisplay
               value={player.life}
               data-life-anchor="player-life"
               style={lifePulse === 'player' ? {
@@ -208,8 +203,6 @@ export default function GamePage() {
             onActivate={(card) => openInspector(card, 'hand')}
           />
         </section>
-
-        <Footer />
       </main>
 
       <CombatLayer />
@@ -221,9 +214,45 @@ export default function GamePage() {
           onClose={closeInspector}
         />
       )}
+
+      <Footer source={source} />
     </>
   );
 }
+
+const MAIN_STYLE: React.CSSProperties = {
+  display: 'flex',
+  flexDirection: 'column',
+  gap: 6,
+  height: '100dvh',
+  maxWidth: 1100,
+  margin: '0 auto',
+  padding: '10px 12px',
+  overflow: 'hidden',
+};
+
+const HEADER_STYLE: React.CSSProperties = {
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'baseline',
+  gap: 12,
+  flexWrap: 'wrap',
+  flexShrink: 0,
+};
+
+const ZONE_STYLE: React.CSSProperties = {
+  display: 'flex',
+  flexDirection: 'column',
+  minHeight: 0,
+  flex: '1 1 0',
+  gap: 4,
+};
+
+const ZONE_HEADING_STYLE: React.CSSProperties = {
+  fontSize: 13,
+  margin: '2px 0',
+  flexShrink: 0,
+};
 
 const controlStyle: React.CSSProperties = {
   padding: '10px 18px',

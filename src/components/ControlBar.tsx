@@ -61,8 +61,9 @@ export function ControlBar({
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        gap: 6,
-        margin: '20px 0',
+        gap: 4,
+        margin: '4px 0',
+        flexShrink: 0,
       }}
     >
       {turn === 'opponent' && !winner && (
@@ -125,10 +126,11 @@ export function ControlBar({
 }
 
 const CONTROL_STYLE: React.CSSProperties = {
-  padding: '10px 18px',
+  padding: '8px 16px',
   background: '#263238',
   border: '1px solid #455a64',
   borderRadius: 8,
   color: '#eceff1',
   cursor: 'pointer',
+  fontSize: 14,
 };

@@ -9,6 +9,14 @@ html, body {
   min-height: 100vh;
 }
 
+/* The <main> game area is pinned to the viewport (100dvh, overflow:hidden).
+ * Horizontal scroll inside each zone keeps the whole table visible at once,
+ * so the legal footer lives below the fold. Allow body to scroll so the
+ * footer stays reachable via keyboard/scroll wheel. */
+body {
+  overflow-x: hidden;
+}
+
 /* Visually hide but keep available to assistive tech */
 .sr-only {
   position: absolute !important;
