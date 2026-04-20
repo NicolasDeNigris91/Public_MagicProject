@@ -1,7 +1,13 @@
 .card {
   position: relative;
-  width: clamp(104px, 26vw, 160px);
+  /* Height-first sizing: four card-height zones (opponent & player
+   * battlefields, player hand, opponent compact strip, plus headers and
+   * controls) must all fit inside 100dvh. Binding card height to dvh keeps
+   * the whole table visible without overflow on any viewport. Width is
+   * derived from aspect-ratio so proportions match a real MTG card. */
+  height: clamp(148px, 22dvh, 220px);
   aspect-ratio: 160 / 223;
+  width: auto;
   border-radius: 10px;
   border: 2px solid transparent;
   padding: 0;
@@ -11,12 +17,6 @@
   transform-style: preserve-3d;
   color: #fff;
   font-family: inherit;
-}
-
-@media (min-width: 720px) {
-  .card {
-    width: clamp(128px, 18vw, 160px);
-  }
 }
 
 .card:focus-visible {

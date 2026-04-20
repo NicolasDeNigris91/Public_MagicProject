@@ -240,12 +240,20 @@ const HEADER_STYLE: React.CSSProperties = {
   flexShrink: 0,
 };
 
+/**
+ * `display: contents` promotes the section's children (h2, hand, battlefield)
+ * to direct flex children of <main>. This lets BOTH battlefields — one from
+ * each zone — share remaining vertical space via `flex: 1 1 0` on their own
+ * rule, instead of each zone absorbing space as a unit. Otherwise the player
+ * zone's fixed-height hand would starve the player battlefield of height
+ * while the opponent battlefield stays empty and huge.
+ *
+ * The <section aria-label="..."> still conveys the semantic grouping to
+ * assistive tech; display:contents is transparent to the accessibility tree
+ * in modern browsers.
+ */
 const ZONE_STYLE: React.CSSProperties = {
-  display: 'flex',
-  flexDirection: 'column',
-  minHeight: 0,
-  flex: '1 1 0',
-  gap: 4,
+  display: 'contents',
 };
 
 const ZONE_HEADING_STYLE: React.CSSProperties = {
