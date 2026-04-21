@@ -1,17 +1,14 @@
 import axios, { AxiosError } from 'axios';
 import type { ICard } from '@/engine/types';
+import type { Color } from '@/engine/color';
+import { buildDeckFromCandidates } from '@/engine/color';
 import { adaptScryfallCard, type ScryfallCard } from '@/adapters/scryfall.adapter';
-// stopgap until Task 5 — flatten for the existing fetchRandomCreatures shape
 import { fallbackDecks } from './fallback-deck';
-const fallbackDeck = [...fallbackDecks.W, ...fallbackDecks.R];
 
 const http = axios.create({
   baseURL: 'https://api.scryfall.com',
   timeout: 8000,
   headers: {
-    // Scryfall requires a User-Agent identifying the client.
-    // In the browser, UA is controlled by the browser; this is a no-op there
-    // but documents intent and works server-side.
     'User-Agent': 'mtg-tcg-a11y-portfolio/0.1',
     Accept: 'application/json',
   },
@@ -24,21 +21,33 @@ export interface FetchResult {
 }
 
 /**
- * Random creatures. Scryfall recommends ≤10 req/s with ≥50ms spacing;
- * one call per init is well under the budget.
+ * Fetch a balanced 10-card mono-color deck.
+ *
+ * Strategy: one `/cards/search` call per color, filter strictly to
+ * the requested color, then `buildDeckFromCandidates` fits the pool
+ * into the 10-slot skeleton locally. Any slot a candidate can't
+ * cover falls back to the per-color seed at that slot position.
+ * Whole-query failure returns the full per-color seed deck.
  */
-export async function fetchRandomCreatures(count = 20): Promise<FetchResult> {
+export async function fetchDeckForColor(color: Color): Promise<FetchResult> {
+  const seeds = fallbackDecks[color];
   try {
     const { data } = await http.get<{ data: ScryfallCard[] }>('/cards/search', {
-      params: { q: 'type:creature', order: 'random', unique: 'cards' },
+      params: {
+        q: `c=${color.toLowerCase()} t:creature cmc<=6 -t:token`,
+        order: 'random',
+        unique: 'cards',
+      },
     });
-    const cards = (data.data ?? []).slice(0, count).map(adaptScryfallCard);
-    if (cards.length === 0) {
-      return { cards: fallbackDeck, source: 'fallback', error: 'Empty response' };
+    const candidates = (data.data ?? [])
+      .map(adaptScryfallCard)
+      .filter((c) => c.color === color && c.power > 0 && c.toughness > 0);
+    if (candidates.length === 0) {
+      return { cards: seeds, source: 'fallback', error: 'Empty response' };
     }
-    return { cards, source: 'scryfall' };
+    return { cards: buildDeckFromCandidates(candidates, seeds), source: 'scryfall' };
   } catch (err) {
     const msg = err instanceof AxiosError ? err.message : 'Unknown error';
-    return { cards: fallbackDeck, source: 'fallback', error: msg };
+    return { cards: seeds, source: 'fallback', error: msg };
   }
 }
