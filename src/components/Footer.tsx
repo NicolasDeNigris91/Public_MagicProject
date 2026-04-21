@@ -26,11 +26,6 @@ export function Footer({ source }: FooterProps = {}) {
         </p>
       )}
       <p>
-        <strong>Atalhos de teclado:</strong> <kbd>Tab</kbd> e <kbd>Setas</kbd> para navegar entre cartas;{' '}
-        <kbd>Enter</kbd> ou <kbd>Espaço</kbd> para ativar; <kbd>i</kbd> em uma carta no campo abre os detalhes;{' '}
-        <kbd>Esc</kbd> fecha os detalhes.
-      </p>
-      <p>
         <strong>Aviso Legal:</strong> Este é um projeto de portfólio não oficial, sem fins lucrativos.
         {' '}<em>Magic: The Gathering</em>, nomes de cartas, arte e marcas registradas são propriedade da{' '}
         <strong>Wizards of the Coast LLC</strong>, subsidiária da Hasbro, Inc. Este projeto não é produzido,
