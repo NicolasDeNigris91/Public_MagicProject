@@ -25,7 +25,8 @@ export type MessageKey =
   | 'action.opponentThinking' | 'action.attackBlocked'
   | 'battlefield.yourLabel' | 'battlefield.opponentLabel' | 'battlefield.empty'
   | 'hand.your' | 'hand.opponent'
-  | 'lang.toggle' | 'lang.pt' | 'lang.en';
+  | 'lang.toggle' | 'lang.pt' | 'lang.en'
+  | 'log.title' | 'log.empty' | 'log.open' | 'log.close' | 'log.shortcut';
 
 export const messages: Record<Lang, Record<MessageKey, string>> = {
   pt: {
@@ -70,6 +71,11 @@ export const messages: Record<Lang, Record<MessageKey, string>> = {
     'lang.toggle': 'Mudar idioma',
     'lang.pt': 'PT',
     'lang.en': 'EN',
+    'log.title': 'Registro da partida',
+    'log.empty': 'Nenhum evento ainda.',
+    'log.open': 'Abrir registro',
+    'log.close': 'Fechar registro',
+    'log.shortcut': 'Atalho: L',
   },
   en: {
     'app.title': 'MTG Combat Demo',
@@ -113,6 +119,11 @@ export const messages: Record<Lang, Record<MessageKey, string>> = {
     'lang.toggle': 'Change language',
     'lang.pt': 'PT',
     'lang.en': 'EN',
+    'log.title': 'Match log',
+    'log.empty': 'No events yet.',
+    'log.open': 'Open log',
+    'log.close': 'Close log',
+    'log.shortcut': 'Shortcut: L',
   },
 };
 

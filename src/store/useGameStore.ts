@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { AnnouncePriority, GameResult, ICard, IGameState, IPlayer, LogEntry, PlayerId } from '@/engine/types';
+import type { AnnouncePriority, GameResult, ICard, IGameState, IPlayer, LogEntry, LogKind, PlayerId } from '@/engine/types';
 import {
   PLAYS_PER_TURN, applyDamage, beginTurn, canAttack, canAttackFace, canPlay,
   drawCard, playCardToField, removeFromField, resolveCombat,
@@ -12,7 +12,18 @@ interface GameActions {
   playCardToField: (who: PlayerId, cardId: string) => void;
   attack: (attackerId: string, blockerId: string | null) => void;
   endTurn: () => void;
-  announce: (message: string, priority?: AnnouncePriority) => void;
+  /**
+   * Append a message to the log. `kind` tags the entry for the
+   * visible combat log to style; if omitted, defaults to 'info'.
+   * `meta` carries structured data alongside the pre-built message
+   * for future localization and richer rendering.
+   */
+  announce: (
+    message: string,
+    priority?: AnnouncePriority,
+    kind?: LogKind,
+    meta?: Record<string, string | number>,
+  ) => void;
 }
 
 type GameStore = IGameState & GameActions;
@@ -40,10 +51,19 @@ function makePlayer(id: PlayerId, deck: ICard[]): IPlayer {
 // are appended in the same millisecond. The announcer uses id as its
 // cursor, so any collision would cause a message to be re-spoken.
 let logSeq = 0;
-function log(msg: string, priority: AnnouncePriority): LogEntry {
+function log(
+  msg: string,
+  priority: AnnouncePriority,
+  kind: LogKind = 'info',
+  meta?: Record<string, string | number>,
+): LogEntry {
   return {
     id: `log-${++logSeq}`,
-    message: msg, priority, timestamp: Date.now(),
+    message: msg,
+    priority,
+    timestamp: Date.now(),
+    kind,
+    ...(meta ? { meta } : {}),
   };
 }
 
@@ -68,13 +88,18 @@ export const useGameStore = create<GameStore>((set, get) => ({
       turnNumber: 1,
       initialized: true,
       generation: s.generation + 1,
-      gameLog: [log(`New match. Turn 1. You have ${STARTING_LIFE} life, ${STARTING_HAND} cards, and one play. Your turn.`, 'polite')],
+      gameLog: [log(
+        `New match. Turn 1. You have ${STARTING_LIFE} life, ${STARTING_HAND} cards, and one play. Your turn.`,
+        'polite',
+        'turn',
+        { turnNumber: 1, player: 'player' },
+      )],
     }));
   },
 
-  announce: (message, priority = 'polite') => {
+  announce: (message, priority = 'polite', kind = 'info', meta) => {
     set((s) => {
-      const next = [...s.gameLog, log(message, priority)];
+      const next = [...s.gameLog, log(message, priority, kind, meta)];
       return { gameLog: next.length > MAX_LOG ? next.slice(-MAX_LOG) : next };
     });
   },
@@ -94,14 +119,26 @@ export const useGameStore = create<GameStore>((set, get) => ({
           ? 'You tried to draw from an empty deck. You lose the match.'
           : 'Opponent tried to draw from an empty deck. You win the match.',
         'assertive',
+        'game-over',
+        { winner: who === 'player' ? 'opponent' : 'player', reason: 'decking' },
       );
       return;
     }
     set({ [who]: updated } as Partial<GameStore>);
     if (who === 'player') {
-      get().announce(`You drew ${drawn.name}. Hand size ${updated.hand.length}.`, 'polite');
+      get().announce(
+        `You drew ${drawn.name}. Hand size ${updated.hand.length}.`,
+        'polite',
+        'draw',
+        { player: 'player', card: drawn.name, handSize: updated.hand.length },
+      );
     } else {
-      get().announce(`Opponent drew a card. Their hand size is ${updated.hand.length}.`, 'polite');
+      get().announce(
+        `Opponent drew a card. Their hand size is ${updated.hand.length}.`,
+        'polite',
+        'draw',
+        { player: 'opponent', handSize: updated.hand.length },
+      );
     }
   },
 
@@ -125,6 +162,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
         ? `You played ${label} to the battlefield. It has summoning sickness and cannot attack this turn.`
         : `Opponent played ${label}. It has summoning sickness.`,
       'polite',
+      'play',
+      { player: who, card: card.name },
     );
   },
 
@@ -191,6 +230,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
           result.attackerDies ? `${attacker.name} dies. ` : ''
         }${result.blockerDies ? `${blocker.name} dies.` : ''}`.trim(),
         'assertive',
+        'combat',
+        {
+          attackingSide, attacker: attacker.name, blocker: blocker.name,
+          attackerDies: result.attackerDies ? 1 : 0,
+          blockerDies: result.blockerDies ? 1 : 0,
+        },
       );
     } else {
       get().announce(
@@ -198,6 +243,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
           defendingSide === 'player' ? 'Your' : "Opponent's"
         } life is now ${defenderPlayer.life}.`,
         'assertive',
+        'combat',
+        {
+          attackingSide, attacker: attacker.name,
+          damage: result.playerDamage, defenderLife: defenderPlayer.life,
+        },
       );
     }
 
@@ -207,6 +257,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
           ? 'Victory! You defeated the opponent.'
           : 'Defeat. The opponent reduced your life to zero.',
         'assertive',
+        'game-over',
+        { winner },
       );
     }
   },
@@ -228,6 +280,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
         ? `Turn ${s.turnNumber + bumpTurn}. Your turn.`
         : "Opponent's turn.",
       'polite',
+      'turn',
+      { turnNumber: s.turnNumber + bumpTurn, player: next },
     );
     get().drawCard(next);
   },

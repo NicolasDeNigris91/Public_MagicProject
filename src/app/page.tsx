@@ -4,6 +4,8 @@ import { ColorSelection } from '@/components/ColorSelection';
 import { type Color } from '@/engine/color';
 import { Hand } from '@/components/Hand';
 import { LangToggle } from '@/components/LangToggle';
+import { CombatLog } from '@/components/CombatLog';
+import { CombatLogToggle } from '@/components/CombatLogToggle';
 import { useI18n } from '@/i18n/I18nProvider';
 import { Battlefield } from '@/components/Battlefield';
 import { ControlBar } from '@/components/ControlBar';
@@ -35,6 +37,7 @@ export default function GamePage() {
   const isAnimating = useCombatStore((s) => s.isAnimating);
 
   const [playerColor, setPlayerColor] = useState<Color | null>(null);
+  const [logOpen, setLogOpen] = useState(false);
   const { ready, source, restart, opponentColor } = useDeck(playerColor);
   const { t } = useI18n();
   const {
@@ -85,6 +88,22 @@ export default function GamePage() {
     apply();
     mql.addEventListener('change', apply);
     return () => mql.removeEventListener('change', apply);
+  }, []);
+
+  useEffect(() => {
+    // Global shortcut: `L` toggles the match log. Bail if the user is
+    // typing into a field or a modifier is held, to avoid hijacking
+    // real keyboard actions.
+    const handler = (e: KeyboardEvent) => {
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      if (e.key !== 'l' && e.key !== 'L') return;
+      const tgt = e.target as HTMLElement | null;
+      if (tgt && (tgt.tagName === 'INPUT' || tgt.tagName === 'TEXTAREA' || tgt.isContentEditable)) return;
+      e.preventDefault();
+      setLogOpen((prev) => !prev);
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
   }, []);
 
   const onPlayAgain = () => {
@@ -153,12 +172,13 @@ export default function GamePage() {
       <main id="main" ref={mainRef} style={MAIN_STYLE}>
         <header style={HEADER_STYLE}>
           <h1 style={{ margin: 0, fontSize: 'clamp(14px, 3.5vw, 18px)' }}>{t('app.title')}</h1>
-          <div style={{ fontSize: 'clamp(11px, 2.6vw, 13px)', color: '#90a4ae', display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+          <div style={{ fontSize: 'clamp(11px, 2.6vw, 13px)', color: '#90a4ae', display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
             <span>
               {t('turn.label')} <strong>{turnNumber}</strong>
               {' · '}<strong>{turn === 'player' ? t('turn.yourMove') : t('turn.opponent')}</strong>
               {' · '}{t('turn.plays')}: <strong>{player.playsRemaining}</strong>
             </span>
+            <CombatLogToggle open={logOpen} onToggle={() => setLogOpen((o) => !o)} />
             <LangToggle />
           </div>
         </header>
@@ -244,6 +264,10 @@ export default function GamePage() {
       </main>
 
       <CombatLayer />
+
+      <div id="match-log">
+        <CombatLog open={logOpen} onClose={() => setLogOpen(false)} />
+      </div>
 
       {inspected && (
         <CardInspector

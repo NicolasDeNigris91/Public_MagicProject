@@ -52,11 +52,30 @@ export interface IPlayer {
   playsRemaining: number;
 }
 
+/**
+ * Classification for a log entry. The UI derives styling and icons
+ * from this; the announcer (live region) ignores it and reads
+ * `message` verbatim. 'info' is the catch-all default.
+ */
+export type LogKind =
+  | 'info'
+  | 'turn'
+  | 'draw'
+  | 'play'
+  | 'combat'
+  | 'game-over';
+
 export interface LogEntry {
   id: string;
   message: string;
   priority: AnnouncePriority;
   timestamp: number;
+  /** Event classification used by the visible combat log for styling. */
+  kind?: LogKind;
+  /** Structured payload for future localization — kept alongside the
+   *  pre-built `message` so rendering can upgrade without breaking
+   *  call sites. */
+  meta?: Record<string, string | number>;
 }
 
 export type GameResult = 'player' | 'opponent' | null;

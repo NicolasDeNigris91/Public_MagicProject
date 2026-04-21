@@ -19,6 +19,8 @@ import { ControlBar } from '@/components/ControlBar';
 import { Battlefield } from '@/components/Battlefield';
 import { Card } from '@/components/Card/Card';
 import { Hand } from '@/components/Hand';
+import { CombatLog } from '@/components/CombatLog';
+import { CombatLogToggle } from '@/components/CombatLogToggle';
 import type { ICard } from '@/engine/types';
 
 const sampleCard: ICard = {
@@ -85,5 +87,13 @@ describe('a11y sweep', () => {
     await expectNoViolations(
       <Hand hand={cards} label="Opponent hand" onActivate={() => {}} hidden compact />,
     );
+  });
+
+  it('CombatLog (open, empty) has no axe violations', async () => {
+    await expectNoViolations(<CombatLog open={true} onClose={() => {}} />);
+  });
+
+  it('CombatLogToggle has no axe violations', async () => {
+    await expectNoViolations(<CombatLogToggle open={false} onToggle={() => {}} />);
   });
 });
