@@ -1,7 +1,16 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+
+vi.mock('@/services/scryfall.client', () => ({
+  // Default: never-resolving promise so existing tests don't trigger
+  // a setState after mount. Tests that care about the resolved state
+  // override via mockResolvedValueOnce.
+  fetchColorArt: vi.fn(() => new Promise(() => {})),
+}));
+
 import { ColorSelection } from './ColorSelection';
+import { fetchColorArt } from '@/services/scryfall.client';
 import { COLORS, COLOR_LABELS } from '@/engine/color';
 
 describe('ColorSelection', () => {
@@ -20,6 +29,18 @@ describe('ColorSelection', () => {
     render(<ColorSelection onSelect={onSelect} />);
     await user.click(screen.getByRole('button', { name: /Vermelho/i }));
     expect(onSelect).toHaveBeenCalledWith('R');
+  });
+
+  it('swaps the swatch for the card art thumbnail once fetchColorArt resolves', async () => {
+    vi.mocked(fetchColorArt).mockResolvedValueOnce({
+      W: 'https://cards.scryfall.io/art_crop/akroma.jpg',
+    });
+    render(<ColorSelection onSelect={() => {}} />);
+    const whiteBtn = screen.getByRole('button', { name: /Branco/i });
+    await waitFor(() => {
+      const img = whiteBtn.querySelector('img');
+      expect(img?.getAttribute('src')).toBe('https://cards.scryfall.io/art_crop/akroma.jpg');
+    });
   });
 
   it('moves focus with Left/Right arrows and selects on Enter', async () => {

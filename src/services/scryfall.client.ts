@@ -1,7 +1,7 @@
 import axios, { AxiosError } from 'axios';
 import type { ICard } from '@/engine/types';
 import type { Color } from '@/engine/color';
-import { buildDeckFromCandidates } from '@/engine/color';
+import { COLORS, buildDeckFromCandidates } from '@/engine/color';
 import { adaptScryfallCard, type ScryfallCard } from '@/adapters/scryfall.adapter';
 import { fallbackDecks } from './fallback-deck';
 
@@ -50,4 +50,36 @@ export async function fetchDeckForColor(color: Color): Promise<FetchResult> {
     const msg = err instanceof AxiosError ? err.message : 'Unknown error';
     return { cards: seeds, source: 'fallback', error: msg };
   }
+}
+
+/** One iconic creature per color used as the selector's art thumbnail. */
+export const COLOR_ART_CARDS: Record<Color, string> = {
+  W: 'Akroma, Angel of Wrath',
+  U: 'Hullbreaker Horror',
+  B: 'Phage the Untouchable',
+  R: 'Flametongue Kavu',
+  G: 'Primeval Titan',
+};
+
+async function fetchArtCrop(exactName: string): Promise<string | null> {
+  try {
+    const { data } = await http.get<ScryfallCard>('/cards/named', {
+      params: { exact: exactName },
+    });
+    const uris = data.image_uris ?? data.card_faces?.[0]?.image_uris;
+    return uris?.art_crop ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/** Fetch art_crop for every color's icon card in parallel. Missing
+ *  entries silently fall back to the solid swatches in the UI. */
+export async function fetchColorArt(): Promise<Partial<Record<Color, string>>> {
+  const entries = await Promise.all(
+    COLORS.map(async (c) => [c, await fetchArtCrop(COLOR_ART_CARDS[c])] as const),
+  );
+  const out: Partial<Record<Color, string>> = {};
+  for (const [c, url] of entries) if (url) out[c] = url;
+  return out;
 }

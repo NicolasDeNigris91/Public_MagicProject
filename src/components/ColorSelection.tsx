@@ -1,6 +1,7 @@
 'use client';
-import { useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { COLORS, COLOR_LABELS, type Color } from '@/engine/color';
+import { fetchColorArt } from '@/services/scryfall.client';
 
 const SWATCH: Record<Color, string> = {
   W: '#f8f1d9',
@@ -16,6 +17,15 @@ interface Props {
 
 export function ColorSelection({ onSelect }: Props) {
   const buttonsRef = useRef<HTMLButtonElement[]>([]);
+  const [art, setArt] = useState<Partial<Record<Color, string>>>({});
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchColorArt().then((map) => {
+      if (!cancelled) setArt(map);
+    });
+    return () => { cancelled = true; };
+  }, []);
 
   function onKeyDown(e: React.KeyboardEvent<HTMLButtonElement>, idx: number) {
     if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
@@ -35,6 +45,7 @@ export function ColorSelection({ onSelect }: Props) {
         <div role="toolbar" aria-label="Cores disponíveis" style={GRID_STYLE}>
           {COLORS.map((c, i) => {
             const { name, flavor } = COLOR_LABELS[c];
+            const artUrl = art[c];
             return (
               <button
                 key={c}
@@ -45,7 +56,12 @@ export function ColorSelection({ onSelect }: Props) {
                 aria-label={`${name} — ${flavor}`}
                 style={BUTTON_STYLE}
               >
-                <span aria-hidden="true" style={{ ...SWATCH_STYLE, background: SWATCH[c] }} />
+                {artUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={artUrl} alt="" style={ART_STYLE} loading="lazy" />
+                ) : (
+                  <span aria-hidden="true" style={{ ...SWATCH_STYLE, background: SWATCH[c] }} />
+                )}
                 <span style={NAME_STYLE}>{name}</span>
                 <span style={FLAVOR_STYLE}>{flavor}</span>
               </button>
@@ -95,6 +111,10 @@ const BUTTON_STYLE: React.CSSProperties = {
 const SWATCH_STYLE: React.CSSProperties = {
   width: 32, height: 32, borderRadius: '50%',
   border: '2px solid #eceff1',
+};
+const ART_STYLE: React.CSSProperties = {
+  width: 96, height: 70, objectFit: 'cover',
+  borderRadius: 6, border: '1px solid #455a64',
 };
 const NAME_STYLE: React.CSSProperties = { fontSize: 14, fontWeight: 600 };
 const FLAVOR_STYLE: React.CSSProperties = { fontSize: 11, color: '#90a4ae', textAlign: 'center' };
