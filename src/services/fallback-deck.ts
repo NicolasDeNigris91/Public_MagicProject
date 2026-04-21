@@ -102,10 +102,22 @@ function seedToCard(color: Color, s: Seed): ICard {
   };
 }
 
+/**
+ * Each color's 10 seeds are doubled (with `-b` id suffix) to fill the
+ * 20-slot skeleton. The doubled copies sit at positions 10-19 and
+ * mirror the originals; without this, decks would be 10 cards long
+ * and deck-out would end every match by turn 6.
+ */
+function doubled(color: Color, seeds: Seed[]): ICard[] {
+  const firstHalf = seeds.map((s) => seedToCard(color, s));
+  const secondHalf = seeds.map((s) => seedToCard(color, { ...s, id: `${s.id}-b` }));
+  return [...firstHalf, ...secondHalf];
+}
+
 export const fallbackDecks: Record<Color, ICard[]> = {
-  W: SEEDS_BY_COLOR.W.map((s) => seedToCard('W', s)),
-  U: SEEDS_BY_COLOR.U.map((s) => seedToCard('U', s)),
-  B: SEEDS_BY_COLOR.B.map((s) => seedToCard('B', s)),
-  R: SEEDS_BY_COLOR.R.map((s) => seedToCard('R', s)),
-  G: SEEDS_BY_COLOR.G.map((s) => seedToCard('G', s)),
+  W: doubled('W', SEEDS_BY_COLOR.W),
+  U: doubled('U', SEEDS_BY_COLOR.U),
+  B: doubled('B', SEEDS_BY_COLOR.B),
+  R: doubled('R', SEEDS_BY_COLOR.R),
+  G: doubled('G', SEEDS_BY_COLOR.G),
 };

@@ -51,18 +51,24 @@ function card(partial: Partial<ICard> & { id: string; cmc: number; power: number
 }
 
 function makeSeeds(): ICard[] {
-  // 10 seeds, one per skeleton slot, each sitting cleanly inside its window.
+  // 20 seeds, one per skeleton slot. The curve template is repeated
+  // twice (same shape); seeds 10-19 mirror seeds 0-9 with `-b` ids
+  // so every slot has a fitting fallback with a unique id.
+  const base = [
+    { id: 'seed-0', cmc: 1, power: 1, toughness: 1 },
+    { id: 'seed-1', cmc: 1, power: 2, toughness: 1 },
+    { id: 'seed-2', cmc: 2, power: 2, toughness: 2 },
+    { id: 'seed-3', cmc: 2, power: 2, toughness: 3 },
+    { id: 'seed-4', cmc: 3, power: 2, toughness: 3 },
+    { id: 'seed-5', cmc: 3, power: 3, toughness: 2 },
+    { id: 'seed-6', cmc: 4, power: 3, toughness: 4 },
+    { id: 'seed-7', cmc: 5, power: 4, toughness: 4 },
+    { id: 'seed-8', cmc: 6, power: 5, toughness: 5 },
+    { id: 'seed-9', cmc: 2, power: 1, toughness: 2 },
+  ];
   return [
-    card({ id: 'seed-0', cmc: 1, power: 1, toughness: 1 }),
-    card({ id: 'seed-1', cmc: 1, power: 2, toughness: 1 }),
-    card({ id: 'seed-2', cmc: 2, power: 2, toughness: 2 }),
-    card({ id: 'seed-3', cmc: 2, power: 2, toughness: 3 }),
-    card({ id: 'seed-4', cmc: 3, power: 2, toughness: 3 }),
-    card({ id: 'seed-5', cmc: 3, power: 3, toughness: 2 }),
-    card({ id: 'seed-6', cmc: 4, power: 3, toughness: 4 }),
-    card({ id: 'seed-7', cmc: 5, power: 4, toughness: 4 }),
-    card({ id: 'seed-8', cmc: 6, power: 5, toughness: 5 }),
-    card({ id: 'seed-9', cmc: 2, power: 1, toughness: 2 }),
+    ...base.map(card),
+    ...base.map((b) => card({ ...b, id: `${b.id}-b` })),
   ];
 }
 
@@ -90,9 +96,10 @@ describe('buildDeckFromCandidates', () => {
 
   it('falls back to the per-slot seed when no candidate fits', () => {
     const offCurve = card({ id: 'off', cmc: 8, power: 9, toughness: 9 });
-    const deck = buildDeckFromCandidates([offCurve], makeSeeds());
-    // off-curve candidate fits no slot → all slots come from seeds.
-    deck.forEach((c, i) => expect(c.id).toBe(`seed-${i}`));
+    const seeds = makeSeeds();
+    const deck = buildDeckFromCandidates([offCurve], seeds);
+    // off-curve candidate fits no slot → deck equals the seeds in order.
+    expect(deck.map((c) => c.id)).toEqual(seeds.map((c) => c.id));
   });
 
   it('places a cmc-2 candidate into the flex slot (slot 9) when earlier slots are already filled', () => {

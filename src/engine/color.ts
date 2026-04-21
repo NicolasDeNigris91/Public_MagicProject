@@ -31,9 +31,23 @@ export interface SkeletonSlot {
   toughness: readonly [number, number];
 }
 
-/** Ten slots per deck. Both sides fill the same skeleton, so power
- *  budget and curve are identical — only the color pie differs. */
+/** Twenty slots per deck. Both sides fill the same skeleton, so
+ *  power budget and curve are identical — only the color pie
+ *  differs. The curve is the same 10-slot template repeated twice:
+ *  a 20-card deck minus the 5-card opening hand leaves a 15-card
+ *  library, enough runway that decking-out doesn't end the match
+ *  by turn 6 on its own. */
 export const SKELETON: readonly SkeletonSlot[] = [
+  { cmc: 1, power: [1, 2], toughness: [1, 2] },
+  { cmc: 1, power: [1, 2], toughness: [1, 2] },
+  { cmc: 2, power: [2, 2], toughness: [1, 3] },
+  { cmc: 2, power: [2, 2], toughness: [1, 3] },
+  { cmc: 3, power: [2, 3], toughness: [2, 3] },
+  { cmc: 3, power: [2, 3], toughness: [2, 3] },
+  { cmc: 4, power: [3, 4], toughness: [3, 4] },
+  { cmc: 5, power: [4, 4], toughness: [4, 4] },
+  { cmc: 6, power: [5, 5], toughness: [5, 5] },
+  { cmc: [1, 3], power: [1, 2], toughness: [1, 4] },
   { cmc: 1, power: [1, 2], toughness: [1, 2] },
   { cmc: 1, power: [1, 2], toughness: [1, 2] },
   { cmc: 2, power: [2, 2], toughness: [1, 3] },
