@@ -31,7 +31,7 @@ export default function GamePage() {
   const lifePulse = useCombatStore((s) => s.lifePulse);
   const isAnimating = useCombatStore((s) => s.isAnimating);
 
-  const { source, restart } = useDeck();
+  const { ready: _ready, source, restart } = useDeck(null);
   const {
     inspected,
     open: openInspector,

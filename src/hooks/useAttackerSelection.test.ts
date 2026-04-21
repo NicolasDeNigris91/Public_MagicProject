@@ -22,7 +22,7 @@ describe('useAttackerSelection', () => {
 
   it('ignores activation while animator is busy', () => {
     const deck = Array.from({ length: 20 }, (_, i) => makeCard(`d${i}`));
-    useGameStore.getState().initGame(deck);
+    useGameStore.getState().initGame(deck, deck);
 
     const { result } = renderHook(() => useAttackerSelection());
 
@@ -41,7 +41,7 @@ describe('useAttackerSelection', () => {
   it('forwards resolveCombat output to playCombat with correct field mapping', async () => {
     vi.useRealTimers();
     const deck = Array.from({ length: 20 }, (_, i) => makeCard(`d${i}`, 3, 3));
-    useGameStore.getState().initGame(deck);
+    useGameStore.getState().initGame(deck, deck);
 
     const attacker = { ...makeCard('att-1', 3, 3), summoningSick: false };
     const blocker = { ...makeCard('blk-1', 2, 5), summoningSick: false };
@@ -80,7 +80,7 @@ describe('useAttackerSelection', () => {
     // Verify the helper is a function; deeper focus behavior is covered
     // by manual QA in Task 13.
     const deck = Array.from({ length: 20 }, (_, i) => makeCard(`d${i}`));
-    useGameStore.getState().initGame(deck);
+    useGameStore.getState().initGame(deck, deck);
 
     const { result } = renderHook(() => useAttackerSelection());
     expect(typeof result.current.handleBattlefieldActivate).toBe('function');
