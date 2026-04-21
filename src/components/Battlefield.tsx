@@ -1,6 +1,7 @@
 'use client';
 import type { ICard } from '@/engine/types';
 import { Card } from './Card/Card';
+import { useI18n } from '@/i18n/I18nProvider';
 
 export interface BattlefieldProps {
   label: string;
@@ -22,6 +23,7 @@ const PLAYMAT: Record<NonNullable<BattlefieldProps['variant']>, string> = {
 };
 
 export function Battlefield({ label, cards, variant = 'player', onCardActivate, onCardInspect, selectedId }: BattlefieldProps) {
+  const { t } = useI18n();
   return (
     <section
       aria-label={`${label}. ${cards.length} creature${cards.length === 1 ? '' : 's'} on the battlefield.`}
@@ -57,7 +59,7 @@ export function Battlefield({ label, cards, variant = 'player', onCardActivate, 
                  stroke="#546e7a" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
               <path d="M4 4l7 7m9-7l-7 7M4 20l7-7m9 7l-7-7"/>
             </svg>
-            <span>{label} — no creatures in play</span>
+            <span>{t('battlefield.empty', { label })}</span>
           </li>
         )}
         {cards.map((card) => (

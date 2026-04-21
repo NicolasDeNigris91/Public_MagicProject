@@ -2,6 +2,7 @@
 import { MANA_SYMBOL_URL, type Color } from '@/engine/color';
 import { LifeDisplay } from './LifeDisplay';
 import { IMPACT_MS } from '@/constants/timings';
+import { useI18n } from '@/i18n/I18nProvider';
 
 export interface PlayerHeaderProps {
   /** Human-facing label, e.g. "You" or "Opponent". */
@@ -22,6 +23,7 @@ export interface PlayerHeaderProps {
  * keeping mana symbol and hand count as secondary affordances.
  */
 export function PlayerHeader({ label, color, life, handCount, pulsing, lifeAnchor }: PlayerHeaderProps) {
+  const { t } = useI18n();
   const pulseStyle: React.CSSProperties | undefined = pulsing
     ? {
         animation: `combat-flash ${IMPACT_MS}ms ease-in-out, combat-shake ${IMPACT_MS}ms ease-in-out`,
@@ -39,12 +41,13 @@ export function PlayerHeader({ label, color, life, handCount, pulsing, lifeAncho
         <span style={LABEL_STYLE}>{label}</span>
       </span>
 
-      <span style={LIFE_STYLE} aria-label={`Life ${life}`}>
+      <span style={LIFE_STYLE}>
         <span aria-hidden="true" style={HEART_STYLE}>
           <svg viewBox="0 0 24 24" width="22" height="22" fill="#ef5350" aria-hidden="true">
             <path d="M12 21s-7.5-4.35-10-9.5C.5 7.5 3 4 6.5 4c2 0 3.5 1.2 4.5 2.7C12 5.2 13.5 4 15.5 4 19 4 21.5 7.5 20 11.5 19.5 16.65 12 21 12 21z"/>
           </svg>
         </span>
+        <span className="sr-only">{t('player.lifePrefix')}</span>
         <LifeDisplay
           value={life}
           data-life-anchor={lifeAnchor}
@@ -52,8 +55,11 @@ export function PlayerHeader({ label, color, life, handCount, pulsing, lifeAncho
         />
       </span>
 
-      <span style={HAND_STYLE} aria-label={`Hand ${handCount} card${handCount === 1 ? '' : 's'}`}>
-        <span aria-hidden="true" style={HAND_LABEL_STYLE}>hand</span>
+      <span style={HAND_STYLE}>
+        <span className="sr-only">
+          {t('player.handLabel')} {handCount} {handCount === 1 ? t('player.handSingular') : t('player.handPlural')}
+        </span>
+        <span aria-hidden="true" style={HAND_LABEL_STYLE}>{t('player.handLabel')}</span>
         <span aria-hidden="true" style={HAND_COUNT_STYLE}>{handCount}</span>
       </span>
     </h2>

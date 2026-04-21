@@ -1,8 +1,10 @@
 'use client';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ColorSelection } from '@/components/ColorSelection';
-import { COLOR_LABELS, type Color } from '@/engine/color';
+import { type Color } from '@/engine/color';
 import { Hand } from '@/components/Hand';
+import { LangToggle } from '@/components/LangToggle';
+import { useI18n } from '@/i18n/I18nProvider';
 import { Battlefield } from '@/components/Battlefield';
 import { ControlBar } from '@/components/ControlBar';
 import { Footer } from '@/components/Footer';
@@ -34,6 +36,7 @@ export default function GamePage() {
 
   const [playerColor, setPlayerColor] = useState<Color | null>(null);
   const { ready, source, restart, opponentColor } = useDeck(playerColor);
+  const { t } = useI18n();
   const {
     inspected,
     open: openInspector,
@@ -64,10 +67,10 @@ export default function GamePage() {
 
   useEffect(() => {
     if (!ready || !playerColor || !opponentColor) return;
-    const me = COLOR_LABELS[playerColor].name;
-    const them = COLOR_LABELS[opponentColor].name;
-    announce(`Você escolheu ${me}. Oponente jogará com ${them}. Distribuindo cartas.`, 'polite');
-  }, [ready, playerColor, opponentColor, announce]);
+    const me = t(`color.${playerColor}.name`);
+    const them = t(`color.${opponentColor}.name`);
+    announce(t('color.announceChoice', { me, them }), 'polite');
+  }, [ready, playerColor, opponentColor, announce, t]);
 
   useEffect(() => {
     // After the user picks a color, the previously-focused button unmounts.
@@ -140,7 +143,7 @@ export default function GamePage() {
         aria-live="polite"
         style={{ padding: 32, textAlign: 'center' }}
       >
-        <p>Distribuindo cartas…</p>
+        <p>{t('game.loading')}</p>
       </main>
     );
   }
@@ -149,11 +152,14 @@ export default function GamePage() {
     <>
       <main id="main" ref={mainRef} style={MAIN_STYLE}>
         <header style={HEADER_STYLE}>
-          <h1 style={{ margin: 0, fontSize: 'clamp(14px, 3.5vw, 18px)' }}>MTG Combat Demo</h1>
-          <div style={{ fontSize: 'clamp(11px, 2.6vw, 13px)', color: '#90a4ae' }}>
-            Turn <strong>{turnNumber}</strong>
-            {' · '}<strong>{turn === 'player' ? 'Your move' : "Opponent"}</strong>
-            {' · '}Plays: <strong>{player.playsRemaining}</strong>
+          <h1 style={{ margin: 0, fontSize: 'clamp(14px, 3.5vw, 18px)' }}>{t('app.title')}</h1>
+          <div style={{ fontSize: 'clamp(11px, 2.6vw, 13px)', color: '#90a4ae', display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+            <span>
+              {t('turn.label')} <strong>{turnNumber}</strong>
+              {' · '}<strong>{turn === 'player' ? t('turn.yourMove') : t('turn.opponent')}</strong>
+              {' · '}{t('turn.plays')}: <strong>{player.playsRemaining}</strong>
+            </span>
+            <LangToggle />
           </div>
         </header>
 
@@ -170,31 +176,31 @@ export default function GamePage() {
             }}
           >
             <strong id="game-over-title" style={{ fontSize: 16 }}>
-              {winner === 'player' ? 'Victory, you defeated the opponent.' : 'Defeat, your life reached zero.'}
+              {winner === 'player' ? t('game.victory') : t('game.defeat')}
             </strong>
             <div style={{ display: 'flex', gap: 8 }}>
               <button onClick={onPlayAgain} style={controlStyle}>
-                Jogar de novo com {COLOR_LABELS[playerColor].name}
+                {t('game.playAgain', { color: t(`color.${playerColor}.name`) })}
               </button>
               <button onClick={handleChangeColor} style={controlStyle}>
-                Trocar cor
+                {t('game.changeColor')}
               </button>
             </div>
           </div>
         )}
 
-        <section aria-label="Opponent" style={ZONE_STYLE}>
+        <section aria-label={t('player.opponent')} style={ZONE_STYLE}>
           <PlayerHeader
-            label="Opponent"
+            label={t('player.opponent')}
             color={opponentColor}
             life={opponent.life}
             handCount={opponent.hand.length}
             pulsing={lifePulse === 'opponent'}
             lifeAnchor="opponent-life"
           />
-          <Hand hand={opponent.hand} label="Opponent hand" onActivate={() => undefined} hidden compact />
+          <Hand hand={opponent.hand} label={t('hand.opponent')} onActivate={() => undefined} hidden compact />
           <Battlefield
-            label="Opponent battlefield"
+            label={t('battlefield.opponentLabel')}
             variant="opponent"
             cards={opponent.battlefield}
             onCardActivate={handleBattlefieldActivate}
@@ -212,9 +218,9 @@ export default function GamePage() {
           onEndTurn={endTurn}
         />
 
-        <section aria-label="Player" style={ZONE_STYLE}>
+        <section aria-label={t('player.you')} style={ZONE_STYLE}>
           <PlayerHeader
-            label="You"
+            label={t('player.you')}
             color={playerColor}
             life={player.life}
             handCount={player.hand.length}
@@ -222,7 +228,7 @@ export default function GamePage() {
             lifeAnchor="player-life"
           />
           <Battlefield
-            label="Your battlefield"
+            label={t('battlefield.yourLabel')}
             variant="player"
             cards={player.battlefield}
             onCardActivate={handleBattlefieldActivate}
@@ -231,7 +237,7 @@ export default function GamePage() {
           />
           <Hand
             hand={player.hand}
-            label="Your hand"
+            label={t('hand.your')}
             onActivate={(card) => openInspector(card, 'hand')}
           />
         </section>

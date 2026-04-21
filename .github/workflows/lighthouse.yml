@@ -1,0 +1,25 @@
+name: Lighthouse
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  lhci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - name: Run Lighthouse CI
+        run: npx --yes @lhci/cli@0.14.x autorun
+        env:
+          # Publishes an anonymous report to temporary-public-storage; the
+          # URL shows up in the job log so you can click through from PRs.
+          LHCI_BUILD_CONTEXT__CURRENT_HASH: ${{ github.sha }}

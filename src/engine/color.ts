@@ -15,11 +15,11 @@ export type Color = 'W' | 'U' | 'B' | 'R' | 'G';
 export const COLORS: readonly Color[] = ['W', 'U', 'B', 'R', 'G'] as const;
 
 export const COLOR_LABELS: Record<Color, { name: string; flavor: string }> = {
-  W: { name: 'Branco',   flavor: 'ordem, proteção e tropas em formação' },
-  U: { name: 'Azul',     flavor: 'voa, esquiva e controla o ritmo' },
-  B: { name: 'Preto',    flavor: 'ameaças mortais que voltam do cemitério' },
-  R: { name: 'Vermelho', flavor: 'velocidade pura e dano direto' },
-  G: { name: 'Verde',    flavor: 'força bruta e bichões dominando a mesa' },
+  W: { name: 'Branco',   flavor: 'Ordem, proteção e tropas em formação' },
+  U: { name: 'Azul',     flavor: 'Voa, esquiva e controla o ritmo' },
+  B: { name: 'Preto',    flavor: 'Ameaças mortais que voltam do cemitério' },
+  R: { name: 'Vermelho', flavor: 'Velocidade pura e dano direto' },
+  G: { name: 'Verde',    flavor: 'Força bruta e bichões dominando a mesa' },
 };
 
 /**

@@ -1,7 +1,8 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
-import { COLORS, COLOR_LABELS, MANA_SYMBOL_URL, type Color } from '@/engine/color';
+import { COLORS, MANA_SYMBOL_URL, type Color } from '@/engine/color';
 import { fetchColorArt } from '@/services/scryfall.client';
+import { useI18n } from '@/i18n/I18nProvider';
 
 const SWATCH: Record<Color, string> = {
   W: '#f8f1d9',
@@ -18,6 +19,7 @@ interface Props {
 export function ColorSelection({ onSelect }: Props) {
   const buttonsRef = useRef<HTMLButtonElement[]>([]);
   const [art, setArt] = useState<Partial<Record<Color, string>>>({});
+  const { t } = useI18n();
 
   useEffect(() => {
     let cancelled = false;
@@ -38,10 +40,11 @@ export function ColorSelection({ onSelect }: Props) {
   return (
     <main id="main" style={WRAPPER_STYLE}>
       <fieldset style={FIELDSET_STYLE}>
-        <legend style={LEGEND_STYLE}>Escolha sua cor</legend>
-        <div role="toolbar" aria-label="Cores disponíveis" style={GRID_STYLE}>
+        <legend style={LEGEND_STYLE}>{t('color.selectTitle')}</legend>
+        <div role="toolbar" aria-label={t('color.toolbarLabel')} style={GRID_STYLE}>
           {COLORS.map((c, i) => {
-            const { name, flavor } = COLOR_LABELS[c];
+            const name = t(`color.${c}.name`);
+            const flavor = t(`color.${c}.flavor`);
             const artUrl = art[c];
             return (
               <button

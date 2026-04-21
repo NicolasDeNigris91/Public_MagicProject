@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { GameResult, PlayerId } from '@/engine/types';
 import { FACE_BLOCKED_NOTE_MS, OPPONENT_PULSE_MS } from '@/constants/timings';
+import { useI18n } from '@/i18n/I18nProvider';
 
 export interface ControlBarProps {
   turn: PlayerId;
@@ -32,6 +33,7 @@ export function ControlBar({
 }: ControlBarProps) {
   const [showFaceBlockedNote, setShowFaceBlockedNote] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const { t } = useI18n();
 
   useEffect(() => () => {
     if (timerRef.current) clearTimeout(timerRef.current);
@@ -89,7 +91,7 @@ export function ControlBar({
               animation: `pulse-dot ${OPPONENT_PULSE_MS}ms ease-in-out infinite`,
             }}
           />
-          Opponent thinking…
+          {t('action.opponentThinking')}
         </p>
       )}
       <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
@@ -108,13 +110,13 @@ export function ControlBar({
             <path d="M16 16l4 4"/>
             <path d="M19 21l2-2"/>
           </svg>
-          <span>Attack opponent directly</span>
+          <span>{t('action.attackDirect')}</span>
         </button>
         <button
           onClick={onEndTurn}
           disabled={endDisabled}
           aria-disabled={endDisabled}
-          aria-label="End turn"
+          aria-label={t('action.endTurn')}
           className="btn-end"
           style={END_STYLE}
         >
@@ -124,7 +126,7 @@ export function ControlBar({
             <path d="M6 2v4a6 6 0 0 0 12 0V2"/>
             <path d="M6 22v-4a6 6 0 0 1 12 0v4"/>
           </svg>
-          <span>End turn</span>
+          <span>{t('action.endTurn')}</span>
         </button>
       </div>
       {showFaceBlockedNote && (
@@ -133,7 +135,7 @@ export function ControlBar({
           role="alert"
           style={{ margin: 0, fontSize: 12, color: '#ffb74d', textAlign: 'center' }}
         >
-          Cannot attack directly while the opponent has creatures on the battlefield.
+          {t('action.attackBlocked')}
         </p>
       )}
     </div>
