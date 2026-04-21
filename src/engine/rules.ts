@@ -40,6 +40,10 @@ export function canPlay(player: IPlayer): boolean {
   return player.playsRemaining > 0;
 }
 
+export function canAfford(player: IPlayer, card: ICard): boolean {
+  return player.manaAvailable >= card.cmc;
+}
+
 export function canAttack(card: ICard): boolean {
   return !card.summoningSick && !card.attackedThisTurn;
 }

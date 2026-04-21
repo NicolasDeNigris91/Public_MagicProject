@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { ICard, IPlayer } from './types';
 import {
-  PLAYS_PER_TURN, applyDamage, beginTurn, canAttack, canAttackFace, canPlay,
+  PLAYS_PER_TURN, applyDamage, beginTurn, canAfford, canAttack, canAttackFace, canPlay,
   drawCard, playCardToField, resolveCombat,
 } from './rules';
 
@@ -13,7 +13,7 @@ const makeCard = (id: string, power = 2, toughness = 2): ICard => ({
 
 const makePlayer = (overrides: Partial<IPlayer> = {}): IPlayer => ({
   id: 'player', life: 20, hand: [], battlefield: [], deck: [],
-  playsRemaining: PLAYS_PER_TURN, ...overrides,
+  playsRemaining: PLAYS_PER_TURN, manaMax: 0, manaAvailable: 0, ...overrides,
 });
 
 describe('drawCard', () => {
@@ -66,6 +66,25 @@ describe('canPlay / canAttack', () => {
 
   it('blocks attacks for creatures that already attacked this turn', () => {
     expect(canAttack({ ...makeCard('a'), attackedThisTurn: true })).toBe(false);
+  });
+});
+
+describe('canAfford', () => {
+  it('returns true when manaAvailable >= card.cmc', () => {
+    const card = { ...makeCard('a'), cmc: 3 };
+    const player = makePlayer({ manaAvailable: 3 });
+    expect(canAfford(player, card)).toBe(true);
+  });
+
+  it('returns false when manaAvailable < card.cmc', () => {
+    const card = { ...makeCard('a'), cmc: 4 };
+    const player = makePlayer({ manaAvailable: 3 });
+    expect(canAfford(player, card)).toBe(false);
+  });
+
+  it('treats cmc 0 as always affordable', () => {
+    const card = { ...makeCard('a'), cmc: 0 };
+    expect(canAfford(makePlayer({ manaAvailable: 0 }), card)).toBe(true);
   });
 });
 
