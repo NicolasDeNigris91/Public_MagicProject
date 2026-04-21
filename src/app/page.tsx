@@ -8,7 +8,7 @@ import { ControlBar } from '@/components/ControlBar';
 import { Footer } from '@/components/Footer';
 import { CardInspector } from '@/components/CardInspector/CardInspector';
 import { CombatLayer } from '@/components/CombatLayer/CombatLayer';
-import { LifeDisplay } from '@/components/LifeDisplay';
+import { PlayerHeader } from '@/components/PlayerHeader';
 import { useGameStore } from '@/store/useGameStore';
 import { useCombatStore } from '@/store/useCombatStore';
 import { useDeck } from '@/hooks/useDeck';
@@ -18,7 +18,6 @@ import { useInertWhile } from '@/hooks/useInertWhile';
 import { usePostPlayFocus } from '@/hooks/usePostPlayFocus';
 import { useAIOrchestrator } from '@/hooks/useAIOrchestrator';
 import { buildInspectorActions } from '@/utils/buildInspectorActions';
-import { IMPACT_MS } from '@/constants/timings';
 
 export default function GamePage() {
   const player = useGameStore((s) => s.player);
@@ -185,16 +184,14 @@ export default function GamePage() {
         )}
 
         <section aria-label="Opponent" style={ZONE_STYLE}>
-          <h2 style={ZONE_HEADING_STYLE}>
-            Opponent, life <LifeDisplay
-              value={opponent.life}
-              data-life-anchor="opponent-life"
-              style={lifePulse === 'opponent' ? {
-                animation: `combat-flash ${IMPACT_MS}ms ease-in-out, combat-shake ${IMPACT_MS}ms ease-in-out`,
-                color: '#ef5350',
-              } : undefined}
-            />, hand {opponent.hand.length}
-          </h2>
+          <PlayerHeader
+            label="Opponent"
+            color={opponentColor}
+            life={opponent.life}
+            handCount={opponent.hand.length}
+            pulsing={lifePulse === 'opponent'}
+            lifeAnchor="opponent-life"
+          />
           <Hand hand={opponent.hand} label="Opponent hand" onActivate={() => undefined} hidden compact />
           <Battlefield
             label="Opponent battlefield"
@@ -215,16 +212,14 @@ export default function GamePage() {
         />
 
         <section aria-label="Player" style={ZONE_STYLE}>
-          <h2 style={ZONE_HEADING_STYLE}>
-            You, life <LifeDisplay
-              value={player.life}
-              data-life-anchor="player-life"
-              style={lifePulse === 'player' ? {
-                animation: `combat-flash ${IMPACT_MS}ms ease-in-out, combat-shake ${IMPACT_MS}ms ease-in-out`,
-                color: '#ef5350',
-              } : undefined}
-            />, hand {player.hand.length}
-          </h2>
+          <PlayerHeader
+            label="You"
+            color={playerColor}
+            life={player.life}
+            handCount={player.hand.length}
+            pulsing={lifePulse === 'player'}
+            lifeAnchor="player-life"
+          />
           <Battlefield
             label="Your battlefield"
             cards={player.battlefield}
@@ -289,12 +284,6 @@ const HEADER_STYLE: React.CSSProperties = {
  */
 const ZONE_STYLE: React.CSSProperties = {
   display: 'contents',
-};
-
-const ZONE_HEADING_STYLE: React.CSSProperties = {
-  fontSize: 13,
-  margin: '2px 0',
-  flexShrink: 0,
 };
 
 const controlStyle: React.CSSProperties = {

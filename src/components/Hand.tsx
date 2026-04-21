@@ -2,6 +2,7 @@
 import { useRef, type KeyboardEvent } from 'react';
 import type { ICard } from '@/engine/types';
 import { Card } from './Card/Card';
+import { CardBack } from './CardBack';
 
 /**
  * The player's hand is a listbox-like keyboard group:
@@ -61,22 +62,7 @@ export function Hand({ hand, label, onActivate, hidden = false, compact = false 
         {hand.map((card) => (
           <li key={card.id} style={{ flexShrink: 0 }}>
             {hidden ? (
-              <div
-                aria-hidden="true"
-                style={
-                  compact
-                    ? {
-                        width: 26, height: 36, borderRadius: 4,
-                        background: 'linear-gradient(135deg,#1a237e,#0d47a1)',
-                        border: '1px solid #455a64',
-                      }
-                    : {
-                        width: 160, height: 223, borderRadius: 10,
-                        background: 'linear-gradient(135deg,#1a237e,#0d47a1)',
-                        border: '2px solid #455a64',
-                      }
-                }
-              />
+              <CardBack compact={compact} />
             ) : (
               <Card card={card} onActivate={onActivate} />
             )}

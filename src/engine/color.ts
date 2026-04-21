@@ -22,6 +22,19 @@ export const COLOR_LABELS: Record<Color, { name: string; flavor: string }> = {
   G: { name: 'Verde',    flavor: 'força bruta e bichões dominando a mesa' },
 };
 
+/**
+ * Canonical WUBRG mana symbols served by Scryfall's static CDN.
+ * Hardcoded because the five basic symbols never change, so there
+ * is no benefit to hitting /symbology at runtime.
+ */
+export const MANA_SYMBOL_URL: Record<Color, string> = {
+  W: 'https://svgs.scryfall.io/card-symbols/W.svg',
+  U: 'https://svgs.scryfall.io/card-symbols/U.svg',
+  B: 'https://svgs.scryfall.io/card-symbols/B.svg',
+  R: 'https://svgs.scryfall.io/card-symbols/R.svg',
+  G: 'https://svgs.scryfall.io/card-symbols/G.svg',
+};
+
 export interface SkeletonSlot {
   /** Fixed integer CMC, or inclusive [min, max] for flex slots. */
   cmc: number | readonly [number, number];

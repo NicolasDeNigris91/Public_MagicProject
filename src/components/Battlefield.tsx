@@ -40,7 +40,13 @@ export function Battlefield({ label, cards, onCardActivate, onCardInspect, selec
         }}
       >
         {cards.length === 0 && (
-          <li style={{ color: '#78909c', fontStyle: 'italic', textAlign: 'center', width: '100%' }}>Empty.</li>
+          <li style={EMPTY_STYLE}>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true"
+                 stroke="#546e7a" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M4 4l7 7m9-7l-7 7M4 20l7-7m9 7l-7-7"/>
+            </svg>
+            <span>{label} — no creatures in play</span>
+          </li>
         )}
         {cards.map((card) => (
           <li key={card.id} style={{ flexShrink: 0 }}>
@@ -57,3 +63,15 @@ export function Battlefield({ label, cards, onCardActivate, onCardInspect, selec
     </section>
   );
 }
+
+const EMPTY_STYLE: React.CSSProperties = {
+  color: '#78909c',
+  fontStyle: 'italic',
+  fontSize: 13,
+  textAlign: 'center',
+  width: '100%',
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  gap: 6,
+};

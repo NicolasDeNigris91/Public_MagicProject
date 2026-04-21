@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
-import { COLORS, COLOR_LABELS, type Color } from '@/engine/color';
+import { COLORS, COLOR_LABELS, MANA_SYMBOL_URL, type Color } from '@/engine/color';
 import { fetchColorArt } from '@/services/scryfall.client';
 
 const SWATCH: Record<Color, string> = {
@@ -9,17 +9,6 @@ const SWATCH: Record<Color, string> = {
   B: '#2b2a2a',
   R: '#d04a3e',
   G: '#3d9a5f',
-};
-
-// Canonical mana symbols served by Scryfall's static CDN. URLs are
-// stable (the five basic WUBRG symbols never change), so we hardcode
-// instead of fetching /symbology on every mount.
-const MANA_SYMBOL: Record<Color, string> = {
-  W: 'https://svgs.scryfall.io/card-symbols/W.svg',
-  U: 'https://svgs.scryfall.io/card-symbols/U.svg',
-  B: 'https://svgs.scryfall.io/card-symbols/B.svg',
-  R: 'https://svgs.scryfall.io/card-symbols/R.svg',
-  G: 'https://svgs.scryfall.io/card-symbols/G.svg',
 };
 
 interface Props {
@@ -71,7 +60,7 @@ export function ColorSelection({ onSelect }: Props) {
                   <span aria-hidden="true" style={{ ...SWATCH_STYLE, background: SWATCH[c] }} />
                 )}
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={MANA_SYMBOL[c]} alt="" style={MANA_STYLE} loading="lazy" />
+                <img src={MANA_SYMBOL_URL[c]} alt="" style={MANA_STYLE} loading="lazy" />
                 <span style={FLAVOR_STYLE}>{flavor}</span>
               </button>
             );
