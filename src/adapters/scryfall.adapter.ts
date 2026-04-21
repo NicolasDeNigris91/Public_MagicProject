@@ -4,6 +4,7 @@
  * data source (Lorcana, Pokemon TCG, a homebrew JSON) means rewriting
  * only this file.
  */
+import type { Color } from '@/engine/color';
 import type { ICard } from '@/engine/types';
 import { buildA11yDescription } from '@/utils/describeCard';
 
@@ -25,6 +26,10 @@ export interface ScryfallCard {
   toughness?: string;
   image_uris?: ScryfallImageUris;
   card_faces?: Array<{ image_uris?: ScryfallImageUris; name?: string }>;
+  /** Letter-coded colors: 'W' 'U' 'B' 'R' 'G'. Empty array = colorless. */
+  colors?: string[];
+  /** Converted mana cost. */
+  cmc?: number;
 }
 
 function parseStat(v: string | undefined): number {
@@ -37,6 +42,14 @@ function pickImageUris(raw: ScryfallCard): ScryfallImageUris {
   return raw.image_uris ?? raw.card_faces?.[0]?.image_uris ?? {};
 }
 
+const COLOR_SET = new Set<Color>(['W', 'U', 'B', 'R', 'G']);
+
+function deriveColor(colors: string[] | undefined): Color | undefined {
+  if (!colors || colors.length !== 1) return undefined;
+  const c = colors[0];
+  return COLOR_SET.has(c as Color) ? (c as Color) : undefined;
+}
+
 export function adaptScryfallCard(raw: ScryfallCard): ICard {
   const power = parseStat(raw.power);
   const toughness = parseStat(raw.toughness);
@@ -46,6 +59,8 @@ export function adaptScryfallCard(raw: ScryfallCard): ICard {
     name: raw.name,
     power,
     toughness,
+    cmc: raw.cmc ?? 0,
+    color: deriveColor(raw.colors),
     manaCost: raw.mana_cost ?? '',
     typeLine: raw.type_line,
     oracleText: raw.oracle_text ?? '',

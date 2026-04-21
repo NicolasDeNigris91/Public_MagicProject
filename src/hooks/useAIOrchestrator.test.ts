@@ -7,7 +7,7 @@ import type { ICard } from '@/engine/types';
 
 function card(id: string, p = 2, t = 2): ICard {
   return {
-    id, name: `C-${id}`, power: p, toughness: t,
+    id, name: `C-${id}`, power: p, toughness: t, cmc: 0,
     manaCost: '{1}', typeLine: 'Creature', oracleText: '',
     imageUrl: '', imageUrlSmall: '', accessibilityDescription: `card ${id}`,
   };
@@ -19,7 +19,7 @@ describe('useAIOrchestrator', () => {
 
   it('runs the opponent turn when turn flips to opponent', () => {
     const deck = Array.from({ length: 20 }, (_, i) => card(`d${i}`));
-    useGameStore.getState().initGame(deck);
+    useGameStore.getState().initGame(deck, deck);
     renderHook(() => useAIOrchestrator());
 
     act(() => { useGameStore.getState().endTurn(); });
@@ -31,7 +31,7 @@ describe('useAIOrchestrator', () => {
 
   it('aborts mid-flight if generation advances (Play again pressed)', () => {
     const deck = Array.from({ length: 20 }, (_, i) => card(`d${i}`));
-    useGameStore.getState().initGame(deck);
+    useGameStore.getState().initGame(deck, deck);
     renderHook(() => useAIOrchestrator());
 
     act(() => { useGameStore.getState().endTurn(); });
@@ -39,7 +39,7 @@ describe('useAIOrchestrator', () => {
     act(() => { vi.advanceTimersByTime(1000); });
 
     const turnBeforeReset = useGameStore.getState().turn;
-    act(() => { useGameStore.getState().initGame(deck); });
+    act(() => { useGameStore.getState().initGame(deck, deck); });
     act(() => { vi.advanceTimersByTime(10000); });
 
     // Fresh match, it is the player's turn (initGame sets turn = 'player').
@@ -57,7 +57,7 @@ describe('useAIOrchestrator x animator', () => {
 
   it('AI attacks call playCombat with correct intent mapping', async () => {
     const deck = Array.from({ length: 20 }, (_, i) => card(`d${i}`, 3, 3));
-    useGameStore.getState().initGame(deck);
+    useGameStore.getState().initGame(deck, deck);
 
     // Seed a non-sick AI creature ready to attack, and an empty player board.
     const aiAttacker = { ...card('ai-1', 4, 4), summoningSick: false };
@@ -90,7 +90,7 @@ describe('useAIOrchestrator x animator', () => {
     useCombatStore.getState().reset();
 
     const deck = Array.from({ length: 20 }, (_, i) => card(`d${i}`, 3, 3));
-    useGameStore.getState().initGame(deck);
+    useGameStore.getState().initGame(deck, deck);
 
     const aiAttacker = { ...card('ai-1', 5, 5), summoningSick: false };
     useGameStore.setState((s) => ({
@@ -111,7 +111,7 @@ describe('useAIOrchestrator x animator', () => {
     await vi.waitFor(() => expect(playSpy).toHaveBeenCalled(), { timeout: 5000 });
 
     // Simulate "Play again" — bumps generation, resets turn to 'player'.
-    act(() => { useGameStore.getState().initGame(deck); });
+    act(() => { useGameStore.getState().initGame(deck, deck); });
 
     // Now release the animation promise.
     resolvePlay();

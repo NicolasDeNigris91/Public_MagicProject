@@ -7,7 +7,7 @@ import {
 import { shortCardLabel } from '@/utils/describeCard';
 
 interface GameActions {
-  initGame: (deck: ICard[]) => void;
+  initGame: (playerDeck: ICard[], opponentDeck: ICard[]) => void;
   drawCard: (who: PlayerId) => void;
   playCardToField: (who: PlayerId, cardId: string) => void;
   attack: (attackerId: string, blockerId: string | null) => void;
@@ -23,11 +23,6 @@ const STARTING_HAND = 5;
  *  matches. The announcer tracks its cursor by entry id, so trimming
  *  the head of the array is safe. */
 const MAX_LOG = 200;
-
-function splitDeck(all: ICard[]): { playerDeck: ICard[]; opponentDeck: ICard[] } {
-  const half = Math.floor(all.length / 2);
-  return { playerDeck: all.slice(0, half), opponentDeck: all.slice(half) };
-}
 
 function makePlayer(id: PlayerId, deck: ICard[]): IPlayer {
   const hand = deck.slice(0, STARTING_HAND);
@@ -63,8 +58,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   generation: 0,
   initialized: false,
 
-  initGame: (deck) => {
-    const { playerDeck, opponentDeck } = splitDeck(deck);
+  initGame: (playerDeck, opponentDeck) => {
     set((s) => ({
       player: makePlayer('player', playerDeck),
       opponent: makePlayer('opponent', opponentDeck),

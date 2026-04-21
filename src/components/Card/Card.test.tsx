@@ -7,7 +7,7 @@ import type { ICard } from '@/engine/types';
 const sample: ICard = {
   id: 'c1',
   name: 'Test Goblin',
-  power: 1, toughness: 1,
+  power: 1, toughness: 1, cmc: 1,
   manaCost: '{R}',
   typeLine: 'Creature — Goblin',
   oracleText: 'Haste.',

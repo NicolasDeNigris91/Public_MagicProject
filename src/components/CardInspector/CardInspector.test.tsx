@@ -8,7 +8,7 @@ const sampleCard: ICard = {
   id: 'card-1',
   name: 'Shivan Dragon',
   power: 5,
-  toughness: 5,
+  toughness: 5, cmc: 6,
   manaCost: '{4}{R}{R}',
   typeLine: 'Creature — Dragon',
   oracleText: 'Flying. {R}: Shivan Dragon gets +1/+0 until end of turn.',

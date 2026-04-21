@@ -3,7 +3,7 @@ import type { ICard, IPlayer } from './types';
 import { pickCardToPlay, planAttacks } from './ai';
 
 const makeCard = (id: string, power = 2, toughness = 2, typeLine = 'Creature'): ICard => ({
-  id, name: id, power, toughness, manaCost: '{1}', typeLine,
+  id, name: id, power, toughness, cmc: 0, manaCost: '{1}', typeLine,
   oracleText: '', imageUrl: '', imageUrlSmall: '', accessibilityDescription: id,
 });
 

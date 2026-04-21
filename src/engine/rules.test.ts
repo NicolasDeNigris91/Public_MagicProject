@@ -6,7 +6,7 @@ import {
 } from './rules';
 
 const makeCard = (id: string, power = 2, toughness = 2): ICard => ({
-  id, name: `Card ${id}`, power, toughness,
+  id, name: `Card ${id}`, power, toughness, cmc: 0,
   manaCost: '{1}', typeLine: 'Creature', oracleText: '',
   imageUrl: '', imageUrlSmall: '', accessibilityDescription: `Card ${id}`,
 });
