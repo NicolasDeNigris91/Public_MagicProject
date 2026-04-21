@@ -5,22 +5,34 @@ import { Card } from './Card/Card';
 export interface BattlefieldProps {
   label: string;
   cards: ICard[];
+  /** Tints the playmat warm (player) or cool (opponent). */
+  variant?: 'player' | 'opponent';
   onCardActivate?: (card: ICard) => void;
   onCardInspect?: (card: ICard) => void;
   selectedId?: string | null;
 }
 
-export function Battlefield({ label, cards, onCardActivate, onCardInspect, selectedId }: BattlefieldProps) {
+const PLAYMAT: Record<NonNullable<BattlefieldProps['variant']>, string> = {
+  player:
+    'radial-gradient(ellipse at 50% 40%, rgba(255, 179, 66, 0.06), transparent 65%), ' +
+    'linear-gradient(180deg, rgba(255,255,255,0.015), rgba(0,0,0,0.12))',
+  opponent:
+    'radial-gradient(ellipse at 50% 60%, rgba(77, 208, 225, 0.06), transparent 65%), ' +
+    'linear-gradient(180deg, rgba(0,0,0,0.12), rgba(255,255,255,0.015))',
+};
+
+export function Battlefield({ label, cards, variant = 'player', onCardActivate, onCardInspect, selectedId }: BattlefieldProps) {
   return (
     <section
       aria-label={`${label}. ${cards.length} creature${cards.length === 1 ? '' : 's'} on the battlefield.`}
       style={{
         flex: '1 1 0',
         minHeight: 0,
-        border: '1px dashed #37474f',
+        border: '1px solid rgba(120, 144, 156, 0.18)',
         borderRadius: 12,
         padding: 8,
-        background: 'rgba(255,255,255,0.02)',
+        background: PLAYMAT[variant],
+        boxShadow: 'inset 0 0 32px rgba(0, 0, 0, 0.35)',
         display: 'flex',
         alignItems: 'center',
         overflowX: 'auto',

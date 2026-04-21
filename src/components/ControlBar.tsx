@@ -98,18 +98,33 @@ export function ControlBar({
           disabled={attackDisabled}
           aria-disabled={attackDisabled}
           aria-describedby={showFaceBlockedNote ? 'attack-direct-blocked' : undefined}
-          style={CONTROL_STYLE}
+          className="btn-attack"
+          style={ATTACK_STYLE}
         >
-          Attack opponent directly
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"
+               stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M14.5 17.5L3 6V3h3l11.5 11.5"/>
+            <path d="M13 19l6-6"/>
+            <path d="M16 16l4 4"/>
+            <path d="M19 21l2-2"/>
+          </svg>
+          <span>Attack opponent directly</span>
         </button>
         <button
           onClick={onEndTurn}
           disabled={endDisabled}
           aria-disabled={endDisabled}
           aria-label="End turn"
-          style={CONTROL_STYLE}
+          className="btn-end"
+          style={END_STYLE}
         >
-          End turn
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"
+               stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M6 2h12M6 22h12"/>
+            <path d="M6 2v4a6 6 0 0 0 12 0V2"/>
+            <path d="M6 22v-4a6 6 0 0 1 12 0v4"/>
+          </svg>
+          <span>End turn</span>
         </button>
       </div>
       {showFaceBlockedNote && (
@@ -125,12 +140,29 @@ export function ControlBar({
   );
 }
 
-const CONTROL_STYLE: React.CSSProperties = {
-  padding: '8px 16px',
-  background: '#263238',
-  border: '1px solid #455a64',
+const BUTTON_BASE: React.CSSProperties = {
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: 8,
+  padding: '9px 16px',
   borderRadius: 8,
-  color: '#eceff1',
   cursor: 'pointer',
   fontSize: 14,
+  fontFamily: 'inherit',
+  fontWeight: 600,
+  letterSpacing: 0.2,
+  transition: 'background 120ms, border-color 120ms, color 120ms, transform 120ms',
+};
+const ATTACK_STYLE: React.CSSProperties = {
+  ...BUTTON_BASE,
+  background: 'rgba(239, 83, 80, 0.12)',
+  border: '1px solid rgba(239, 83, 80, 0.55)',
+  color: '#ffcdd2',
+};
+const END_STYLE: React.CSSProperties = {
+  ...BUTTON_BASE,
+  background: 'transparent',
+  border: '1px solid #455a64',
+  color: '#b0bec5',
+  fontWeight: 500,
 };

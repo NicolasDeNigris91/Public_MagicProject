@@ -195,6 +195,7 @@ export default function GamePage() {
           <Hand hand={opponent.hand} label="Opponent hand" onActivate={() => undefined} hidden compact />
           <Battlefield
             label="Opponent battlefield"
+            variant="opponent"
             cards={opponent.battlefield}
             onCardActivate={handleBattlefieldActivate}
             onCardInspect={(card) => openInspector(card, 'opponent-field')}
@@ -222,6 +223,7 @@ export default function GamePage() {
           />
           <Battlefield
             label="Your battlefield"
+            variant="player"
             cards={player.battlefield}
             onCardActivate={handleBattlefieldActivate}
             onCardInspect={(card) => openInspector(card, 'own-field')}

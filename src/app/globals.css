@@ -62,6 +62,29 @@ a { color: #4dd0e1; }
   50%      { opacity: 1;    transform: scale(1.35); }
 }
 
+.btn-attack:hover:not(:disabled) {
+  background: rgba(239, 83, 80, 0.22);
+  border-color: #ef5350;
+  color: #fff;
+  transform: translateY(-1px);
+}
+.btn-attack:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+.btn-end:hover:not(:disabled) {
+  background: rgba(176, 190, 197, 0.08);
+  border-color: #78909c;
+  color: #eceff1;
+  transform: translateY(-1px);
+}
+.btn-end:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
