@@ -1,7 +1,9 @@
 import axios, { AxiosError } from 'axios';
 import type { ICard } from '@/engine/types';
 import { adaptScryfallCard, type ScryfallCard } from '@/adapters/scryfall.adapter';
-import { fallbackDeck } from './fallback-deck';
+// stopgap until Task 5 — flatten for the existing fetchRandomCreatures shape
+import { fallbackDecks } from './fallback-deck';
+const fallbackDeck = [...fallbackDecks.W, ...fallbackDecks.R];
 
 const http = axios.create({
   baseURL: 'https://api.scryfall.com',
