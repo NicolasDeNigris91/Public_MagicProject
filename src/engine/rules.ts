@@ -19,10 +19,11 @@ export function drawCard(player: IPlayer): { player: IPlayer; drawn: ICard | nul
 
 /**
  * Play a creature card from hand to the battlefield. Decrements the
- * player's `playsRemaining` and marks the entering creature with
- * summoning sickness so it cannot attack the turn it comes down.
- * Caller is responsible for checking `canPlay` first if enforcement
- * is desired (store does this; engine stays pure).
+ * player's `playsRemaining`, spends `card.cmc` from `manaAvailable`,
+ * and marks the entering creature with summoning sickness so it cannot
+ * attack the turn it comes down. Caller is responsible for checking
+ * `canPlay` AND `canAfford` first if enforcement is desired (the store
+ * does this; engine stays pure).
  */
 export function playCardToField(player: IPlayer, cardId: string): IPlayer {
   const card = player.hand.find((c) => c.id === cardId);
@@ -33,6 +34,7 @@ export function playCardToField(player: IPlayer, cardId: string): IPlayer {
     hand: player.hand.filter((c) => c.id !== cardId),
     battlefield: [...player.battlefield, entering],
     playsRemaining: Math.max(0, player.playsRemaining - 1),
+    manaAvailable: Math.max(0, player.manaAvailable - card.cmc),
   };
 }
 

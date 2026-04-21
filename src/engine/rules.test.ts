@@ -51,6 +51,18 @@ describe('playCardToField', () => {
     const p = makePlayer();
     expect(playCardToField(p, 'ghost')).toEqual(p);
   });
+
+  it('decrements manaAvailable by card.cmc', () => {
+    const c = { ...makeCard('a'), cmc: 3 };
+    const p = makePlayer({ hand: [c], manaAvailable: 5, manaMax: 5 });
+    expect(playCardToField(p, 'a').manaAvailable).toBe(2);
+  });
+
+  it('treats free (cmc 0) cards as costing zero mana', () => {
+    const c = { ...makeCard('a'), cmc: 0 };
+    const p = makePlayer({ hand: [c], manaAvailable: 0 });
+    expect(playCardToField(p, 'a').manaAvailable).toBe(0);
+  });
 });
 
 describe('canPlay / canAttack', () => {
