@@ -37,6 +37,7 @@ A stripped-down MTG combat subset, just enough to make decisions matter:
 - **Face damage only when the board is clear.** While the opponent has any creature on the battlefield, direct attacks are blocked — every creature acts as an implicit blocker-of-last-resort. The "Attack opponent directly" button is disabled and announced as such for screen readers.
 - **Two loss conditions**: life reaches zero, or you try to draw from an empty deck (deck-out).
 - **Turn counter** visible in the header along with plays remaining.
+- **Color selection.** Before each match you pick one of the five MTG colors; the opponent plays a different color, chosen at random from the remaining four. Both decks are assembled from the same 10-slot skeleton (curve + stat budget), so the matchup is color-vs-color, not lucky-draw-vs-unlucky-draw.
 
 ## Architecture
 
