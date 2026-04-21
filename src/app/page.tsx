@@ -1,5 +1,7 @@
 'use client';
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { ColorSelection } from '@/components/ColorSelection';
+import { COLOR_LABELS, type Color } from '@/engine/color';
 import { Hand } from '@/components/Hand';
 import { Battlefield } from '@/components/Battlefield';
 import { ControlBar } from '@/components/ControlBar';
@@ -31,7 +33,8 @@ export default function GamePage() {
   const lifePulse = useCombatStore((s) => s.lifePulse);
   const isAnimating = useCombatStore((s) => s.isAnimating);
 
-  const { ready: _ready, source, restart } = useDeck(null);
+  const [playerColor, setPlayerColor] = useState<Color | null>(null);
+  const { ready, source, restart, opponentColor } = useDeck(playerColor);
   const {
     inspected,
     open: openInspector,
@@ -60,6 +63,13 @@ export default function GamePage() {
   }, [winner, clearInspector]);
 
   useEffect(() => {
+    if (!ready || !playerColor || !opponentColor) return;
+    const me = COLOR_LABELS[playerColor].name;
+    const them = COLOR_LABELS[opponentColor].name;
+    announce(`Você escolheu ${me}. Oponente jogará com ${them}. Distribuindo cartas.`, 'polite');
+  }, [ready, playerColor, opponentColor, announce]);
+
+  useEffect(() => {
     const mql = window.matchMedia('(prefers-reduced-motion: reduce)');
     const apply = () => useCombatStore.setState({ reducedMotion: mql.matches });
     apply();
@@ -71,6 +81,13 @@ export default function GamePage() {
     clearAttacker();
     postPlayFocus.clear();
     restart();
+  };
+
+  const handleChangeColor = () => {
+    clearAttacker();
+    postPlayFocus.clear();
+    clearInspector();
+    setPlayerColor(null);
   };
 
   const inspectorActions = useMemo(() => {
@@ -102,7 +119,11 @@ export default function GamePage() {
     closeInspector,
   ]);
 
-  if (!initialized) {
+  if (!playerColor) {
+    return <ColorSelection onSelect={setPlayerColor} />;
+  }
+
+  if (!ready || !initialized) {
     return (
       <main
         id="main"
@@ -111,7 +132,7 @@ export default function GamePage() {
         aria-live="polite"
         style={{ padding: 32, textAlign: 'center' }}
       >
-        <p>Loading deck from Scryfall…</p>
+        <p>Distribuindo cartas…</p>
       </main>
     );
   }
@@ -143,9 +164,14 @@ export default function GamePage() {
             <strong id="game-over-title" style={{ fontSize: 16 }}>
               {winner === 'player' ? 'Victory, you defeated the opponent.' : 'Defeat, your life reached zero.'}
             </strong>
-            <button onClick={onPlayAgain} style={controlStyle}>
-              Play again
-            </button>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button onClick={onPlayAgain} style={controlStyle}>
+                Jogar de novo com {COLOR_LABELS[playerColor].name}
+              </button>
+              <button onClick={handleChangeColor} style={controlStyle}>
+                Trocar cor
+              </button>
+            </div>
           </div>
         )}
 
