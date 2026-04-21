@@ -116,6 +116,27 @@ describe('beginTurn', () => {
     const after = beginTurn(p);
     expect(after.battlefield.every((c) => !c.attackedThisTurn)).toBe(true);
   });
+
+  it('ramps manaMax by 1 and refills manaAvailable', () => {
+    const p = makePlayer({ manaMax: 2, manaAvailable: 0 });
+    const after = beginTurn(p);
+    expect(after.manaMax).toBe(3);
+    expect(after.manaAvailable).toBe(3);
+  });
+
+  it('discards leftover manaAvailable from previous turn', () => {
+    // Player ended last turn with 1 mana unspent; new turn refills, no carry.
+    const p = makePlayer({ manaMax: 2, manaAvailable: 1 });
+    const after = beginTurn(p);
+    expect(after.manaAvailable).toBe(after.manaMax);
+  });
+
+  it('first beginTurn from manaMax 0 yields 1 / 1', () => {
+    const p = makePlayer({ manaMax: 0, manaAvailable: 0 });
+    const after = beginTurn(p);
+    expect(after.manaMax).toBe(1);
+    expect(after.manaAvailable).toBe(1);
+  });
 });
 
 describe('resolveCombat', () => {

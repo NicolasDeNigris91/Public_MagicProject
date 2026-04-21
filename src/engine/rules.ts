@@ -92,9 +92,11 @@ export function removeFromField(player: IPlayer, cardId: string): IPlayer {
 /**
  * Begin-of-turn housekeeping for the player whose turn is starting:
  * clear summoning sickness and attack-lock on all their creatures,
- * and refill plays.
+ * refill plays, and ramp mana (manaMax += 1) then refill manaAvailable.
+ * Any unspent mana from the previous turn is discarded.
  */
 export function beginTurn(player: IPlayer): IPlayer {
+  const manaMax = player.manaMax + 1;
   return {
     ...player,
     battlefield: player.battlefield.map((c) =>
@@ -103,5 +105,7 @@ export function beginTurn(player: IPlayer): IPlayer {
         : c,
     ),
     playsRemaining: PLAYS_PER_TURN,
+    manaMax,
+    manaAvailable: manaMax,
   };
 }
