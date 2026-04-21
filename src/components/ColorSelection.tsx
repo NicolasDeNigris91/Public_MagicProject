@@ -27,13 +27,12 @@ export function ColorSelection({ onSelect }: Props) {
 
   return (
     <main id="main" style={WRAPPER_STYLE}>
-      <a href="#main" className="skip-link">Pular para o conteúdo</a>
       <fieldset style={FIELDSET_STYLE}>
         <legend style={LEGEND_STYLE}>Escolha sua cor</legend>
         <p style={HINT_STYLE}>
-          Seu oponente jogará com uma cor diferente, também balanceada.
+          Seu oponente jogará com uma cor diferente, também balanceada. Use as setas para navegar entre as cores.
         </p>
-        <div style={GRID_STYLE}>
+        <div role="toolbar" aria-label="Cores disponíveis" style={GRID_STYLE}>
           {COLORS.map((c, i) => {
             const { name, flavor } = COLOR_LABELS[c];
             return (

@@ -54,6 +54,7 @@ export default function GamePage() {
 
   const mainRef = useRef<HTMLElement>(null);
   const gameOverRef = useRef<HTMLDivElement>(null);
+  const loadingRef = useRef<HTMLElement>(null);
   useInertWhile(mainRef, inspected !== null);
 
   useEffect(() => {
@@ -68,6 +69,13 @@ export default function GamePage() {
     const them = COLOR_LABELS[opponentColor].name;
     announce(`Você escolheu ${me}. Oponente jogará com ${them}. Distribuindo cartas.`, 'polite');
   }, [ready, playerColor, opponentColor, announce]);
+
+  useEffect(() => {
+    // After the user picks a color, the previously-focused button unmounts.
+    // Move focus onto the loading main so screen readers announce the busy
+    // state and keyboard focus isn't stranded on <body>.
+    if (playerColor && !ready) loadingRef.current?.focus();
+  }, [playerColor, ready]);
 
   useEffect(() => {
     const mql = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -127,7 +135,8 @@ export default function GamePage() {
     return (
       <main
         id="main"
-        ref={mainRef}
+        ref={loadingRef}
+        tabIndex={-1}
         aria-busy="true"
         aria-live="polite"
         style={{ padding: 32, textAlign: 'center' }}
