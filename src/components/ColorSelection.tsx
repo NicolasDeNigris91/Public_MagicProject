@@ -11,6 +11,17 @@ const SWATCH: Record<Color, string> = {
   G: '#3d9a5f',
 };
 
+// Canonical mana symbols served by Scryfall's static CDN. URLs are
+// stable (the five basic WUBRG symbols never change), so we hardcode
+// instead of fetching /symbology on every mount.
+const MANA_SYMBOL: Record<Color, string> = {
+  W: 'https://svgs.scryfall.io/card-symbols/W.svg',
+  U: 'https://svgs.scryfall.io/card-symbols/U.svg',
+  B: 'https://svgs.scryfall.io/card-symbols/B.svg',
+  R: 'https://svgs.scryfall.io/card-symbols/R.svg',
+  G: 'https://svgs.scryfall.io/card-symbols/G.svg',
+};
+
 interface Props {
   onSelect: (color: Color) => void;
 }
@@ -39,9 +50,6 @@ export function ColorSelection({ onSelect }: Props) {
     <main id="main" style={WRAPPER_STYLE}>
       <fieldset style={FIELDSET_STYLE}>
         <legend style={LEGEND_STYLE}>Escolha sua cor</legend>
-        <p style={HINT_STYLE}>
-          Seu oponente jogará com uma cor diferente, também balanceada. Use as setas para navegar entre as cores.
-        </p>
         <div role="toolbar" aria-label="Cores disponíveis" style={GRID_STYLE}>
           {COLORS.map((c, i) => {
             const { name, flavor } = COLOR_LABELS[c];
@@ -62,7 +70,8 @@ export function ColorSelection({ onSelect }: Props) {
                 ) : (
                   <span aria-hidden="true" style={{ ...SWATCH_STYLE, background: SWATCH[c] }} />
                 )}
-                <span style={NAME_STYLE}>{name}</span>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={MANA_SYMBOL[c]} alt="" style={MANA_STYLE} loading="lazy" />
                 <span style={FLAVOR_STYLE}>{flavor}</span>
               </button>
             );
@@ -89,7 +98,6 @@ const FIELDSET_STYLE: React.CSSProperties = {
   width: '100%',
 };
 const LEGEND_STYLE: React.CSSProperties = { padding: '0 8px', fontSize: 16 };
-const HINT_STYLE: React.CSSProperties = { margin: '6px 0 16px', color: '#90a4ae', fontSize: 13 };
 const GRID_STYLE: React.CSSProperties = {
   display: 'grid',
   gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))',
@@ -116,5 +124,5 @@ const ART_STYLE: React.CSSProperties = {
   width: 96, height: 70, objectFit: 'cover',
   borderRadius: 6, border: '1px solid #455a64',
 };
-const NAME_STYLE: React.CSSProperties = { fontSize: 14, fontWeight: 600 };
+const MANA_STYLE: React.CSSProperties = { width: 24, height: 24 };
 const FLAVOR_STYLE: React.CSSProperties = { fontSize: 11, color: '#90a4ae', textAlign: 'center' };

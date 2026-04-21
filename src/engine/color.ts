@@ -15,11 +15,11 @@ export type Color = 'W' | 'U' | 'B' | 'R' | 'G';
 export const COLORS: readonly Color[] = ['W', 'U', 'B', 'R', 'G'] as const;
 
 export const COLOR_LABELS: Record<Color, { name: string; flavor: string }> = {
-  W: { name: 'Branco',   flavor: 'criaturas pequenas e keywords defensivas' },
-  U: { name: 'Azul',     flavor: 'criaturas voadoras e evasivas' },
-  B: { name: 'Preto',    flavor: 'criaturas letais e resilientes' },
-  R: { name: 'Vermelho', flavor: 'criaturas rápidas e agressivas' },
-  G: { name: 'Verde',    flavor: 'criaturas grandes e robustas' },
+  W: { name: 'Branco',   flavor: 'ordem, proteção e tropas em formação' },
+  U: { name: 'Azul',     flavor: 'voa, esquiva e controla o ritmo' },
+  B: { name: 'Preto',    flavor: 'ameaças mortais que voltam do cemitério' },
+  R: { name: 'Vermelho', flavor: 'velocidade pura e dano direto' },
+  G: { name: 'Verde',    flavor: 'força bruta e bichões dominando a mesa' },
 };
 
 export interface SkeletonSlot {
