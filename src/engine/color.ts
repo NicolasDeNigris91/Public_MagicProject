@@ -8,6 +8,8 @@
  * that contract.
  */
 
+import type { ICard } from './types';
+
 export type Color = 'W' | 'U' | 'B' | 'R' | 'G';
 
 export const COLORS: readonly Color[] = ['W', 'U', 'B', 'R', 'G'] as const;
@@ -50,4 +52,49 @@ export function pickOpponentColor(
 ): Color {
   const others = COLORS.filter((c) => c !== playerColor);
   return others[Math.floor(rng() * others.length)];
+}
+
+function cmcMatches(slotCmc: SkeletonSlot['cmc'], cardCmc: number): boolean {
+  if (typeof slotCmc === 'number') return cardCmc === slotCmc;
+  return cardCmc >= slotCmc[0] && cardCmc <= slotCmc[1];
+}
+
+function inRange(r: readonly [number, number], n: number): boolean {
+  return n >= r[0] && n <= r[1];
+}
+
+function fits(slot: SkeletonSlot, c: ICard): boolean {
+  return (
+    cmcMatches(slot.cmc, c.cmc) &&
+    inRange(slot.power, c.power) &&
+    inRange(slot.toughness, c.toughness)
+  );
+}
+
+/**
+ * Greedy best-fit: walk skeleton slots in order, pick the first
+ * unused candidate that fits the slot. If no candidate fits, use
+ * the per-slot seed.
+ *
+ * Candidates are consumed; seeds are indexed by slot position.
+ * Caller is responsible for ensuring `fallbackSeeds.length ===
+ * SKELETON.length` and that each seed fits its corresponding slot.
+ */
+export function buildDeckFromCandidates(
+  candidates: readonly ICard[],
+  fallbackSeeds: readonly ICard[],
+): ICard[] {
+  const used = new Set<string>();
+  const deck: ICard[] = [];
+  for (let i = 0; i < SKELETON.length; i++) {
+    const slot = SKELETON[i];
+    const picked = candidates.find((c) => !used.has(c.id) && fits(slot, c));
+    if (picked) {
+      used.add(picked.id);
+      deck.push(picked);
+    } else {
+      deck.push(fallbackSeeds[i]);
+    }
+  }
+  return deck;
 }

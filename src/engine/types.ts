@@ -8,6 +8,8 @@
  * information; only the medium differs.
  */
 
+import type { Color } from './color';
+
 export type PlayerId = 'player' | 'opponent';
 export type Phase = 'draw' | 'main' | 'combat' | 'end';
 export type AnnouncePriority = 'polite' | 'assertive';
@@ -17,6 +19,13 @@ export interface ICard {
   name: string;
   power: number;
   toughness: number;
+  /** Converted mana cost. Integer total mana value of the card,
+   *  parsed from the Scryfall `cmc` field. */
+  cmc: number;
+  /** Canonical mono-color of the card. `undefined` for multicolor
+   *  or colorless cards (which are filtered out before they reach
+   *  the engine). */
+  color?: Color;
   manaCost: string;
   typeLine: string;
   oracleText: string;
