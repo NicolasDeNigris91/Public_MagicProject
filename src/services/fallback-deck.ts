@@ -31,6 +31,7 @@ const SEEDS: Seed[] = [
 
 export const fallbackDeck: ICard[] = SEEDS.map((s) => ({
   ...s,
+  cmc: 0,              // temporary; Task 4 replaces this file entirely
   imageUrl: '',
   imageUrlSmall: '',
   accessibilityDescription: buildA11yDescription(s),

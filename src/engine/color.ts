@@ -51,7 +51,7 @@ export function pickOpponentColor(
   rng: () => number = Math.random,
 ): Color {
   const others = COLORS.filter((c) => c !== playerColor);
-  return others[Math.floor(rng() * others.length)];
+  return others[Math.floor(rng() * others.length)] as Color;
 }
 
 function cmcMatches(slotCmc: SkeletonSlot['cmc'], cardCmc: number): boolean {
@@ -87,13 +87,13 @@ export function buildDeckFromCandidates(
   const used = new Set<string>();
   const deck: ICard[] = [];
   for (let i = 0; i < SKELETON.length; i++) {
-    const slot = SKELETON[i];
+    const slot = SKELETON[i] as SkeletonSlot;
     const picked = candidates.find((c) => !used.has(c.id) && fits(slot, c));
     if (picked) {
       used.add(picked.id);
       deck.push(picked);
     } else {
-      deck.push(fallbackSeeds[i]);
+      deck.push(fallbackSeeds[i] as ICard);
     }
   }
   return deck;

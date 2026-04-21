@@ -76,9 +76,9 @@ describe('buildDeckFromCandidates', () => {
     const candidate = card({ id: 'cand', cmc: 1, power: 2, toughness: 2 });
     const deck = buildDeckFromCandidates([candidate], makeSeeds());
     // slot 0: 1-drop power 1-2 toughness 1-2 — candidate fits.
-    expect(deck[0].id).toBe('cand');
+    expect(deck[0]!.id).toBe('cand');
     // later slots fall back to seeds.
-    expect(deck[9].id).toBe('seed-9');
+    expect(deck[9]!.id).toBe('seed-9');
   });
 
   it('never reuses the same candidate for two slots', () => {
@@ -107,6 +107,6 @@ describe('buildDeckFromCandidates', () => {
       ],
       makeSeeds(),
     );
-    expect(deck[9].id).toBe('flex');
+    expect(deck[9]!.id).toBe('flex');
   });
 });

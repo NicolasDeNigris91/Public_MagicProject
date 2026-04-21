@@ -7,7 +7,7 @@ import type { ICard } from '@/engine/types';
 
 function makeCard(id: string, p = 2, t = 2): ICard {
   return {
-    id, name: `C-${id}`, power: p, toughness: t,
+    id, name: `C-${id}`, power: p, toughness: t, cmc: 0,
     manaCost: '{1}', typeLine: 'Creature', oracleText: '',
     imageUrl: '', imageUrlSmall: '', accessibilityDescription: `card ${id}`,
   };
