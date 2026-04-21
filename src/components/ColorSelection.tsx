@@ -84,23 +84,23 @@ const WRAPPER_STYLE: React.CSSProperties = {
 const FIELDSET_STYLE: React.CSSProperties = {
   border: '1px solid #455a64',
   borderRadius: 12,
-  padding: 20,
+  padding: 24,
   background: 'rgba(0,0,0,0.35)',
-  maxWidth: 620,
+  maxWidth: 920,
   width: '100%',
 };
 const LEGEND_STYLE: React.CSSProperties = { padding: '0 8px', fontSize: 16 };
 const GRID_STYLE: React.CSSProperties = {
   display: 'grid',
-  gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))',
-  gap: 10,
+  gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
+  gap: 12,
 };
 const BUTTON_STYLE: React.CSSProperties = {
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
-  gap: 6,
-  padding: '12px 8px',
+  gap: 8,
+  padding: '14px 10px',
   background: '#263238',
   border: '1px solid #455a64',
   borderRadius: 10,
@@ -109,12 +109,12 @@ const BUTTON_STYLE: React.CSSProperties = {
   fontFamily: 'inherit',
 };
 const SWATCH_STYLE: React.CSSProperties = {
-  width: 32, height: 32, borderRadius: '50%',
+  width: 48, height: 48, borderRadius: '50%',
   border: '2px solid #eceff1',
 };
 const ART_STYLE: React.CSSProperties = {
-  width: 96, height: 70, objectFit: 'cover',
+  width: 160, height: 117, objectFit: 'cover',
   borderRadius: 6, border: '1px solid #455a64',
 };
-const MANA_STYLE: React.CSSProperties = { width: 24, height: 24 };
-const FLAVOR_STYLE: React.CSSProperties = { fontSize: 11, color: '#90a4ae', textAlign: 'center' };
+const MANA_STYLE: React.CSSProperties = { width: 28, height: 28 };
+const FLAVOR_STYLE: React.CSSProperties = { fontSize: 12, color: '#90a4ae', textAlign: 'center', lineHeight: 1.35 };
