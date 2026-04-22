@@ -189,7 +189,6 @@ export default function GamePage() {
             <span>
               {t('turn.label')} <strong>{turnNumber}</strong>
               {' · '}<strong>{turn === 'player' ? t('turn.yourMove') : t('turn.opponent')}</strong>
-              {' · '}{t('turn.plays')}: <strong>{player.playsRemaining}</strong>
             </span>
             <CombatLogToggle open={logOpen} onToggle={() => setLogOpen((o) => !o)} />
             <LangToggle />

@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import type { AnnouncePriority, GameResult, ICard, IGameState, IPlayer, LogEntry, LogKind, PlayerId } from '@/engine/types';
 import {
-  PLAYS_PER_TURN, applyDamage, beginTurn, canAfford, canAttack, canAttackFace, canPlay,
+  PLAYS_PER_TURN, applyDamage, beginTurn, canAfford, canAttack, canAttackFace,
   drawCard, playCardToField, removeFromField, resolveCombat,
 } from '@/engine/rules';
 import { shortCardLabel } from '@/utils/describeCard';
@@ -92,7 +92,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       initialized: true,
       generation: s.generation + 1,
       gameLog: [log(
-        `New match. Turn 1. You have ${STARTING_LIFE} life, ${STARTING_HAND} cards, one play, and 1 mana. Your turn.`,
+        `New match. Turn 1. You have ${STARTING_LIFE} life, ${STARTING_HAND} cards, and 1 mana. Your turn.`,
         'polite',
         'turn',
         { turnNumber: 1, player: 'player' },
@@ -151,12 +151,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
     if (s.turn !== who) return;
     const card = s[who].hand.find((c) => c.id === cardId);
     if (!card) return;
-    if (!canPlay(s[who])) {
-      if (who === 'player') {
-        get().announce('No plays remaining this turn. End your turn to continue.', 'polite');
-      }
-      return;
-    }
     if (!canAfford(s[who], card)) {
       if (who === 'player') {
         get().announce(
