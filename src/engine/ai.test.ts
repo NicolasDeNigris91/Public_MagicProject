@@ -9,7 +9,7 @@ const makeCard = (id: string, power = 2, toughness = 2, typeLine = 'Creature'): 
 
 const makePlayer = (o: Partial<IPlayer> = {}): IPlayer => ({
   id: 'opponent', life: 20, hand: [], battlefield: [], deck: [],
-  playsRemaining: 1, ...o,
+  playsRemaining: 1, manaMax: 0, manaAvailable: 0, ...o,
 });
 
 describe('pickCardToPlay', () => {

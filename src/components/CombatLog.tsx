@@ -13,8 +13,8 @@ export interface CombatLogProps {
  * Right-side panel that mirrors the game's announcement stream as a
  * scrollable visual history. Each entry is styled per `kind`:
  * turn (neutral), draw (cyan), play (amber), combat (red-tinted),
- * game-over (gold). Live-region speech is unchanged — this is a
- * parallel visual surface for sighted users.
+ * mana (blue), game-over (gold). Live-region speech is unchanged —
+ * this is a parallel visual surface for sighted users.
  */
 export function CombatLog({ open, onClose }: CombatLogProps) {
   const log = useGameStore((s) => s.gameLog);
@@ -71,6 +71,7 @@ const ICON_FOR: Record<LogKind, string> = {
   'draw': '↓',
   'play': '+',
   'combat': '⚔',
+  'mana': '◎',
   'game-over': '★',
 };
 
@@ -80,6 +81,7 @@ const KIND_TINT: Record<LogKind, { border: string; bg: string; icon: string }> =
   'draw':      { border: 'rgba(77,208,225,0.6)', bg: 'rgba(77,208,225,0.05)',  icon: '#4dd0e1' },
   'play':      { border: 'rgba(255,179,66,0.6)', bg: 'rgba(255,179,66,0.05)',  icon: '#ffb74d' },
   'combat':    { border: 'rgba(239,83,80,0.6)',  bg: 'rgba(239,83,80,0.05)',   icon: '#ef5350' },
+  'mana':      { border: 'rgba(144,202,249,0.6)',bg: 'rgba(144,202,249,0.05)', icon: '#90caf9' },
   'game-over': { border: '#ffb300',              bg: 'rgba(255,179,0,0.08)',   icon: '#ffca28' },
 };
 

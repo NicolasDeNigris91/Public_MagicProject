@@ -37,13 +37,16 @@ const MAX_LOG = 200;
 
 function makePlayer(id: PlayerId, deck: ICard[]): IPlayer {
   const hand = deck.slice(0, STARTING_HAND);
+  // Symmetry mirrors playsRemaining: it's the player's turn at init,
+  // so they start with T1 mana already (manaMax=1, manaAvailable=1).
+  // Opponent starts at 0 and gets ramped by beginTurn when their
+  // turn begins.
   return {
     id, life: STARTING_LIFE, hand, battlefield: [],
     deck: deck.slice(STARTING_HAND),
-    // Opponent starts with 0 plays — they get refilled when their
-    // turn begins. Player starts with PLAYS_PER_TURN because it is
-    // already their turn on init.
     playsRemaining: id === 'player' ? PLAYS_PER_TURN : 0,
+    manaMax: id === 'player' ? 1 : 0,
+    manaAvailable: id === 'player' ? 1 : 0,
   };
 }
 
@@ -68,8 +71,8 @@ function log(
 }
 
 export const useGameStore = create<GameStore>((set, get) => ({
-  player: { id: 'player', life: STARTING_LIFE, hand: [], battlefield: [], deck: [], playsRemaining: 0 },
-  opponent: { id: 'opponent', life: STARTING_LIFE, hand: [], battlefield: [], deck: [], playsRemaining: 0 },
+  player: { id: 'player', life: STARTING_LIFE, hand: [], battlefield: [], deck: [], playsRemaining: 0, manaMax: 0, manaAvailable: 0 },
+  opponent: { id: 'opponent', life: STARTING_LIFE, hand: [], battlefield: [], deck: [], playsRemaining: 0, manaMax: 0, manaAvailable: 0 },
   turn: 'player',
   phase: 'main',
   gameLog: [],
@@ -89,7 +92,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       initialized: true,
       generation: s.generation + 1,
       gameLog: [log(
-        `New match. Turn 1. You have ${STARTING_LIFE} life, ${STARTING_HAND} cards, and one play. Your turn.`,
+        `New match. Turn 1. You have ${STARTING_LIFE} life, ${STARTING_HAND} cards, one play, and 1 mana. Your turn.`,
         'polite',
         'turn',
         { turnNumber: 1, player: 'player' },
@@ -268,12 +271,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
     if (s.winner) return;
     const next: PlayerId = s.turn === 'player' ? 'opponent' : 'player';
     const bumpTurn = next === 'player' ? 1 : 0;
-    // Begin-of-turn for the incoming player: clear summoning
-    // sickness on their creatures and refill plays.
+    const updatedNext = beginTurn(s[next]);
     set({
       turn: next,
       turnNumber: s.turnNumber + bumpTurn,
-      [next]: beginTurn(s[next]),
+      [next]: updatedNext,
     } as Partial<GameStore>);
     get().announce(
       next === 'player'
@@ -283,6 +285,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
       'turn',
       { turnNumber: s.turnNumber + bumpTurn, player: next },
     );
+    if (next === 'player') {
+      get().announce(
+        `${updatedNext.manaMax} mana available.`,
+        'polite',
+        'mana',
+        { player: 'player', manaMax: updatedNext.manaMax, manaAvailable: updatedNext.manaAvailable },
+      );
+    }
     get().drawCard(next);
   },
 }));
