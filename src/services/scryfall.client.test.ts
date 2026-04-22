@@ -16,7 +16,17 @@ import { fallbackDecks } from './fallback-deck';
 
 const mockedGet = (axios.create() as unknown as { get: ReturnType<typeof vi.fn> }).get;
 
-function scryfallCard(opts: { id: string; colors: string[]; cmc: number; power: number; toughness: number }) {
+function scryfallCard(opts: {
+  id: string;
+  colors: string[];
+  cmc: number;
+  power: number;
+  toughness: number;
+  /** Omit to simulate a Scryfall card with no images (rare layouts,
+   *  some promos). Adapter will produce imageUrl: ''. */
+  withImage?: boolean;
+}) {
+  const withImage = opts.withImage ?? true;
   return {
     id: opts.id,
     name: opts.id,
@@ -25,6 +35,9 @@ function scryfallCard(opts: { id: string; colors: string[]; cmc: number; power: 
     cmc: opts.cmc,
     power: String(opts.power),
     toughness: String(opts.toughness),
+    ...(withImage
+      ? { image_uris: { normal: `https://cards.scryfall.io/normal/${opts.id}.jpg` } }
+      : {}),
   };
 }
 
@@ -77,6 +90,15 @@ describe('fetchDeckForColor', () => {
     ]}});
     const result = await fetchDeckForColor('R');
     // rg is multicolor, so deriveColor yields undefined, so it's ignored.
+    expect(result.cards[0]!.id).toBe(fallbackDecks.R[0]!.id);
+  });
+
+  it('drops candidates without an image so the deck never shows the blank fallback', async () => {
+    mockedGet.mockResolvedValueOnce({ data: { data: [
+      scryfallCard({ id: 'noimg', colors: ['R'], cmc: 1, power: 2, toughness: 1, withImage: false }),
+    ]}});
+    const result = await fetchDeckForColor('R');
+    // The image-less candidate is rejected; slot 0 falls back to the seed.
     expect(result.cards[0]!.id).toBe(fallbackDecks.R[0]!.id);
   });
 });

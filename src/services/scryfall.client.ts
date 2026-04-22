@@ -41,7 +41,7 @@ export async function fetchDeckForColor(color: Color): Promise<FetchResult> {
     });
     const candidates = (data.data ?? [])
       .map(adaptScryfallCard)
-      .filter((c) => c.color === color && c.power > 0 && c.toughness > 0);
+      .filter((c) => c.color === color && c.power > 0 && c.toughness > 0 && c.imageUrl !== '');
     if (candidates.length === 0) {
       return { cards: seeds, source: 'fallback', error: 'Empty response' };
     }
