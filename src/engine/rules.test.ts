@@ -63,6 +63,12 @@ describe('playCardToField', () => {
     const p = makePlayer({ hand: [c], manaAvailable: 0 });
     expect(playCardToField(p, 'a').manaAvailable).toBe(0);
   });
+
+  it('clamps manaAvailable at 0 when cmc exceeds mana (defensive; callers should gate with canAfford)', () => {
+    const c = { ...makeCard('a'), cmc: 5 };
+    const p = makePlayer({ hand: [c], manaAvailable: 1 });
+    expect(playCardToField(p, 'a').manaAvailable).toBe(0);
+  });
 });
 
 describe('canPlay / canAttack', () => {
