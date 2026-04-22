@@ -52,7 +52,7 @@ export function useAIOrchestrator() {
       if (!stillLive()) return;
       const state = useGameStore.getState();
       if (canPlay(state.opponent)) {
-        const pick = pickCardToPlay(state.opponent.hand);
+        const pick = pickCardToPlay(state.opponent.hand, state.opponent.manaAvailable);
         if (pick) useGameStore.getState().playCardToField('opponent', pick.id);
       }
 
