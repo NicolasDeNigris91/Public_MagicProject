@@ -22,6 +22,8 @@ import { useInertWhile } from '@/hooks/useInertWhile';
 import { usePostPlayFocus } from '@/hooks/usePostPlayFocus';
 import { useAIOrchestrator } from '@/hooks/useAIOrchestrator';
 import { buildInspectorActions } from '@/utils/buildInspectorActions';
+import { canAfford } from '@/engine/rules';
+import { format } from '@/i18n/messages';
 
 export default function GamePage() {
   const player = useGameStore((s) => s.player);
@@ -121,6 +123,14 @@ export default function GamePage() {
 
   const inspectorActions = useMemo(() => {
     if (!inspected) return [];
+    const playDisabledReason =
+      inspected.source === 'hand' && !canAfford(player, inspected.card)
+        ? format(t('hand.cannotPlay.mana'), {
+            name: inspected.card.name,
+            cmc: inspected.card.cmc,
+            available: player.manaAvailable,
+          })
+        : null;
     return buildInspectorActions({
       source: inspected.source,
       isCurrentlySelectedAttacker: selectedAttacker === inspected.card.id,
@@ -135,11 +145,14 @@ export default function GamePage() {
       onSelectAttacker: () => selectAttacker(inspected.card),
       onDeselectAttacker: () => deselectAttacker(inspected.card),
       onClose: closeInspector,
+      playDisabledReason,
     });
   }, [
     inspected,
+    player,
     selectedAttacker,
     turn,
+    t,
     announce,
     playCardToField,
     postPlayFocus,
@@ -217,6 +230,8 @@ export default function GamePage() {
             handCount={opponent.hand.length}
             pulsing={lifePulse === 'opponent'}
             lifeAnchor="opponent-life"
+            manaAvailable={opponent.manaAvailable}
+            manaMax={opponent.manaMax}
           />
           <Hand hand={opponent.hand} label={t('hand.opponent')} onActivate={() => undefined} hidden compact />
           <Battlefield
@@ -246,6 +261,8 @@ export default function GamePage() {
             handCount={player.hand.length}
             pulsing={lifePulse === 'player'}
             lifeAnchor="player-life"
+            manaAvailable={player.manaAvailable}
+            manaMax={player.manaMax}
           />
           <Battlefield
             label={t('battlefield.yourLabel')}

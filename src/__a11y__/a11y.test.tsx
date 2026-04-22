@@ -48,7 +48,7 @@ describe('a11y sweep', () => {
 
   it('PlayerHeader has no axe violations', async () => {
     await expectNoViolations(
-      <PlayerHeader label="You" color="R" life={20} handCount={5} lifeAnchor="player-life" />,
+      <PlayerHeader label="You" color="R" life={20} handCount={5} lifeAnchor="player-life" manaAvailable={1} manaMax={1} />,
     );
   });
 
