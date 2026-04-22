@@ -23,7 +23,10 @@ describe('useAIOrchestrator', () => {
     renderHook(() => useAIOrchestrator());
 
     act(() => { useGameStore.getState().endTurn(); });
-    act(() => { vi.advanceTimersByTime(5000); });
+    // Task 2 greedy-play: the AI now plays every affordable creature in
+    // hand (cmc=0 here, so all 6) at AI_PLAY_DELAY_MS each before combat
+    // and end-turn. Give enough fake-time budget to cover the whole tail.
+    act(() => { vi.advanceTimersByTime(20000); });
 
     // After the AI turn the store should be back on the player's turn.
     expect(useGameStore.getState().turn).toBe('player');
@@ -55,6 +58,7 @@ describe('useAIOrchestrator x animator', () => {
     useCombatStore.getState().reset();
   });
 
+  // 20s test timeout: Task 2 greedy-play pushes combat start past the default 5s.
   it('AI attacks call playCombat with correct intent mapping', async () => {
     const deck = Array.from({ length: 20 }, (_, i) => card(`d${i}`, 3, 3));
     useGameStore.getState().initGame(deck, deck);
@@ -72,7 +76,10 @@ describe('useAIOrchestrator x animator', () => {
     renderHook(() => useAIOrchestrator());
 
     act(() => { useGameStore.getState().endTurn(); });
-    await vi.waitFor(() => expect(spy).toHaveBeenCalled(), { timeout: 5000 });
+    // Task 2 greedy-play: the orchestrator plays every affordable card
+    // before combat. Opponent's whole hand is cmc=0 here, so allow
+    // enough real-time budget for plays + transition to playCombat.
+    await vi.waitFor(() => expect(spy).toHaveBeenCalled(), { timeout: 15000 });
 
     const intent = spy.mock.calls[0]![0];
     expect(intent).toMatchObject({
@@ -83,8 +90,9 @@ describe('useAIOrchestrator x animator', () => {
     });
 
     spy.mockRestore();
-  });
+  }, 20000);
 
+  // 20s test timeout: Task 2 greedy-play pushes combat start past the default 5s.
   it('post-await stillLive() aborts commit when generation advances mid-animation', async () => {
     vi.useRealTimers();
     useCombatStore.getState().reset();
@@ -108,7 +116,9 @@ describe('useAIOrchestrator x animator', () => {
     act(() => { useGameStore.getState().endTurn(); });
 
     // Wait for the AI to reach the await.
-    await vi.waitFor(() => expect(playSpy).toHaveBeenCalled(), { timeout: 5000 });
+    // Task 2 greedy-play: give enough real-time for all plays + combat
+    // transition before playCombat is first called.
+    await vi.waitFor(() => expect(playSpy).toHaveBeenCalled(), { timeout: 15000 });
 
     // Simulate "Play again" — bumps generation, resets turn to 'player'.
     act(() => { useGameStore.getState().initGame(deck, deck); });
@@ -123,5 +133,5 @@ describe('useAIOrchestrator x animator', () => {
 
     playSpy.mockRestore();
     attackSpy.mockRestore();
-  });
+  }, 20000);
 });

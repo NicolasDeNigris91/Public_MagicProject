@@ -2,7 +2,7 @@
 import { useEffect } from 'react';
 import { useGameStore } from '@/store/useGameStore';
 import { useCombatStore } from '@/store/useCombatStore';
-import { canPlay, resolveCombat } from '@/engine/rules';
+import { resolveCombat } from '@/engine/rules';
 import { pickCardToPlay, planAttacks } from '@/engine/ai';
 import type { IPlayer } from '@/engine/types';
 import {
@@ -48,67 +48,76 @@ export function useAIOrchestrator() {
       timers.add(id);
     };
 
-    schedule(() => {
+    const startCombatPhase = () => {
+      if (!stillLive()) return;
+      const opp = useGameStore.getState().opponent;
+      const ready: IPlayer = {
+        ...opp,
+        battlefield: opp.battlefield.filter((c) => !c.summoningSick),
+      };
+      const plans = planAttacks(ready, useGameStore.getState().player);
+
+      let i = 0;
+      const attackTick = async () => {
+        if (!stillLive()) return;
+        const plan = plans[i++];
+        if (!plan) {
+          schedule(() => {
+            if (!stillLive()) return;
+            const store = useGameStore.getState();
+            store.announce('Opponent ends their turn.', 'polite');
+            store.endTurn();
+          }, AI_END_DELAY_MS);
+          return;
+        }
+
+        const curr = useGameStore.getState();
+        const attacker = curr.opponent.battlefield.find((c) => c.id === plan.attackerId);
+        const blocker = plan.blockerId
+          ? curr.player.battlefield.find((c) => c.id === plan.blockerId) ?? null
+          : null;
+        if (attacker) {
+          const result = resolveCombat(attacker, blocker);
+          await useCombatStore.getState().playCombat({
+            attackerId: plan.attackerId,
+            targetId: blocker?.id ?? 'player-life',
+            targetKind: blocker ? 'creature' : 'face',
+            attackerDamage: result.blockerDamage,
+            targetDamage: result.attackerDamage,
+            attackerDies: result.attackerDies,
+            targetDies: result.blockerDies,
+            faceDamage: result.playerDamage,
+          });
+          // Re-check stillLive AFTER the await — the store's turn,
+          // generation, or winner may have changed during the animation.
+          if (!stillLive()) return;
+        }
+
+        useGameStore.getState().attack(plan.attackerId, plan.blockerId);
+        schedule(attackTick, AI_ATTACK_DELAY_MS);
+      };
+      Promise.resolve(attackTick()).catch((err) =>
+        console.error('[ai] attackTick failed', err),
+      );
+    };
+
+    // Greedy main phase: pick the highest-power affordable creature each
+    // tick, play it, then re-evaluate. Reads fresh state every iteration so
+    // `manaAvailable` decreases between picks. Stops when no creature in
+    // hand is affordable, then hands off to combat.
+    const playTick = () => {
       if (!stillLive()) return;
       const state = useGameStore.getState();
-      if (canPlay(state.opponent)) {
-        const pick = pickCardToPlay(state.opponent.hand, state.opponent.manaAvailable);
-        if (pick) useGameStore.getState().playCardToField('opponent', pick.id);
+      const pick = pickCardToPlay(state.opponent.hand, state.opponent.manaAvailable);
+      if (pick) {
+        useGameStore.getState().playCardToField('opponent', pick.id);
+        schedule(playTick, AI_PLAY_DELAY_MS);
+      } else {
+        schedule(startCombatPhase, AI_PLAY_DELAY_MS);
       }
+    };
 
-      schedule(() => {
-        if (!stillLive()) return;
-        const opp = useGameStore.getState().opponent;
-        const ready: IPlayer = {
-          ...opp,
-          battlefield: opp.battlefield.filter((c) => !c.summoningSick),
-        };
-        const plans = planAttacks(ready, useGameStore.getState().player);
-
-        let i = 0;
-        const attackTick = async () => {
-          if (!stillLive()) return;
-          const plan = plans[i++];
-          if (!plan) {
-            schedule(() => {
-              if (!stillLive()) return;
-              const store = useGameStore.getState();
-              store.announce('Opponent ends their turn.', 'polite');
-              store.endTurn();
-            }, AI_END_DELAY_MS);
-            return;
-          }
-
-          const curr = useGameStore.getState();
-          const attacker = curr.opponent.battlefield.find((c) => c.id === plan.attackerId);
-          const blocker = plan.blockerId
-            ? curr.player.battlefield.find((c) => c.id === plan.blockerId) ?? null
-            : null;
-          if (attacker) {
-            const result = resolveCombat(attacker, blocker);
-            await useCombatStore.getState().playCombat({
-              attackerId: plan.attackerId,
-              targetId: blocker?.id ?? 'player-life',
-              targetKind: blocker ? 'creature' : 'face',
-              attackerDamage: result.blockerDamage,
-              targetDamage: result.attackerDamage,
-              attackerDies: result.attackerDies,
-              targetDies: result.blockerDies,
-              faceDamage: result.playerDamage,
-            });
-            // Re-check stillLive AFTER the await — the store's turn,
-            // generation, or winner may have changed during the animation.
-            if (!stillLive()) return;
-          }
-
-          useGameStore.getState().attack(plan.attackerId, plan.blockerId);
-          schedule(attackTick, AI_ATTACK_DELAY_MS);
-        };
-        Promise.resolve(attackTick()).catch((err) =>
-          console.error('[ai] attackTick failed', err),
-        );
-      }, AI_PLAY_DELAY_MS);
-    }, AI_PLAY_DELAY_MS);
+    schedule(playTick, AI_PLAY_DELAY_MS);
 
     return () => {
       timers.forEach(clearTimeout);
