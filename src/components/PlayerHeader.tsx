@@ -15,14 +15,20 @@ export interface PlayerHeaderProps {
   pulsing?: boolean;
   /** data attribute the combat overlay uses to anchor flight targets. */
   lifeAnchor: string;
+  /** Unspent mana this turn. */
+  manaAvailable: number;
+  /** Mana pool size for this turn. */
+  manaMax: number;
 }
 
 /**
  * Structured header for each player's zone. Reads as a heading for
  * screen readers (h2) and foregrounds life as the hero number while
- * keeping mana symbol and hand count as secondary affordances.
+ * keeping mana, hand count, and color symbol as secondary affordances.
  */
-export function PlayerHeader({ label, color, life, handCount, pulsing, lifeAnchor }: PlayerHeaderProps) {
+export function PlayerHeader({
+  label, color, life, handCount, pulsing, lifeAnchor, manaAvailable, manaMax,
+}: PlayerHeaderProps) {
   const { t } = useI18n();
   const pulseStyle: React.CSSProperties | undefined = pulsing
     ? {
@@ -53,6 +59,11 @@ export function PlayerHeader({ label, color, life, handCount, pulsing, lifeAncho
           data-life-anchor={lifeAnchor}
           style={{ ...LIFE_NUMBER_STYLE, ...pulseStyle }}
         />
+      </span>
+
+      <span style={MANA_BLOCK_STYLE} aria-live="polite">
+        <span aria-hidden="true" style={MANA_LABEL_STYLE}>{t('player.manaLabel')}</span>
+        <span style={MANA_VALUE_STYLE}>{manaAvailable} / {manaMax}</span>
       </span>
 
       <span style={HAND_STYLE}>
@@ -111,3 +122,12 @@ const HAND_STYLE: React.CSSProperties = {
 };
 const HAND_LABEL_STYLE: React.CSSProperties = { fontSize: 11, textTransform: 'uppercase', letterSpacing: 0.4 };
 const HAND_COUNT_STYLE: React.CSSProperties = { fontSize: 15, color: '#eceff1', fontWeight: 700 };
+const MANA_BLOCK_STYLE: React.CSSProperties = {
+  display: 'inline-flex',
+  alignItems: 'baseline',
+  gap: 4,
+  color: '#90caf9',
+  fontWeight: 500,
+};
+const MANA_LABEL_STYLE: React.CSSProperties = { fontSize: 11, textTransform: 'uppercase', letterSpacing: 0.4 };
+const MANA_VALUE_STYLE: React.CSSProperties = { fontSize: 15, color: '#eceff1', fontWeight: 700, fontVariantNumeric: 'tabular-nums' };

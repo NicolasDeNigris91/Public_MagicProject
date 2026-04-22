@@ -21,6 +21,7 @@ export type MessageKey =
   | 'color.announceChoice'
   | 'player.you' | 'player.opponent'
   | 'player.lifePrefix' | 'player.handLabel' | 'player.handSingular' | 'player.handPlural'
+  | 'player.manaLabel'
   | 'action.attackDirect' | 'action.endTurn'
   | 'action.opponentThinking' | 'action.attackBlocked'
   | 'battlefield.yourLabel' | 'battlefield.opponentLabel' | 'battlefield.empty'
@@ -60,6 +61,7 @@ export const messages: Record<Lang, Record<MessageKey, string>> = {
     'player.handLabel': 'mão',
     'player.handSingular': 'carta',
     'player.handPlural': 'cartas',
+    'player.manaLabel': 'Mana',
     'action.attackDirect': 'Atacar oponente diretamente',
     'action.endTurn': 'Encerrar turno',
     'action.opponentThinking': 'Oponente pensando…',
@@ -110,6 +112,7 @@ export const messages: Record<Lang, Record<MessageKey, string>> = {
     'player.handLabel': 'hand',
     'player.handSingular': 'card',
     'player.handPlural': 'cards',
+    'player.manaLabel': 'Mana',
     'action.attackDirect': 'Attack opponent directly',
     'action.endTurn': 'End turn',
     'action.opponentThinking': 'Opponent thinking…',
