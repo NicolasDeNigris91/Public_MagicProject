@@ -64,6 +64,16 @@ describe('playCardToField', () => {
     const p = makePlayer({ hand: [c], manaAvailable: 1 });
     expect(playCardToField(p, 'a').manaAvailable).toBe(0);
   });
+
+  it('allows chaining multiple plays in the same turn (no per-turn cap)', () => {
+    const a = { ...makeCard('a'), cmc: 1 };
+    const b = { ...makeCard('b'), cmc: 1 };
+    let p = makePlayer({ hand: [a, b], manaAvailable: 2, manaMax: 2 });
+    p = playCardToField(p, 'a');
+    p = playCardToField(p, 'b');
+    expect(p.battlefield).toHaveLength(2);
+    expect(p.manaAvailable).toBe(0);
+  });
 });
 
 describe('canAttack', () => {
