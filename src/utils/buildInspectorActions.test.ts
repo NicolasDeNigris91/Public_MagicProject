@@ -107,3 +107,32 @@ describe('buildInspectorActions', () => {
       .toBeLessThan(callbacks.onClose.mock.invocationCallOrder[0]!);
   });
 });
+
+describe('buildInspectorActions — hand source disabled play', () => {
+  const noop = () => {};
+  const baseArgs = {
+    source: 'hand' as const,
+    isCurrentlySelectedAttacker: false,
+    onPlay: noop,
+    onSelectAttacker: noop,
+    onDeselectAttacker: noop,
+    onClose: noop,
+  };
+
+  it('marks the play action disabled when playDisabledReason is provided', () => {
+    const actions = buildInspectorActions({
+      ...baseArgs,
+      playDisabledReason: 'Cannot play Foo — costs 4, you have 2 mana.',
+    });
+    const play = actions.find((a) => a.label === 'Play to field');
+    expect(play?.disabled).toBe(true);
+    expect(play?.ariaLabel).toBe('Cannot play Foo — costs 4, you have 2 mana.');
+  });
+
+  it('leaves the play action enabled when playDisabledReason is omitted', () => {
+    const actions = buildInspectorActions(baseArgs);
+    const play = actions.find((a) => a.label === 'Play to field');
+    expect(play?.disabled).toBeFalsy();
+    expect(play?.ariaLabel).toBeUndefined();
+  });
+});

@@ -6,6 +6,11 @@ export interface InspectorAction {
   label: string;
   variant: ActionVariant;
   onClick: () => void;
+  /** When true, the rendered button is disabled and not focusable. */
+  disabled?: boolean;
+  /** Optional override for the button's aria-label. Used to surface
+   *  the reason a disabled action is disabled to screen readers. */
+  ariaLabel?: string;
 }
 
 export interface BuildInspectorActionsArgs {
@@ -15,19 +20,31 @@ export interface BuildInspectorActionsArgs {
   onSelectAttacker: () => void;
   onDeselectAttacker: () => void;
   onClose: () => void;
+  /** When set (only meaningful for source === 'hand'), the "Play to
+   *  field" action is disabled and its aria-label is set to this
+   *  string. Pass `null`/`undefined` when the card is playable. */
+  playDisabledReason?: string | null;
 }
 
 export function buildInspectorActions(args: BuildInspectorActionsArgs): InspectorAction[] {
-  const { source, isCurrentlySelectedAttacker, onPlay, onSelectAttacker, onDeselectAttacker, onClose } = args;
+  const {
+    source, isCurrentlySelectedAttacker,
+    onPlay, onSelectAttacker, onDeselectAttacker, onClose, playDisabledReason,
+  } = args;
 
   const close: InspectorAction = { label: 'Close', variant: 'secondary', onClick: onClose };
   const cancel: InspectorAction = { label: 'Cancel', variant: 'secondary', onClick: onClose };
 
   if (source === 'hand') {
-    return [
-      { label: 'Play to field', variant: 'primary', onClick: () => { onPlay(); onClose(); } },
-      cancel,
-    ];
+    const play: InspectorAction = {
+      label: 'Play to field',
+      variant: 'primary',
+      onClick: () => { onPlay(); onClose(); },
+      ...(playDisabledReason
+        ? { disabled: true, ariaLabel: playDisabledReason }
+        : {}),
+    };
+    return [play, cancel];
   }
 
   if (source === 'own-field') {

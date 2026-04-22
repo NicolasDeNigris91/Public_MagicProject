@@ -28,7 +28,8 @@ export type MessageKey =
   | 'hand.your' | 'hand.opponent'
   | 'lang.toggle' | 'lang.pt' | 'lang.en'
   | 'log.title' | 'log.empty' | 'log.open' | 'log.close' | 'log.shortcut'
-  | 'log.cannotPlay.noPlays' | 'log.cannotPlay.noMana';
+  | 'log.cannotPlay.noPlays' | 'log.cannotPlay.noMana'
+  | 'hand.cannotPlay.mana';
 
 export const messages: Record<Lang, Record<MessageKey, string>> = {
   pt: {
@@ -81,6 +82,7 @@ export const messages: Record<Lang, Record<MessageKey, string>> = {
     'log.shortcut': 'Atalho: L',
     'log.cannotPlay.noPlays': 'Sem jogadas restantes neste turno. Encerre o turno para continuar.',
     'log.cannotPlay.noMana': 'Não pode jogar {name} — custa {cmc}, você tem {available} de mana.',
+    'hand.cannotPlay.mana': 'Não pode jogar {name} — custa {cmc}, você tem {available} de mana.',
   },
   en: {
     'app.title': 'MTG Combat Demo',
@@ -132,6 +134,7 @@ export const messages: Record<Lang, Record<MessageKey, string>> = {
     'log.shortcut': 'Shortcut: L',
     'log.cannotPlay.noPlays': 'No plays remaining this turn. End your turn to continue.',
     'log.cannotPlay.noMana': 'Cannot play {name} — costs {cmc}, you have {available} mana.',
+    'hand.cannotPlay.mana': 'Cannot play {name} — costs {cmc}, you have {available} mana.',
   },
 };
 

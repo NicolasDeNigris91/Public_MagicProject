@@ -130,6 +130,8 @@ export function CardInspector({ card, actions, onClose }: CardInspectorProps) {
               <button
                 key={a.label}
                 type="button"
+                disabled={a.disabled}
+                aria-label={a.ariaLabel}
                 className={`${styles.btn}${a.variant === 'primary' ? ' ' + styles.btnPrimary : ''}${a.variant === 'danger' ? ' ' + styles.btnDanger : ''}`}
                 onClick={a.onClick}
               >
