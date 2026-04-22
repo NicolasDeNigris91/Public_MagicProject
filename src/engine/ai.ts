@@ -1,6 +1,7 @@
 /**
  * Minimal opponent AI. Intentionally simple and deterministic-ish:
- *  - On main phase: play the highest-power creature in hand.
+ *  - On main phase: play the highest-power creature the player can
+ *    afford given their current `manaAvailable`. Pass if nothing fits.
  *  - On combat: attack with each untapped creature into the weakest
  *    possible blocker. Direct (face) attacks are only allowed when the
  *    defender has no creatures at all — matches the house rule enforced
@@ -11,10 +12,12 @@
  */
 import type { ICard, IPlayer } from './types';
 
-export function pickCardToPlay(hand: ICard[]): ICard | null {
-  const creatures = hand.filter((c) => /creature/i.test(c.typeLine));
-  if (creatures.length === 0) return null;
-  return [...creatures].sort((a, b) => b.power - a.power)[0] ?? null;
+export function pickCardToPlay(hand: ICard[], manaAvailable: number): ICard | null {
+  const affordable = hand.filter(
+    (c) => /creature/i.test(c.typeLine) && c.cmc <= manaAvailable,
+  );
+  if (affordable.length === 0) return null;
+  return [...affordable].sort((a, b) => b.power - a.power)[0] ?? null;
 }
 
 export interface AttackPlan {

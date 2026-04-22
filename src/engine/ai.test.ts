@@ -13,15 +13,30 @@ const makePlayer = (o: Partial<IPlayer> = {}): IPlayer => ({
 });
 
 describe('pickCardToPlay', () => {
-  it('picks highest-power creature', () => {
+  it('picks highest-power creature when all are affordable', () => {
     const hand = [makeCard('a', 1, 1), makeCard('b', 4, 2), makeCard('c', 2, 2)];
-    expect(pickCardToPlay(hand)?.id).toBe('b');
+    expect(pickCardToPlay(hand, Infinity)?.id).toBe('b');
   });
+
   it('ignores non-creatures', () => {
-    expect(pickCardToPlay([makeCard('land', 0, 0, 'Land')])).toBeNull();
+    expect(pickCardToPlay([makeCard('land', 0, 0, 'Land')], Infinity)).toBeNull();
   });
+
   it('returns null on empty hand', () => {
-    expect(pickCardToPlay([])).toBeNull();
+    expect(pickCardToPlay([], Infinity)).toBeNull();
+  });
+
+  it('skips creatures whose cmc exceeds manaAvailable', () => {
+    const hand = [
+      { ...makeCard('big', 5, 5), cmc: 5 },
+      { ...makeCard('small', 2, 2), cmc: 2 },
+    ];
+    expect(pickCardToPlay(hand, 3)?.id).toBe('small');
+  });
+
+  it('returns null when no creature is affordable', () => {
+    const hand = [{ ...makeCard('big', 5, 5), cmc: 5 }];
+    expect(pickCardToPlay(hand, 2)).toBeNull();
   });
 });
 
