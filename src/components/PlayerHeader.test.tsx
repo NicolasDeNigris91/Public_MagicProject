@@ -20,7 +20,7 @@ describe('PlayerHeader mana', () => {
         manaMax={3}
       />,
     );
-    expect(screen.getByText(/Mana/i)).toBeInTheDocument();
-    expect(screen.getByText('2 / 3')).toBeInTheDocument();
+    expect(screen.getAllByText(/Mana/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText('2 / 3').length).toBeGreaterThan(0);
   });
 });

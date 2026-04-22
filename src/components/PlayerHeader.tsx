@@ -61,9 +61,10 @@ export function PlayerHeader({
         />
       </span>
 
-      <span style={MANA_BLOCK_STYLE} aria-live="polite">
+      <span style={MANA_BLOCK_STYLE}>
+        <span className="sr-only">{t('player.manaLabel')} {manaAvailable} / {manaMax}</span>
         <span aria-hidden="true" style={MANA_LABEL_STYLE}>{t('player.manaLabel')}</span>
-        <span style={MANA_VALUE_STYLE}>{manaAvailable} / {manaMax}</span>
+        <span aria-hidden="true" style={MANA_VALUE_STYLE}>{manaAvailable} / {manaMax}</span>
       </span>
 
       <span style={HAND_STYLE}>
