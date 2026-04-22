@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { ICard, IPlayer } from './types';
 import {
-  PLAYS_PER_TURN, applyDamage, beginTurn, canAfford, canAttack, canAttackFace, canPlay,
+  applyDamage, beginTurn, canAfford, canAttack, canAttackFace,
   drawCard, playCardToField, resolveCombat,
 } from './rules';
 
@@ -13,7 +13,7 @@ const makeCard = (id: string, power = 2, toughness = 2): ICard => ({
 
 const makePlayer = (overrides: Partial<IPlayer> = {}): IPlayer => ({
   id: 'player', life: 20, hand: [], battlefield: [], deck: [],
-  playsRemaining: PLAYS_PER_TURN, manaMax: 0, manaAvailable: 0, ...overrides,
+  manaMax: 0, manaAvailable: 0, ...overrides,
 });
 
 describe('drawCard', () => {
@@ -42,11 +42,6 @@ describe('playCardToField', () => {
     expect(result.battlefield[0]?.summoningSick).toBe(true);
   });
 
-  it('decrements playsRemaining', () => {
-    const p = makePlayer({ hand: [makeCard('a')], playsRemaining: 1 });
-    expect(playCardToField(p, 'a').playsRemaining).toBe(0);
-  });
-
   it('is a no-op when card not in hand', () => {
     const p = makePlayer();
     expect(playCardToField(p, 'ghost')).toEqual(p);
@@ -71,12 +66,7 @@ describe('playCardToField', () => {
   });
 });
 
-describe('canPlay / canAttack', () => {
-  it('blocks plays when playsRemaining is zero', () => {
-    expect(canPlay(makePlayer({ playsRemaining: 0 }))).toBe(false);
-    expect(canPlay(makePlayer({ playsRemaining: 1 }))).toBe(true);
-  });
-
+describe('canAttack', () => {
   it('blocks attacks for summoning-sick creatures', () => {
     expect(canAttack({ ...makeCard('a'), summoningSick: true })).toBe(false);
     expect(canAttack(makeCard('a'))).toBe(true);
@@ -117,13 +107,11 @@ describe('canAttackFace', () => {
 });
 
 describe('beginTurn', () => {
-  it('clears summoning sickness and refills plays', () => {
+  it('clears summoning sickness on the player\'s creatures', () => {
     const p = makePlayer({
-      playsRemaining: 0,
       battlefield: [{ ...makeCard('a'), summoningSick: true }, makeCard('b')],
     });
     const after = beginTurn(p);
-    expect(after.playsRemaining).toBe(PLAYS_PER_TURN);
     expect(after.battlefield.every((c) => !c.summoningSick)).toBe(true);
   });
 

@@ -9,7 +9,7 @@ export const LANGS: readonly Lang[] = ['pt', 'en'] as const;
 
 export type MessageKey =
   | 'app.title'
-  | 'turn.label' | 'turn.yourMove' | 'turn.opponent' | 'turn.plays'
+  | 'turn.label' | 'turn.yourMove' | 'turn.opponent'
   | 'game.loading' | 'game.victory' | 'game.defeat'
   | 'game.playAgain' | 'game.changeColor'
   | 'color.selectTitle' | 'color.toolbarLabel'
@@ -28,7 +28,7 @@ export type MessageKey =
   | 'hand.your' | 'hand.opponent'
   | 'lang.toggle' | 'lang.pt' | 'lang.en'
   | 'log.title' | 'log.empty' | 'log.open' | 'log.close' | 'log.shortcut'
-  | 'log.cannotPlay.noPlays' | 'log.cannotPlay.noMana'
+  | 'log.cannotPlay.noMana'
   | 'hand.cannotPlay.mana';
 
 export const messages: Record<Lang, Record<MessageKey, string>> = {
@@ -37,7 +37,6 @@ export const messages: Record<Lang, Record<MessageKey, string>> = {
     'turn.label': 'Turno',
     'turn.yourMove': 'Sua vez',
     'turn.opponent': 'Oponente',
-    'turn.plays': 'Jogadas',
     'game.loading': 'Distribuindo cartas…',
     'game.victory': 'Vitória! Você derrotou o oponente.',
     'game.defeat': 'Derrota. Sua vida chegou a zero.',
@@ -80,7 +79,6 @@ export const messages: Record<Lang, Record<MessageKey, string>> = {
     'log.open': 'Abrir registro',
     'log.close': 'Fechar registro',
     'log.shortcut': 'Atalho: L',
-    'log.cannotPlay.noPlays': 'Sem jogadas restantes neste turno. Encerre o turno para continuar.',
     'log.cannotPlay.noMana': 'Não pode jogar {name} — custa {cmc}, você tem {available} de mana.',
     'hand.cannotPlay.mana': 'Não pode jogar {name} — custa {cmc}, você tem {available} de mana.',
   },
@@ -89,7 +87,6 @@ export const messages: Record<Lang, Record<MessageKey, string>> = {
     'turn.label': 'Turn',
     'turn.yourMove': 'Your move',
     'turn.opponent': 'Opponent',
-    'turn.plays': 'Plays',
     'game.loading': 'Dealing cards…',
     'game.victory': 'Victory! You defeated the opponent.',
     'game.defeat': 'Defeat. Your life reached zero.',
@@ -132,7 +129,6 @@ export const messages: Record<Lang, Record<MessageKey, string>> = {
     'log.open': 'Open log',
     'log.close': 'Close log',
     'log.shortcut': 'Shortcut: L',
-    'log.cannotPlay.noPlays': 'No plays remaining this turn. End your turn to continue.',
     'log.cannotPlay.noMana': 'Cannot play {name} — costs {cmc}, you have {available} mana.',
     'hand.cannotPlay.mana': 'Cannot play {name} — costs {cmc}, you have {available} mana.',
   },

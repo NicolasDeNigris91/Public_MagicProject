@@ -47,9 +47,6 @@ export interface IPlayer {
   hand: ICard[];
   battlefield: ICard[];
   deck: ICard[];
-  /** Number of creatures this player may still play this turn.
-   *  Refilled to PLAYS_PER_TURN at the start of their turn. */
-  playsRemaining: number;
   /** Mana pool size for this turn. Increments by 1 at the start
    *  of each of this player's turns. No explicit cap. */
   manaMax: number;

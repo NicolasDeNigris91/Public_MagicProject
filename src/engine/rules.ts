@@ -4,8 +4,6 @@
  */
 import type { ICard, ICombatResult, IPlayer } from './types';
 
-export const PLAYS_PER_TURN = 1;
-
 export function drawCard(player: IPlayer): { player: IPlayer; drawn: ICard | null } {
   if (player.deck.length === 0) return { player, drawn: null };
   const [drawn, ...rest] = player.deck;
@@ -18,12 +16,11 @@ export function drawCard(player: IPlayer): { player: IPlayer; drawn: ICard | nul
 }
 
 /**
- * Play a creature card from hand to the battlefield. Decrements the
- * player's `playsRemaining`, spends `card.cmc` from `manaAvailable`,
- * and marks the entering creature with summoning sickness so it cannot
- * attack the turn it comes down. Caller is responsible for checking
- * `canPlay` AND `canAfford` first if enforcement is desired (the store
- * does this; engine stays pure).
+ * Play a creature card from hand to the battlefield. Spends `card.cmc`
+ * from `manaAvailable`, and marks the entering creature with summoning
+ * sickness so it cannot attack the turn it comes down. Caller is
+ * responsible for checking `canAfford` first if enforcement is desired
+ * (the store does this; engine stays pure).
  */
 export function playCardToField(player: IPlayer, cardId: string): IPlayer {
   const card = player.hand.find((c) => c.id === cardId);
@@ -33,13 +30,8 @@ export function playCardToField(player: IPlayer, cardId: string): IPlayer {
     ...player,
     hand: player.hand.filter((c) => c.id !== cardId),
     battlefield: [...player.battlefield, entering],
-    playsRemaining: Math.max(0, player.playsRemaining - 1),
     manaAvailable: Math.max(0, player.manaAvailable - card.cmc),
   };
-}
-
-export function canPlay(player: IPlayer): boolean {
-  return player.playsRemaining > 0;
 }
 
 export function canAfford(player: IPlayer, card: ICard): boolean {
@@ -94,7 +86,7 @@ export function removeFromField(player: IPlayer, cardId: string): IPlayer {
 /**
  * Begin-of-turn housekeeping for the player whose turn is starting:
  * clear summoning sickness and attack-lock on all their creatures,
- * refill plays, and ramp mana (manaMax += 1) then refill manaAvailable.
+ * and ramp mana (manaMax += 1) then refill manaAvailable.
  * Any unspent mana from the previous turn is discarded.
  */
 export function beginTurn(player: IPlayer): IPlayer {
@@ -106,7 +98,6 @@ export function beginTurn(player: IPlayer): IPlayer {
         ? { ...c, summoningSick: false, attackedThisTurn: false }
         : c,
     ),
-    playsRemaining: PLAYS_PER_TURN,
     manaMax,
     manaAvailable: manaMax,
   };

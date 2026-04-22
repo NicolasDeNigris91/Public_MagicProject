@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import type { AnnouncePriority, GameResult, ICard, IGameState, IPlayer, LogEntry, LogKind, PlayerId } from '@/engine/types';
 import {
-  PLAYS_PER_TURN, applyDamage, beginTurn, canAfford, canAttack, canAttackFace,
+  applyDamage, beginTurn, canAfford, canAttack, canAttackFace,
   drawCard, playCardToField, removeFromField, resolveCombat,
 } from '@/engine/rules';
 import { shortCardLabel } from '@/utils/describeCard';
@@ -37,14 +37,12 @@ const MAX_LOG = 200;
 
 function makePlayer(id: PlayerId, deck: ICard[]): IPlayer {
   const hand = deck.slice(0, STARTING_HAND);
-  // Symmetry mirrors playsRemaining: it's the player's turn at init,
-  // so they start with T1 mana already (manaMax=1, manaAvailable=1).
-  // Opponent starts at 0 and gets ramped by beginTurn when their
-  // turn begins.
+  // It's the player's turn at init, so they start with T1 mana
+  // already (manaMax=1, manaAvailable=1). Opponent starts at 0 and
+  // gets ramped by beginTurn when their turn begins.
   return {
     id, life: STARTING_LIFE, hand, battlefield: [],
     deck: deck.slice(STARTING_HAND),
-    playsRemaining: id === 'player' ? PLAYS_PER_TURN : 0,
     manaMax: id === 'player' ? 1 : 0,
     manaAvailable: id === 'player' ? 1 : 0,
   };
@@ -71,8 +69,8 @@ function log(
 }
 
 export const useGameStore = create<GameStore>((set, get) => ({
-  player: { id: 'player', life: STARTING_LIFE, hand: [], battlefield: [], deck: [], playsRemaining: 0, manaMax: 0, manaAvailable: 0 },
-  opponent: { id: 'opponent', life: STARTING_LIFE, hand: [], battlefield: [], deck: [], playsRemaining: 0, manaMax: 0, manaAvailable: 0 },
+  player: { id: 'player', life: STARTING_LIFE, hand: [], battlefield: [], deck: [], manaMax: 0, manaAvailable: 0 },
+  opponent: { id: 'opponent', life: STARTING_LIFE, hand: [], battlefield: [], deck: [], manaMax: 0, manaAvailable: 0 },
   turn: 'player',
   phase: 'main',
   gameLog: [],
