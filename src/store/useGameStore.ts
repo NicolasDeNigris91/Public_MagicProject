@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import type { AnnouncePriority, GameResult, ICard, IGameState, IPlayer, LogEntry, LogKind, PlayerId } from '@/engine/types';
 import {
-  PLAYS_PER_TURN, applyDamage, beginTurn, canAttack, canAttackFace, canPlay,
+  PLAYS_PER_TURN, applyDamage, beginTurn, canAfford, canAttack, canAttackFace, canPlay,
   drawCard, playCardToField, removeFromField, resolveCombat,
 } from '@/engine/rules';
 import { shortCardLabel } from '@/utils/describeCard';
@@ -149,14 +149,23 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const s = get();
     if (s.winner) return;
     if (s.turn !== who) return;
+    const card = s[who].hand.find((c) => c.id === cardId);
+    if (!card) return;
     if (!canPlay(s[who])) {
       if (who === 'player') {
         get().announce('No plays remaining this turn. End your turn to continue.', 'polite');
       }
       return;
     }
-    const card = s[who].hand.find((c) => c.id === cardId);
-    if (!card) return;
+    if (!canAfford(s[who], card)) {
+      if (who === 'player') {
+        get().announce(
+          `Cannot play ${card.name} — costs ${card.cmc}, you have ${s[who].manaAvailable} mana.`,
+          'polite',
+        );
+      }
+      return;
+    }
     const updated = playCardToField(s[who], cardId);
     set({ [who]: updated } as Partial<GameStore>);
     const label = shortCardLabel(card);

@@ -26,7 +26,8 @@ export type MessageKey =
   | 'battlefield.yourLabel' | 'battlefield.opponentLabel' | 'battlefield.empty'
   | 'hand.your' | 'hand.opponent'
   | 'lang.toggle' | 'lang.pt' | 'lang.en'
-  | 'log.title' | 'log.empty' | 'log.open' | 'log.close' | 'log.shortcut';
+  | 'log.title' | 'log.empty' | 'log.open' | 'log.close' | 'log.shortcut'
+  | 'log.cannotPlay.noPlays' | 'log.cannotPlay.noMana';
 
 export const messages: Record<Lang, Record<MessageKey, string>> = {
   pt: {
@@ -76,6 +77,8 @@ export const messages: Record<Lang, Record<MessageKey, string>> = {
     'log.open': 'Abrir registro',
     'log.close': 'Fechar registro',
     'log.shortcut': 'Atalho: L',
+    'log.cannotPlay.noPlays': 'Sem jogadas restantes neste turno. Encerre o turno para continuar.',
+    'log.cannotPlay.noMana': 'Não pode jogar {name} — custa {cmc}, você tem {available} de mana.',
   },
   en: {
     'app.title': 'MTG Combat Demo',
@@ -124,6 +127,8 @@ export const messages: Record<Lang, Record<MessageKey, string>> = {
     'log.open': 'Open log',
     'log.close': 'Close log',
     'log.shortcut': 'Shortcut: L',
+    'log.cannotPlay.noPlays': 'No plays remaining this turn. End your turn to continue.',
+    'log.cannotPlay.noMana': 'Cannot play {name} — costs {cmc}, you have {available} mana.',
   },
 };
 
