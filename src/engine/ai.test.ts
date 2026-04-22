@@ -38,6 +38,11 @@ describe('pickCardToPlay', () => {
     const hand = [{ ...makeCard('big', 5, 5), cmc: 5 }];
     expect(pickCardToPlay(hand, 2)).toBeNull();
   });
+
+  it('treats cmc equal to manaAvailable as affordable', () => {
+    const hand = [{ ...makeCard('exact', 3, 3), cmc: 3 }];
+    expect(pickCardToPlay(hand, 3)?.id).toBe('exact');
+  });
 });
 
 describe('planAttacks', () => {
