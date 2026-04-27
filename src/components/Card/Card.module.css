@@ -57,7 +57,7 @@
   object-fit: cover;
 }
 
-/* ——— Fallback styling ——— */
+/* --- Fallback styling --- */
 .fallback {
   position: absolute;
   inset: 0;

@@ -27,7 +27,7 @@ export function useAttackerSelection() {
    * Preview-then-commit: resolve the combat purely from the current
    * snapshot, await the animation, then let the store commit. Relies
    * on the invariant that no other mutation touches the attacker or
-   * blocker between the preview and commit — guaranteed today by the
+   * blocker between the preview and commit - guaranteed today by the
    * animator's serial queue and the isAnimating guards at every
    * attack entry point (player + AI).
    */

@@ -108,7 +108,7 @@ describe('buildInspectorActions', () => {
   });
 });
 
-describe('buildInspectorActions — hand source disabled play', () => {
+describe('buildInspectorActions - hand source disabled play', () => {
   const noop = () => {};
   const baseArgs = {
     source: 'hand' as const,
@@ -122,11 +122,11 @@ describe('buildInspectorActions — hand source disabled play', () => {
   it('marks the play action disabled when playDisabledReason is provided', () => {
     const actions = buildInspectorActions({
       ...baseArgs,
-      playDisabledReason: 'Cannot play Foo — costs 4, you have 2 mana.',
+      playDisabledReason: 'Cannot play Foo - costs 4, you have 2 mana.',
     });
     const play = actions.find((a) => a.label === 'Play to field');
     expect(play?.disabled).toBe(true);
-    expect(play?.ariaLabel).toBe('Cannot play Foo — costs 4, you have 2 mana.');
+    expect(play?.ariaLabel).toBe('Cannot play Foo - costs 4, you have 2 mana.');
   });
 
   it('leaves the play action enabled when playDisabledReason is omitted', () => {

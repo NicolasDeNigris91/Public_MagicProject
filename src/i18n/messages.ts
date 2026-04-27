@@ -1,6 +1,6 @@
 /**
  * Translation catalog for the UI. Scryfall-provided card text (names,
- * oracle text, type lines) stays in English — it's source data, not
+ * oracle text, type lines) stays in English - it's source data, not
  * UI copy. Only strings authored by this app are translated here.
  */
 export type Lang = 'pt' | 'en';
@@ -68,7 +68,7 @@ export const messages: Record<Lang, Record<MessageKey, string>> = {
     'action.attackBlocked': 'Não pode atacar diretamente enquanto o oponente tiver criaturas no campo.',
     'battlefield.yourLabel': 'Seu campo de batalha',
     'battlefield.opponentLabel': 'Campo do oponente',
-    'battlefield.empty': '{label} — sem criaturas em jogo',
+    'battlefield.empty': '{label} - sem criaturas em jogo',
     'hand.your': 'Sua mão',
     'hand.opponent': 'Mão do oponente',
     'lang.toggle': 'Mudar idioma',
@@ -79,8 +79,8 @@ export const messages: Record<Lang, Record<MessageKey, string>> = {
     'log.open': 'Abrir registro',
     'log.close': 'Fechar registro',
     'log.shortcut': 'Atalho: L',
-    'log.cannotPlay.noMana': 'Não pode jogar {name} — custa {cmc}, você tem {available} de mana.',
-    'hand.cannotPlay.mana': 'Não pode jogar {name} — custa {cmc}, você tem {available} de mana.',
+    'log.cannotPlay.noMana': 'Não pode jogar {name} - custa {cmc}, você tem {available} de mana.',
+    'hand.cannotPlay.mana': 'Não pode jogar {name} - custa {cmc}, você tem {available} de mana.',
   },
   en: {
     'app.title': 'MTG Combat Demo',
@@ -118,7 +118,7 @@ export const messages: Record<Lang, Record<MessageKey, string>> = {
     'action.attackBlocked': 'Cannot attack directly while the opponent has creatures on the battlefield.',
     'battlefield.yourLabel': 'Your battlefield',
     'battlefield.opponentLabel': 'Opponent battlefield',
-    'battlefield.empty': '{label} — no creatures in play',
+    'battlefield.empty': '{label} - no creatures in play',
     'hand.your': 'Your hand',
     'hand.opponent': 'Opponent hand',
     'lang.toggle': 'Change language',
@@ -129,8 +129,8 @@ export const messages: Record<Lang, Record<MessageKey, string>> = {
     'log.open': 'Open log',
     'log.close': 'Close log',
     'log.shortcut': 'Shortcut: L',
-    'log.cannotPlay.noMana': 'Cannot play {name} — costs {cmc}, you have {available} mana.',
-    'hand.cannotPlay.mana': 'Cannot play {name} — costs {cmc}, you have {available} mana.',
+    'log.cannotPlay.noMana': 'Cannot play {name} - costs {cmc}, you have {available} mana.',
+    'hand.cannotPlay.mana': 'Cannot play {name} - costs {cmc}, you have {available} mana.',
   },
 };
 

@@ -38,7 +38,7 @@ describe('useAIOrchestrator', () => {
     renderHook(() => useAIOrchestrator());
 
     act(() => { useGameStore.getState().endTurn(); });
-    // Advance partially — AI plays a card, next setTimeout is scheduled.
+    // Advance partially - AI plays a card, next setTimeout is scheduled.
     act(() => { vi.advanceTimersByTime(1000); });
 
     const turnBeforeReset = useGameStore.getState().turn;
@@ -120,7 +120,7 @@ describe('useAIOrchestrator x animator', () => {
     // transition before playCombat is first called.
     await vi.waitFor(() => expect(playSpy).toHaveBeenCalled(), { timeout: 15000 });
 
-    // Simulate "Play again" — bumps generation, resets turn to 'player'.
+    // Simulate "Play again" - bumps generation, resets turn to 'player'.
     act(() => { useGameStore.getState().initGame(deck, deck); });
 
     // Now release the animation promise.

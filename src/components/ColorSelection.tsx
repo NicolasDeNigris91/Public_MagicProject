@@ -53,7 +53,7 @@ export function ColorSelection({ onSelect }: Props) {
                 type="button"
                 onClick={() => onSelect(c)}
                 onKeyDown={(e) => onKeyDown(e, i)}
-                aria-label={`${name} — ${flavor}`}
+                aria-label={`${name} - ${flavor}`}
                 style={BUTTON_STYLE}
               >
                 {artUrl ? (

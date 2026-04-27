@@ -8,7 +8,7 @@ import { CardBack } from './CardBack';
  * The player's hand is a listbox-like keyboard group:
  * - Tab enters the group, focus lands on first card.
  * - ArrowLeft / ArrowRight move focus between cards.
- * - Enter / Space on a card calls onActivate — the same contract as click.
+ * - Enter / Space on a card calls onActivate - the same contract as click.
  *
  * onActivate semantics changed: clicking a card no longer plays it
  * directly. The page wires onActivate to "open the inspector", and the

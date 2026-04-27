@@ -140,7 +140,7 @@ describe('useCombatStore', () => {
     // Ensure setState is restored in case the thrown branch didn't run.
     useCombatStore.setState = originalSet;
 
-    // Second call should succeed normally — queue was not poisoned.
+    // Second call should succeed normally - queue was not poisoned.
     const p2 = playCombat(intent({ attackerId: 'second' }));
     await vi.advanceTimersByTimeAsync(1200);
     await p2;

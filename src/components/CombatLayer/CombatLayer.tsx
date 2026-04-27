@@ -34,7 +34,7 @@ const KEYFRAMES_CSS = `
 
 /**
  * Portal overlay that renders combat animation visuals on top of the
- * game surface. Decorative only — aria-hidden throughout. Narration
+ * game surface. Decorative only - aria-hidden throughout. Narration
  * flows through the existing live regions driven by useGameStore.
  */
 export function CombatLayer() {
@@ -78,7 +78,7 @@ function DamageNumber({ anchorId, value }: { anchorId: string; value: number }) 
   // The bounding rect is captured once on mount. If the viewport
   // scrolls or resizes during the 600ms float animation the damage
   // number will be pinned to the original (stale) coordinate. In
-  // practice this is fine — the animation is short, input is blocked
+  // practice this is fine - the animation is short, input is blocked
   // during combat (Task 12), and the board fits the viewport.
   useEffect(() => {
     const el = document.querySelector<HTMLElement>(

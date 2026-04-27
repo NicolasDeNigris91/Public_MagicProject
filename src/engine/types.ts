@@ -1,13 +1,3 @@
-/**
- * Domain types for the game engine.
- *
- * A11y note: `accessibilityDescription` is a first-class field on ICard.
- * Treating it as data (not a render-time concern) guarantees that every
- * code path — combat log, announcements, card focus — uses the same
- * canonical description. A blind user and a sighted user get the same
- * information; only the medium differs.
- */
-
 import type { Color } from './color';
 
 export type PlayerId = 'player' | 'opponent';
@@ -76,7 +66,7 @@ export interface LogEntry {
   timestamp: number;
   /** Event classification used by the visible combat log for styling. */
   kind?: LogKind;
-  /** Structured payload for future localization — kept alongside the
+  /** Structured payload for future localization - kept alongside the
    *  pre-built `message` so rendering can upgrade without breaking
    *  call sites. */
   meta?: Record<string, string | number>;

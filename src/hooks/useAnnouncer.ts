@@ -2,35 +2,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { useGameStore } from '@/store/useGameStore';
 
-/**
- * FIFO queue -> two live regions.
- *
- * Why a queue, not "latest wins":
- *   During the opponent's turn the store fires many messages within a
- *   few hundred milliseconds (play card, attack 1, attack 2, ...).
- *   A naive "take the newest and drop the rest" approach silently
- *   eats announcements — the exact failure mode the live region is
- *   meant to prevent. Each event must be heard in order.
- *
- * Cursor by id, not index:
- *   The store caps `gameLog` to MAX_LOG entries and trims from the
- *   head. An absolute-index cursor would misalign after the first
- *   truncation; tracking the last-seen entry id survives truncation.
- *
- * Flush cadence:
- *   Each message holds ~1100 ms before the next — roughly the natural
- *   speech rate for a short sentence. Gives AT time to finish.
- *
- * Generation reset:
- *   `initGame` bumps `generation` and replaces `gameLog`. When we see
- *   generation advance we drop pending queue items from the old match
- *   and reset the cursor.
- *
- * Nonce key:
- *   The React `key` on the live-region DOM node (LiveRegion.tsx) is
- *   bumped on every flush so repeated identical messages remount the
- *   node and re-trigger an announcement.
- */
+// FIFO queue feeding two live regions. Cursor tracks last-seen entry by
+// id (the gameLog gets trimmed from the head, so indices drift). Flush
+// holds ~1100ms between messages so AT can finish. Generation bump on
+// initGame drops stale queue items.
 export interface AnnouncerState {
   polite: string;
   politeKey: number;

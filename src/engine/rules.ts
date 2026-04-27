@@ -1,7 +1,3 @@
-/**
- * Pure rules engine. No React, no Zustand, no network.
- * Every function takes state, returns new state. Deterministic & testable.
- */
 import type { ICard, ICombatResult, IPlayer } from './types';
 
 export function drawCard(player: IPlayer): { player: IPlayer; drawn: ICard | null } {
@@ -15,13 +11,8 @@ export function drawCard(player: IPlayer): { player: IPlayer; drawn: ICard | nul
   };
 }
 
-/**
- * Play a creature card from hand to the battlefield. Spends `card.cmc`
- * from `manaAvailable`, and marks the entering creature with summoning
- * sickness so it cannot attack the turn it comes down. Caller is
- * responsible for checking `canAfford` first if enforcement is desired
- * (the store does this; engine stays pure).
- */
+// Spends card.cmc from manaAvailable. Caller should check canAfford first;
+// the store does, the engine clamps defensively.
 export function playCardToField(player: IPlayer, cardId: string): IPlayer {
   const card = player.hand.find((c) => c.id === cardId);
   if (!card) return player;
@@ -42,20 +33,12 @@ export function canAttack(card: ICard): boolean {
   return !card.summoningSick && !card.attackedThisTurn;
 }
 
-/**
- * House rule: an attacker can only hit the defender's life total when
- * the defender has no creatures on the battlefield. Any creature acts
- * as an implicit blocker-of-last-resort.
- */
+// House rule: face damage only when the defender has no creatures.
 export function canAttackFace(defender: IPlayer): boolean {
   return defender.battlefield.length === 0;
 }
 
-/**
- * One-on-one MTG combat resolution. If no blocker, attacker hits the
- * player directly. Damage is simultaneous (both sides deal damage
- * before death).
- */
+// Simultaneous damage. With no blocker the attacker hits face.
 export function resolveCombat(attacker: ICard, blocker: ICard | null): ICombatResult {
   if (!blocker) {
     return {
@@ -83,12 +66,8 @@ export function removeFromField(player: IPlayer, cardId: string): IPlayer {
   return { ...player, battlefield: player.battlefield.filter((c) => c.id !== cardId) };
 }
 
-/**
- * Begin-of-turn housekeeping for the player whose turn is starting:
- * clear summoning sickness and attack-lock on all their creatures,
- * and ramp mana (manaMax += 1) then refill manaAvailable.
- * Any unspent mana from the previous turn is discarded.
- */
+// Clears sickness/attack-lock, ramps manaMax by 1, refills available.
+// Unspent mana does not carry over.
 export function beginTurn(player: IPlayer): IPlayer {
   const manaMax = player.manaMax + 1;
   return {

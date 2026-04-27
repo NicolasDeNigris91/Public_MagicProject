@@ -1,4 +1,4 @@
-// Companion to screenshots.mjs — captures the "attacker selected" frame.
+// Companion to screenshots.mjs - captures the "attacker selected" frame.
 // See screenshots.mjs for setup.
 import { chromium } from 'playwright';
 import { resolve } from 'node:path';
@@ -56,7 +56,7 @@ await endAndWait();
 console.log('T2 play+end');
 await playFirstHandCard();
 await endAndWait();
-// T3 — creatures from T1 should be sickness-free
+// T3 - creatures from T1 should be sickness-free
 console.log('T3 play (optional) + not ending');
 await playFirstHandCard();
 
@@ -86,7 +86,7 @@ await el.scrollIntoViewIfNeeded();
 await el.click();
 await page.waitForTimeout(800);
 
-console.log('shot — combat (attacker selected)');
+console.log('shot - combat (attacker selected)');
 await page.screenshot({ path: resolve(OUT, 'combat.png'), fullPage: false });
 
 await browser.close();

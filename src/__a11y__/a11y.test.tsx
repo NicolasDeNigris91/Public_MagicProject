@@ -2,7 +2,7 @@
  * Axe sweep over the key surfaces. Runs `vitest-axe` against each
  * component rendered in isolation. Catches regressions of concrete
  * WCAG failures (missing labels, bad contrast, duplicate ids, etc.)
- * — not a substitute for manual screen-reader review, but a CI gate
+ * - not a substitute for manual screen-reader review, but a CI gate
  * that fails on known-bad patterns.
  */
 import { describe, it, expect, vi } from 'vitest';
@@ -28,11 +28,11 @@ const sampleCard: ICard = {
   name: 'Test Goblin',
   power: 1, toughness: 1, cmc: 1,
   manaCost: '{R}',
-  typeLine: 'Creature — Goblin',
+  typeLine: 'Creature - Goblin',
   oracleText: 'Haste.',
   imageUrl: '',
   imageUrlSmall: '',
-  accessibilityDescription: 'Test Goblin. Creature — Goblin. Mana cost red. Power 1, toughness 1. Haste.',
+  accessibilityDescription: 'Test Goblin. Creature - Goblin. Mana cost red. Power 1, toughness 1. Haste.',
 };
 
 async function expectNoViolations(ui: React.ReactElement) {

@@ -1,15 +1,6 @@
 'use client';
-/**
- * Two ARIA live regions, mounted once at the root.
- *
- * `role="status"` implies `aria-live="polite"` and `role="alert"`
- * implies `aria-live="assertive"` per the ARIA spec — setting both can
- * cause double-announcements on older NVDA builds. We use the roles
- * and let the implicit live-region semantics carry the contract.
- *
- * The `key` bumps on each flush so identical repeated messages remount
- * the node and re-trigger the announcement.
- */
+// Two live regions mounted at the root. Roles imply aria-live, so we don't
+// also set aria-live (older NVDA double-announces when both are present).
 import { useAnnouncer } from '@/hooks/useAnnouncer';
 
 export function LiveRegion() {

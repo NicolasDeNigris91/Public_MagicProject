@@ -152,7 +152,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     if (!canAfford(s[who], card)) {
       if (who === 'player') {
         get().announce(
-          `Cannot play ${card.name} — costs ${card.cmc}, you have ${s[who].manaAvailable} mana.`,
+          `Cannot play ${card.name} - costs ${card.cmc}, you have ${s[who].manaAvailable} mana.`,
           'polite',
         );
       }

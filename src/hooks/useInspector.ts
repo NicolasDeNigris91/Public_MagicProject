@@ -54,7 +54,7 @@ export function useInspector() {
     });
   }, []);
 
-  // Close without focus restore — used when the origin button no
+  // Close without focus restore - used when the origin button no
   // longer exists (game over, tab unmount).
   const clear = useCallback(() => setInspected(null), []);
 

@@ -88,7 +88,7 @@ export function useAIOrchestrator() {
             targetDies: result.blockerDies,
             faceDamage: result.playerDamage,
           });
-          // Re-check stillLive AFTER the await — the store's turn,
+          // Re-check stillLive AFTER the await - the store's turn,
           // generation, or winner may have changed during the animation.
           if (!stillLive()) return;
         }

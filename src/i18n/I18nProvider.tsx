@@ -23,7 +23,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
       const saved = window.localStorage.getItem(STORAGE_KEY);
       if (saved === 'pt' || saved === 'en') setLangState(saved);
     } catch {
-      // localStorage unavailable (private mode, sandbox) — ignore.
+      // localStorage unavailable (private mode, sandbox) - ignore.
     }
   }, []);
 
@@ -45,7 +45,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
 
 /**
  * Falls back to the default-language dictionary when rendered outside
- * <I18nProvider> — useful in unit tests that don't want to wrap every
+ * <I18nProvider> - useful in unit tests that don't want to wrap every
  * render, and harmless in prod because the provider is mounted in the
  * root layout.
  */

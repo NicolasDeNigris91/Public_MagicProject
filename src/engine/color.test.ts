@@ -81,7 +81,7 @@ describe('buildDeckFromCandidates', () => {
   it('uses candidates over seeds when a candidate fits the slot', () => {
     const candidate = card({ id: 'cand', cmc: 1, power: 2, toughness: 2 });
     const deck = buildDeckFromCandidates([candidate], makeSeeds());
-    // slot 0: 1-drop power 1-2 toughness 1-2 — candidate fits.
+    // slot 0: 1-drop power 1-2 toughness 1-2 - candidate fits.
     expect(deck[0]!.id).toBe('cand');
     // later slots fall back to seeds.
     expect(deck[9]!.id).toBe('seed-9');

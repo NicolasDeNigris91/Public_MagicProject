@@ -9,13 +9,8 @@ export interface CombatLogProps {
   onClose: () => void;
 }
 
-/**
- * Right-side panel that mirrors the game's announcement stream as a
- * scrollable visual history. Each entry is styled per `kind`:
- * turn (neutral), draw (cyan), play (amber), combat (red-tinted),
- * mana (blue), game-over (gold). Live-region speech is unchanged —
- * this is a parallel visual surface for sighted users.
- */
+// Scrollable visual history of announcements. Styled per kind:
+// turn, draw, play, combat, mana, game-over.
 export function CombatLog({ open, onClose }: CombatLogProps) {
   const log = useGameStore((s) => s.gameLog);
   const { t } = useI18n();

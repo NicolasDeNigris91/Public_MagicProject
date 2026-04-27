@@ -1,6 +1,6 @@
 /**
  * Decorative back-of-card used to represent the opponent's hidden hand.
- * Pure SVG — no network, no defs (avoids duplicate-id collisions when
+ * Pure SVG - no network, no defs (avoids duplicate-id collisions when
  * the component is rendered five times side-by-side).
  */
 export interface CardBackProps {

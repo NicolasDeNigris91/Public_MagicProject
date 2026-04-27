@@ -33,7 +33,7 @@ await page
   .waitForFunction(() => !document.body.innerText.includes('Loading deck from Scryfall'), {
     timeout: 45_000,
   })
-  .catch(() => console.log('deck still loading — proceeding anyway'));
+  .catch(() => console.log('deck still loading - proceeding anyway'));
 
 await page.waitForTimeout(1500);
 
@@ -92,24 +92,24 @@ async function endTurn() {
   await page.waitForTimeout(1500);
 }
 
-console.log('step — play card T1');
+console.log('step - play card T1');
 await playCardFromHand();
-console.log('step — end T1, wait AI');
+console.log('step - end T1, wait AI');
 await endTurn();
-console.log('step — play card T2');
+console.log('step - play card T2');
 await playCardFromHand();
-console.log('step — end T2, wait AI');
+console.log('step - end T2, wait AI');
 await endTurn();
 
 await page.waitForTimeout(800);
 
-console.log('shot — hero (full page)');
+console.log('shot - hero (full page)');
 await page.screenshot({ path: resolve(OUT_DIR, 'hero.png'), fullPage: true });
 
-console.log('shot — board');
+console.log('shot - board');
 await page.screenshot({ path: resolve(OUT_DIR, 'board.png'), fullPage: false });
 
-// Inspector shot — click a hand card to open modal
+// Inspector shot - click a hand card to open modal
 {
   const firstHandCard = playerHand().first();
   if (await firstHandCard.count()) {
@@ -119,7 +119,7 @@ await page.screenshot({ path: resolve(OUT_DIR, 'board.png'), fullPage: false });
     try {
       await dialog.waitFor({ state: 'visible', timeout: 3000 });
       await page.waitForTimeout(500);
-      console.log('shot — inspector');
+      console.log('shot - inspector');
       await page.screenshot({ path: resolve(OUT_DIR, 'inspector.png'), fullPage: false });
     } catch {
       console.log('  inspector dialog did not open');
@@ -130,14 +130,14 @@ await page.screenshot({ path: resolve(OUT_DIR, 'board.png'), fullPage: false });
   }
 }
 
-// Combat shot — click a player creature on battlefield; this selects it as attacker
+// Combat shot - click a player creature on battlefield; this selects it as attacker
 {
   const myCreature = playerField().first();
   if (await myCreature.count()) {
     await myCreature.scrollIntoViewIfNeeded();
     await myCreature.click();
     await page.waitForTimeout(700);
-    console.log('shot — attacker selected');
+    console.log('shot - attacker selected');
     await page.screenshot({ path: resolve(OUT_DIR, 'combat.png'), fullPage: false });
   } else {
     console.log('  no player creatures on field for combat shot');
@@ -150,7 +150,7 @@ await page.screenshot({ path: resolve(OUT_DIR, 'board.png'), fullPage: false });
   if (await hand.count()) {
     await hand.first().scrollIntoViewIfNeeded();
     await page.waitForTimeout(400);
-    console.log('shot — hand');
+    console.log('shot - hand');
     await hand.first().screenshot({ path: resolve(OUT_DIR, 'hand.png') });
   }
 }

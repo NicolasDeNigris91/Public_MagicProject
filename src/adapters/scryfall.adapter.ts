@@ -1,6 +1,6 @@
 /**
  * Boundary between Scryfall's data shape and our engine's ICard.
- * The engine MUST NOT import anything from Scryfall — swapping card
+ * The engine MUST NOT import anything from Scryfall - swapping card
  * data source (Lorcana, Pokemon TCG, a homebrew JSON) means rewriting
  * only this file.
  */

@@ -320,8 +320,8 @@ const HEADER_STYLE: React.CSSProperties = {
 
 /**
  * `display: contents` promotes the section's children (h2, hand, battlefield)
- * to direct flex children of <main>. This lets BOTH battlefields — one from
- * each zone — share remaining vertical space via `flex: 1 1 0` on their own
+ * to direct flex children of <main>. This lets BOTH battlefields - one from
+ * each zone - share remaining vertical space via `flex: 1 1 0` on their own
  * rule, instead of each zone absorbing space as a unit. Otherwise the player
  * zone's fixed-height hand would starve the player battlefield of height
  * while the opponent battlefield stays empty and huge.

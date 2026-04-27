@@ -1,21 +1,4 @@
 'use client';
-/**
- * Accessible, animated card.
- *
- * A11y contract:
- * - Native <button>: focusable, activatable with Enter/Space for free.
- * - aria-label carries the FULL game-relevant description (name, type,
- *   mana cost, power/toughness, rules text). A screen-reader user gets
- *   the same information as a sighted user reading the card frame.
- * - The <img> is marked decorative (alt=""): all its semantic content
- *   is already in aria-label. Double-announcing the name would be noise.
- * - When the image fails, <CardFallback> paints a text-only card — the
- *   sighted experience degrades gracefully, the AT experience is
- *   unchanged (still driven by aria-label).
- * - prefers-reduced-motion: Framer Motion's useReducedMotion hook makes
- *   the flip snap instead of rotate. No information is conveyed only
- *   through motion.
- */
 import { motion, useReducedMotion } from 'framer-motion';
 import { useState, type KeyboardEvent } from 'react';
 import type { ICard } from '@/engine/types';
@@ -69,10 +52,8 @@ export function Card({ card, selected = false, onActivate, onInspect, animateEnt
       ? `combat-shake ${IMPACT_MS}ms ease-in-out, combat-flash ${IMPACT_MS}ms ease-in-out`
       : undefined;
 
-  // Attack-availability state is part of the game-relevant description
-  // a screen-reader user needs, so we append it at render time rather
-  // than polluting the adapter. Summoning sickness takes precedence
-  // since a just-played creature hasn't had the chance to attack.
+  // Append attack-availability at render time rather than baking it into
+  // the adapter. Summoning sickness takes precedence over already-attacked.
   const exhausted = card.attackedThisTurn && !card.summoningSick;
   const ariaLabel = card.summoningSick
     ? `${card.accessibilityDescription} Summoning sickness: cannot attack this turn.`

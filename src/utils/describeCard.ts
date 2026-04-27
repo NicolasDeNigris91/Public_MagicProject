@@ -1,17 +1,6 @@
-/**
- * Generates the canonical natural-language description of a card.
- *
- * This is THE core utility for making a visual game accessible.
- * A sighted player sees art + name + mana cost + P/T in the card frame.
- * A screen-reader user hears exactly the same information, in prose,
- * via aria-label. No feature should be exposed visually without also
- * being represented here.
- *
- * Example output:
- *   "Shivan Dragon. Creature — Dragon. Mana cost 4 generic plus 2 red.
- *    Power 5, toughness 5. Flying. Red mana: Shivan Dragon gets +1/+0
- *    until end of turn."
- */
+// Builds the prose description used as the canonical aria-label.
+// Example: "Shivan Dragon. Creature - Dragon. Mana cost 4 generic plus
+// 2 red. Power 5, toughness 5. Flying. {R}: gets +1/+0 until end of turn."
 import type { ICard } from '@/engine/types';
 
 export interface RawCardFields {

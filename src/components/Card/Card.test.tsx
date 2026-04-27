@@ -9,21 +9,21 @@ const sample: ICard = {
   name: 'Test Goblin',
   power: 1, toughness: 1, cmc: 1,
   manaCost: '{R}',
-  typeLine: 'Creature — Goblin',
+  typeLine: 'Creature - Goblin',
   oracleText: 'Haste.',
   imageUrl: '',
   imageUrlSmall: '',
-  accessibilityDescription: 'Test Goblin. Creature — Goblin. Mana cost red. Power 1, toughness 1. Haste.',
+  accessibilityDescription: 'Test Goblin. Creature - Goblin. Mana cost red. Power 1, toughness 1. Haste.',
 };
 
-describe('Card — onInspect', () => {
+describe('Card - onInspect', () => {
   it('pressing "i" with focus invokes onInspect (not onActivate)', async () => {
     const onActivate = vi.fn();
     const onInspect = vi.fn();
     render(<Card card={sample} onActivate={onActivate} onInspect={onInspect} />);
     // Anchor: the outer card button's accessible name starts with "Test Goblin."
     // (the card.accessibilityDescription); the inspect span's aria-label is
-    // "Inspect Test Goblin" — different leading character.
+    // "Inspect Test Goblin" - different leading character.
     const btn = screen.getByRole('button', { name: /^Test Goblin\./ });
     btn.focus();
     await userEvent.keyboard('i');

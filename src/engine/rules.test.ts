@@ -59,13 +59,13 @@ describe('playCardToField', () => {
     expect(playCardToField(p, 'a').manaAvailable).toBe(0);
   });
 
-  it('clamps manaAvailable at 0 when cmc exceeds mana (defensive; callers should gate with canAfford)', () => {
+  it('clamps manaAvailable at 0 when cmc exceeds mana', () => {
     const c = { ...makeCard('a'), cmc: 5 };
     const p = makePlayer({ hand: [c], manaAvailable: 1 });
     expect(playCardToField(p, 'a').manaAvailable).toBe(0);
   });
 
-  it('allows chaining multiple plays in the same turn (no per-turn cap)', () => {
+  it('allows multiple plays per turn', () => {
     const a = { ...makeCard('a'), cmc: 1 };
     const b = { ...makeCard('b'), cmc: 1 };
     let p = makePlayer({ hand: [a, b], manaAvailable: 2, manaMax: 2 });
@@ -77,12 +77,12 @@ describe('playCardToField', () => {
 });
 
 describe('canAttack', () => {
-  it('blocks attacks for summoning-sick creatures', () => {
+  it('blocks summoning-sick creatures', () => {
     expect(canAttack({ ...makeCard('a'), summoningSick: true })).toBe(false);
     expect(canAttack(makeCard('a'))).toBe(true);
   });
 
-  it('blocks attacks for creatures that already attacked this turn', () => {
+  it('blocks creatures that already attacked', () => {
     expect(canAttack({ ...makeCard('a'), attackedThisTurn: true })).toBe(false);
   });
 });
@@ -117,7 +117,7 @@ describe('canAttackFace', () => {
 });
 
 describe('beginTurn', () => {
-  it('clears summoning sickness on the player\'s creatures', () => {
+  it('clears summoning sickness', () => {
     const p = makePlayer({
       battlefield: [{ ...makeCard('a'), summoningSick: true }, makeCard('b')],
     });
@@ -125,7 +125,7 @@ describe('beginTurn', () => {
     expect(after.battlefield.every((c) => !c.summoningSick)).toBe(true);
   });
 
-  it('clears attackedThisTurn so creatures can attack again', () => {
+  it('clears attackedThisTurn', () => {
     const p = makePlayer({
       battlefield: [{ ...makeCard('a'), attackedThisTurn: true }],
     });
@@ -133,21 +133,20 @@ describe('beginTurn', () => {
     expect(after.battlefield.every((c) => !c.attackedThisTurn)).toBe(true);
   });
 
-  it('ramps manaMax by 1 and refills manaAvailable', () => {
+  it('ramps manaMax and refills available', () => {
     const p = makePlayer({ manaMax: 2, manaAvailable: 0 });
     const after = beginTurn(p);
     expect(after.manaMax).toBe(3);
     expect(after.manaAvailable).toBe(3);
   });
 
-  it('discards leftover manaAvailable from previous turn', () => {
-    // Player ended last turn with 1 mana unspent; new turn refills, no carry.
+  it('resets unspent mana on new turn', () => {
     const p = makePlayer({ manaMax: 2, manaAvailable: 1 });
     const after = beginTurn(p);
     expect(after.manaAvailable).toBe(after.manaMax);
   });
 
-  it('first beginTurn from manaMax 0 yields 1 / 1', () => {
+  it('first turn yields 1 / 1', () => {
     const p = makePlayer({ manaMax: 0, manaAvailable: 0 });
     const after = beginTurn(p);
     expect(after.manaMax).toBe(1);
@@ -168,7 +167,7 @@ describe('resolveCombat', () => {
     expect(r.blockerDies).toBe(true);
   });
 
-  it('large attacker vs small blocker: only blocker dies', () => {
+  it('large attacker vs small blocker', () => {
     const r = resolveCombat(makeCard('a', 5, 5), makeCard('b', 1, 1));
     expect(r.blockerDies).toBe(true);
     expect(r.attackerDies).toBe(false);

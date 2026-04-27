@@ -5,7 +5,10 @@ node_modules
 .env*
 !.env.example
 
-# Local tooling workspaces
+# Local editor / tooling
 .claude/
 .idea/
 .vscode/
+*.local.md
+*.local/
+

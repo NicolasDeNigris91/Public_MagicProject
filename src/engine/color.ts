@@ -45,7 +45,7 @@ export interface SkeletonSlot {
 }
 
 /** Twenty slots per deck. Both sides fill the same skeleton, so
- *  power budget and curve are identical — only the color pie
+ *  power budget and curve are identical - only the color pie
  *  differs. The curve is the same 10-slot template repeated twice:
  *  a 20-card deck minus the 5-card opening hand leaves a 15-card
  *  library, enough runway that decking-out doesn't end the match

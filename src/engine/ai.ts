@@ -1,15 +1,5 @@
-/**
- * Minimal opponent AI. Intentionally simple and deterministic-ish:
- *  - On main phase: play the highest-power creature the player can
- *    afford given their current `manaAvailable`. Pass if nothing fits.
- *  - On combat: attack with each untapped creature into the weakest
- *    possible blocker. Direct (face) attacks are only allowed when the
- *    defender has no creatures at all — matches the house rule enforced
- *    by the engine and UI.
- *
- * Kept in `engine/` because it depends only on ICard shapes — no React,
- * no store. The store orchestrates; this file just picks moves.
- */
+// Greedy opponent: play the biggest affordable creature; attack into the
+// weakest legal blocker, or face if the board is empty.
 import type { ICard, IPlayer } from './types';
 
 export function pickCardToPlay(hand: ICard[], manaAvailable: number): ICard | null {
