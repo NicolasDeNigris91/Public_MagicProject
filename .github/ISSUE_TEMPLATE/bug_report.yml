@@ -1,0 +1,55 @@
+name: Bug report
+description: Report unexpected gameplay behavior, an accessibility regression, or a UI bug.
+title: "[bug] "
+labels: ["bug", "triage"]
+body:
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - engine (rules / combat / AI)
+        - accessibility (screen reader, keyboard, focus, live regions)
+        - UI / animation
+        - Scryfall integration / offline fallback
+        - other
+    validations:
+      required: true
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Reproduction steps
+      description: |
+        Minimal, self-contained steps. Include color picked, mana state,
+        what was on the battlefield. Game log helps.
+    validations:
+      required: true
+
+  - type: input
+    id: env
+    attributes:
+      label: Browser / OS / AT
+      placeholder: "Firefox 132 + NVDA on Windows 11; Safari + VoiceOver on macOS 15; ..."
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: I searched existing issues and this is not a duplicate.
+          required: true
