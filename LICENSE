@@ -19,3 +19,14 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+---
+
+Note: This MIT License applies to the source code of this project only.
+
+*Magic: The Gathering*, card names, art, mana symbols, and related trademarks
+are property of **Wizards of the Coast LLC**, a subsidiary of Hasbro, Inc.
+This project is unofficial Fan Content permitted under the
+[Wizards of the Coast Fan Content Policy](https://company.wizards.com/en/legal/fancontentpolicy)
+and is not approved or endorsed by Wizards. Card data and images are sourced
+from the public [Scryfall API](https://scryfall.com).
