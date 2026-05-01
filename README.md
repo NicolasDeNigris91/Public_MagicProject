@@ -1,5 +1,9 @@
 # MTG TCG - Accessible Combat Demo
 
+[![CI](https://github.com/NicolasDeNigris91/Public_MagicProject/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/NicolasDeNigris91/Public_MagicProject/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/NicolasDeNigris91/Public_MagicProject/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/NicolasDeNigris91/Public_MagicProject/actions/workflows/codeql.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+
 A keyboard-first, screen-reader-first TCG demo built on the [Scryfall API](https://scryfall.com). Real *Magic: The Gathering* cards plug into a stripped-down combat engine, and the whole UI is wired so the same information reaches you whether you're reading the card frame or hearing it through ARIA live regions. Built as a portfolio piece because most "accessible" web games stop at tab order.
 
 ![Tabuleiro com uma criatura selecionada como atacante](docs/screenshots/combat.png)
