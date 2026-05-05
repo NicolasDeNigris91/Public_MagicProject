@@ -1,5 +1,6 @@
 'use client';
 import { useI18n } from '@/i18n/I18nProvider';
+import styles from './Battlefield.module.css';
 import { Card } from './Card/Card';
 import type { ICard } from '@/engine/types';
 
@@ -13,15 +14,6 @@ export interface BattlefieldProps {
   selectedId?: string | null;
 }
 
-const PLAYMAT: Record<NonNullable<BattlefieldProps['variant']>, string> = {
-  player:
-    'radial-gradient(ellipse at 50% 40%, rgba(255, 179, 66, 0.06), transparent 65%), ' +
-    'linear-gradient(180deg, rgba(255,255,255,0.015), rgba(0,0,0,0.12))',
-  opponent:
-    'radial-gradient(ellipse at 50% 60%, rgba(77, 208, 225, 0.06), transparent 65%), ' +
-    'linear-gradient(180deg, rgba(0,0,0,0.12), rgba(255,255,255,0.015))',
-};
-
 export function Battlefield({
   label,
   cards,
@@ -31,37 +23,15 @@ export function Battlefield({
   selectedId,
 }: BattlefieldProps) {
   const { t } = useI18n();
+  const empty = cards.length === 0;
   return (
     <section
       aria-label={`${label}. ${cards.length} creature${cards.length === 1 ? '' : 's'} on the battlefield.`}
-      style={{
-        flex: '1 1 0',
-        minHeight: 0,
-        border: '1px solid rgba(120, 144, 156, 0.18)',
-        borderRadius: 12,
-        padding: 8,
-        background: PLAYMAT[variant],
-        boxShadow: 'inset 0 0 32px rgba(0, 0, 0, 0.35)',
-        display: 'flex',
-        alignItems: 'center',
-        overflowX: 'auto',
-        overflowY: 'hidden',
-      }}
+      className={`${styles.zone} ${styles[variant]}`}
     >
-      <ul
-        style={{
-          display: 'flex',
-          gap: 10,
-          listStyle: 'none',
-          margin: 0,
-          padding: 0,
-          flexWrap: 'nowrap',
-          justifyContent: cards.length === 0 ? 'center' : 'flex-start',
-          width: '100%',
-        }}
-      >
-        {cards.length === 0 && (
-          <li style={EMPTY_STYLE}>
+      <ul className={`${styles.list}${empty ? ` ${styles.listEmpty}` : ''}`}>
+        {empty && (
+          <li className={styles.empty}>
             <svg
               width="28"
               height="28"
@@ -79,7 +49,7 @@ export function Battlefield({
           </li>
         )}
         {cards.map((card) => (
-          <li key={card.id} style={{ flexShrink: 0 }}>
+          <li key={card.id} className={styles.item}>
             <Card
               card={card}
               animateEntry
@@ -93,15 +63,3 @@ export function Battlefield({
     </section>
   );
 }
-
-const EMPTY_STYLE: React.CSSProperties = {
-  color: '#78909c',
-  fontStyle: 'italic',
-  fontSize: 13,
-  textAlign: 'center',
-  width: '100%',
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  gap: 6,
-};

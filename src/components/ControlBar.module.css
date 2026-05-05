@@ -1,0 +1,73 @@
+.bar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin: 4px 0;
+  flex-shrink: 0;
+}
+
+.thinking {
+  margin: 0;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  color: #90a4ae;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Pulse-dot keyframe lives in globals.css. Duration must track
+ * OPPONENT_PULSE_MS in src/constants/timings.ts. */
+.thinkingDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #4dd0e1;
+  animation: pulse-dot 1200ms ease-in-out infinite;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-family: inherit;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  transition:
+    background 120ms,
+    border-color 120ms,
+    color 120ms,
+    transform 120ms;
+}
+
+.attack {
+  background: rgba(239, 83, 80, 0.12);
+  border: 1px solid rgba(239, 83, 80, 0.55);
+  color: #ffcdd2;
+}
+
+.end {
+  background: transparent;
+  border: 1px solid #455a64;
+  color: #b0bec5;
+  font-weight: 500;
+}
+
+.blockedNote {
+  margin: 0;
+  font-size: 12px;
+  color: #ffb74d;
+  text-align: center;
+}

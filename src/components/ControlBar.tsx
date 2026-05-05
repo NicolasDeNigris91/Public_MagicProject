@@ -1,7 +1,8 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
-import { FACE_BLOCKED_NOTE_MS, OPPONENT_PULSE_MS } from '@/constants/timings';
+import { FACE_BLOCKED_NOTE_MS } from '@/constants/timings';
 import { useI18n } from '@/i18n/I18nProvider';
+import styles from './ControlBar.module.css';
 import type { GameResult, PlayerId } from '@/engine/types';
 
 export interface ControlBarProps {
@@ -58,50 +59,20 @@ export function ControlBar({
   const endDisabled = commonDisabled || turn !== 'player';
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: 4,
-        margin: '4px 0',
-        flexShrink: 0,
-      }}
-    >
+    <div className={styles.bar}>
       {turn === 'opponent' && !winner && (
-        <p
-          aria-hidden="true"
-          style={{
-            margin: 0,
-            fontSize: 12,
-            letterSpacing: 0.5,
-            color: '#90a4ae',
-            textTransform: 'uppercase',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 8,
-          }}
-        >
-          <span
-            style={{
-              width: 8,
-              height: 8,
-              borderRadius: '50%',
-              background: '#4dd0e1',
-              animation: `pulse-dot ${OPPONENT_PULSE_MS}ms ease-in-out infinite`,
-            }}
-          />
+        <p aria-hidden="true" className={styles.thinking}>
+          <span className={styles.thinkingDot} />
           {t('action.opponentThinking')}
         </p>
       )}
-      <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
+      <div className={styles.actions}>
         <button
           onClick={tryAttackDirectly}
           disabled={attackDisabled}
           aria-disabled={attackDisabled}
           aria-describedby={showFaceBlockedNote ? 'attack-direct-blocked' : undefined}
-          className="btn-attack"
-          style={ATTACK_STYLE}
+          className={`btn-attack ${styles.button} ${styles.attack}`}
         >
           <svg
             width="16"
@@ -126,8 +97,7 @@ export function ControlBar({
           disabled={endDisabled}
           aria-disabled={endDisabled}
           aria-label={t('action.endTurn')}
-          className="btn-end"
-          style={END_STYLE}
+          className={`btn-end ${styles.button} ${styles.end}`}
         >
           <svg
             width="16"
@@ -148,41 +118,10 @@ export function ControlBar({
         </button>
       </div>
       {showFaceBlockedNote && (
-        <p
-          id="attack-direct-blocked"
-          role="alert"
-          style={{ margin: 0, fontSize: 12, color: '#ffb74d', textAlign: 'center' }}
-        >
+        <p id="attack-direct-blocked" role="alert" className={styles.blockedNote}>
           {t('action.attackBlocked')}
         </p>
       )}
     </div>
   );
 }
-
-const BUTTON_BASE: React.CSSProperties = {
-  display: 'inline-flex',
-  alignItems: 'center',
-  gap: 8,
-  padding: '9px 16px',
-  borderRadius: 8,
-  cursor: 'pointer',
-  fontSize: 14,
-  fontFamily: 'inherit',
-  fontWeight: 600,
-  letterSpacing: 0.2,
-  transition: 'background 120ms, border-color 120ms, color 120ms, transform 120ms',
-};
-const ATTACK_STYLE: React.CSSProperties = {
-  ...BUTTON_BASE,
-  background: 'rgba(239, 83, 80, 0.12)',
-  border: '1px solid rgba(239, 83, 80, 0.55)',
-  color: '#ffcdd2',
-};
-const END_STYLE: React.CSSProperties = {
-  ...BUTTON_BASE,
-  background: 'transparent',
-  border: '1px solid #455a64',
-  color: '#b0bec5',
-  fontWeight: 500,
-};
