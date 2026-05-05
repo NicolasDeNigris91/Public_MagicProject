@@ -190,9 +190,10 @@ export default function GamePage() {
   return (
     <>
       <main id="main" ref={mainRef} style={MAIN_STYLE}>
-        <header style={HEADER_STYLE}>
+        <header data-mtg-header style={HEADER_STYLE}>
           <h1 style={{ margin: 0, fontSize: 'clamp(14px, 3.5vw, 18px)' }}>{t('app.title')}</h1>
           <div
+            data-mtg-turn-cluster
             style={{
               fontSize: 'clamp(11px, 2.6vw, 13px)',
               color: '#90a4ae',
