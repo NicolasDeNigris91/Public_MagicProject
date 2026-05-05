@@ -2,11 +2,7 @@
 import { useEffect, useRef, useState } from 'react';
 
 const DURATION_MS = 400;
-
-function prefersReducedMotion(): boolean {
-  if (typeof window === 'undefined') return false;
-  return window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches ?? false;
-}
+const RM_QUERY = '(prefers-reduced-motion: reduce)';
 
 interface Props extends React.HTMLAttributes<HTMLElement> {
   value: number;
@@ -20,10 +16,24 @@ interface Props extends React.HTMLAttributes<HTMLElement> {
 export function LifeDisplay({ value, ...rest }: Props) {
   const [displayed, setDisplayed] = useState(value);
   const prev = useRef(value);
+  const [reduced, setReduced] = useState(false);
+
+  // Subscribe to OS-level motion-preference flips so toggling the
+  // setting mid-game starts snapping immediately. Reading the flag
+  // only on each value change would keep animating until the next
+  // life delta arrived.
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) return;
+    const mql = window.matchMedia(RM_QUERY);
+    const apply = () => setReduced(mql.matches);
+    apply();
+    mql.addEventListener('change', apply);
+    return () => mql.removeEventListener('change', apply);
+  }, []);
 
   useEffect(() => {
     if (prev.current === value) return;
-    if (prefersReducedMotion()) {
+    if (reduced) {
       setDisplayed(value);
       prev.current = value;
       return;
@@ -41,7 +51,7 @@ export function LifeDisplay({ value, ...rest }: Props) {
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [value]);
+  }, [value, reduced]);
 
   return (
     <strong role="status" aria-live="off" {...rest}>
