@@ -53,6 +53,8 @@ src/
 
 `engine/` doesn't import from anywhere else in the tree, so swapping Scryfall for Lorcana, Pokemon TCG or a homebrew JSON only means rewriting `adapters/`.
 
+For the long-form layered diagram, hard invariants, and design decisions, see [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md). Architectural choices that are intentionally permanent (e.g. *no undo*) are recorded as ADRs under [`docs/adr/`](./docs/adr/).
+
 ## Accessibility
 
 The card's prose description is treated as data, not presentation. The adapter precomputes `accessibilityDescription` on every `ICard` (a natural sentence with name, type, mana cost, power/toughness and rules text), and that string is the single source of truth for every screen-reader-facing surface.
