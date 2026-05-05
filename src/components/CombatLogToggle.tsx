@@ -14,6 +14,7 @@ export function CombatLogToggle({ open, onToggle }: CombatLogToggleProps) {
       onClick={onToggle}
       aria-expanded={open}
       aria-controls="match-log"
+      aria-keyshortcuts="L"
       aria-label={open ? t('log.close') : t('log.open')}
       title={`${t('log.title')} (${t('log.shortcut')})`}
       style={BTN_STYLE}

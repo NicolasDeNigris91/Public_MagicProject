@@ -86,6 +86,7 @@ export function Card({
         className={`${styles.card}${card.summoningSick || exhausted ? ` ${styles.sick}` : ''}`}
         aria-label={ariaLabel}
         aria-pressed={selected}
+        {...(onInspect ? { 'aria-keyshortcuts': 'I' } : {})}
         {...(posInSet !== undefined ? { 'aria-posinset': posInSet } : {})}
         {...(setSize !== undefined ? { 'aria-setsize': setSize } : {})}
         onClick={() => onActivate?.(card)}
