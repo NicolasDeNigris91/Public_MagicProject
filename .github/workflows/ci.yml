@@ -69,3 +69,28 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
+
+  # End-to-end + browser-axe sweep against the real production build.
+  # Catches regressions JSDOM-axe can't see (focus order in the live ARIA
+  # tree, computed contrast, route/CSP/hydration glitches). Runs after
+  # unit/build because it consumes the same artifact.
+  e2e:
+    runs-on: ubuntu-latest
+    needs: [typecheck, lint, test, build]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 14
