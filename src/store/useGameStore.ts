@@ -349,6 +349,6 @@ export const useGameStore = create<GameStore>()(
         get().drawCard(next);
       },
     }),
-    { name: 'game', enabled: process.env.NODE_ENV !== 'production' },
+    { name: 'game', enabled: process.env.NODE_ENV === 'development' },
   ),
 );

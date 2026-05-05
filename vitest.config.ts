@@ -35,6 +35,11 @@ export default defineConfig({
         'src/utils/**': { lines: 90, branches: 80, functions: 95, statements: 90 },
         'src/adapters/**': { lines: 85, branches: 80, functions: 90, statements: 85 },
         'src/services/fallback-deck.ts': { lines: 95, branches: 95, functions: 95, statements: 95 },
+        // Hooks are now fully covered. Floor sits a bit below current
+        // (85/82/100/85) so a passing test stays passing across small
+        // refactors, but a real regression on a hook drops below floor
+        // and trips CI.
+        'src/hooks/**': { lines: 80, branches: 78, functions: 95, statements: 80 },
       },
     },
   },
