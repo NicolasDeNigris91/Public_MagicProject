@@ -39,7 +39,11 @@ describe('ColorSelection', () => {
     const whiteBtn = screen.getByRole('button', { name: /Branco/i });
     await waitFor(() => {
       const img = whiteBtn.querySelector('img');
-      expect(img?.getAttribute('src')).toBe('https://cards.scryfall.io/art_crop/akroma.jpg');
+      // next/image rewrites the src into /_next/image?url=... — check the
+      // encoded source URL is in there rather than the raw scryfall URL.
+      expect(img?.getAttribute('src')).toContain(
+        encodeURIComponent('https://cards.scryfall.io/art_crop/akroma.jpg'),
+      );
     });
   });
 

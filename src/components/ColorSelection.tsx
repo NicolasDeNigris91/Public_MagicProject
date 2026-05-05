@@ -1,4 +1,5 @@
 'use client';
+import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';
 import { COLORS, MANA_SYMBOL_URL, type Color } from '@/engine/color';
 import { useI18n } from '@/i18n/I18nProvider';
@@ -61,8 +62,15 @@ export function ColorSelection({ onSelect }: Props) {
                 style={BUTTON_STYLE}
               >
                 {artUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={artUrl} alt="" style={ART_STYLE} loading="lazy" />
+                  <Image
+                    src={artUrl}
+                    alt=""
+                    width={160}
+                    height={117}
+                    sizes="160px"
+                    style={ART_STYLE}
+                    loading="lazy"
+                  />
                 ) : (
                   <span aria-hidden="true" style={{ ...SWATCH_STYLE, background: SWATCH[c] }} />
                 )}
