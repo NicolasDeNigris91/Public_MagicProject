@@ -1,7 +1,6 @@
 import type { Color } from './color';
 
 export type PlayerId = 'player' | 'opponent';
-export type Phase = 'draw' | 'main' | 'combat' | 'end';
 export type AnnouncePriority = 'polite' | 'assertive';
 
 // Branded ids. The brand is a unique-symbol property so two distinct
@@ -84,7 +83,6 @@ export interface IGameState {
   player: IPlayer;
   opponent: IPlayer;
   turn: PlayerId;
-  phase: Phase;
   gameLog: LogEntry[];
   winner: GameResult;
   turnNumber: number;
