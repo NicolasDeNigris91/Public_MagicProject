@@ -4,32 +4,73 @@
  * data source (Lorcana, Pokemon TCG, a homebrew JSON) means rewriting
  * only this file.
  */
+import { z } from 'zod';
 import type { Color } from '@/engine/color';
 import type { ICard } from '@/engine/types';
 import { buildA11yDescription } from '@/utils/describeCard';
 
-export interface ScryfallImageUris {
-  small?: string;
-  normal?: string;
-  large?: string;
-  png?: string;
-  art_crop?: string;
-}
+// Zod schemas at the network boundary. Anything matching the schema
+// can be safely fed to `adaptScryfallCard`; anything that doesn't is
+// dropped at parse time. Optional fields stay optional - we tolerate
+// cards with missing image_uris, oracle_text, etc.
+export const ScryfallImageUrisSchema = z
+  .object({
+    small: z.string().optional(),
+    normal: z.string().optional(),
+    large: z.string().optional(),
+    png: z.string().optional(),
+    art_crop: z.string().optional(),
+  })
+  .passthrough();
 
-export interface ScryfallCard {
-  id: string;
-  name: string;
-  mana_cost?: string;
-  type_line: string;
-  oracle_text?: string;
-  power?: string;
-  toughness?: string;
-  image_uris?: ScryfallImageUris;
-  card_faces?: Array<{ image_uris?: ScryfallImageUris; name?: string }>;
-  /** Letter-coded colors: 'W' 'U' 'B' 'R' 'G'. Empty array = colorless. */
-  colors?: string[];
-  /** Converted mana cost. */
-  cmc?: number;
+export const ScryfallCardSchema = z
+  .object({
+    id: z.string(),
+    name: z.string(),
+    mana_cost: z.string().optional(),
+    type_line: z.string(),
+    oracle_text: z.string().optional(),
+    power: z.string().optional(),
+    toughness: z.string().optional(),
+    image_uris: ScryfallImageUrisSchema.optional(),
+    card_faces: z
+      .array(
+        z
+          .object({
+            image_uris: ScryfallImageUrisSchema.optional(),
+            name: z.string().optional(),
+          })
+          .passthrough(),
+      )
+      .optional(),
+    /** Letter-coded colors: 'W' 'U' 'B' 'R' 'G'. Empty array = colorless. */
+    colors: z.array(z.string()).optional(),
+    /** Converted mana cost. */
+    cmc: z.number().optional(),
+  })
+  .passthrough();
+
+export const ScryfallSearchResponseSchema = z
+  .object({
+    data: z.array(z.unknown()).default([]),
+  })
+  .passthrough();
+
+export type ScryfallImageUris = z.infer<typeof ScryfallImageUrisSchema>;
+export type ScryfallCard = z.infer<typeof ScryfallCardSchema>;
+
+/**
+ * Validate each card individually, drop invalid ones. We don't reject
+ * the whole batch on one bad apple because Scryfall's corpus is large
+ * and one schema drift shouldn't kill the demo.
+ */
+export function parseScryfallCards(raw: unknown[]): ScryfallCard[] {
+  const out: ScryfallCard[] = [];
+  for (const item of raw) {
+    const parsed = ScryfallCardSchema.safeParse(item);
+    if (parsed.success) out.push(parsed.data);
+  }
+  return out;
 }
 
 function parseStat(v: string | undefined): number {

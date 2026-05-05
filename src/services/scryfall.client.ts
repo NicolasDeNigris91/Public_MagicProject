@@ -2,7 +2,12 @@ import axios, { AxiosError } from 'axios';
 import type { ICard } from '@/engine/types';
 import type { Color } from '@/engine/color';
 import { COLORS, buildDeckFromCandidates } from '@/engine/color';
-import { adaptScryfallCard, type ScryfallCard } from '@/adapters/scryfall.adapter';
+import {
+  adaptScryfallCard,
+  parseScryfallCards,
+  ScryfallCardSchema,
+  ScryfallSearchResponseSchema,
+} from '@/adapters/scryfall.adapter';
 import { fallbackDecks } from './fallback-deck';
 
 const http = axios.create({
@@ -32,14 +37,22 @@ export interface FetchResult {
 export async function fetchDeckForColor(color: Color): Promise<FetchResult> {
   const seeds = fallbackDecks[color];
   try {
-    const { data } = await http.get<{ data: ScryfallCard[] }>('/cards/search', {
+    const { data } = await http.get<unknown>('/cards/search', {
       params: {
         q: `c=${color.toLowerCase()} t:creature cmc<=6 -t:token`,
         order: 'random',
         unique: 'cards',
       },
     });
-    const candidates = (data.data ?? [])
+    // Validate envelope shape, then validate each card individually.
+    // A schema drift on one card drops that card; the whole response
+    // only fails if `data.data` itself isn't an array.
+    const envelope = ScryfallSearchResponseSchema.safeParse(data);
+    if (!envelope.success) {
+      return { cards: seeds, source: 'fallback', error: 'Malformed envelope' };
+    }
+    const validCards = parseScryfallCards(envelope.data.data);
+    const candidates = validCards
       .map(adaptScryfallCard)
       .filter((c) => c.color === color && c.power > 0 && c.toughness > 0 && c.imageUrl !== '');
     if (candidates.length === 0) {
@@ -63,10 +76,12 @@ export const COLOR_ART_CARDS: Record<Color, string> = {
 
 async function fetchArtCrop(exactName: string): Promise<string | null> {
   try {
-    const { data } = await http.get<ScryfallCard>('/cards/named', {
+    const { data } = await http.get<unknown>('/cards/named', {
       params: { exact: exactName },
     });
-    const uris = data.image_uris ?? data.card_faces?.[0]?.image_uris;
+    const parsed = ScryfallCardSchema.safeParse(data);
+    if (!parsed.success) return null;
+    const uris = parsed.data.image_uris ?? parsed.data.card_faces?.[0]?.image_uris;
     return uris?.art_crop ?? null;
   } catch {
     return null;
