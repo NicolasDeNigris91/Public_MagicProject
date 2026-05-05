@@ -1,5 +1,6 @@
 'use client';
 import { useI18n } from '@/i18n/I18nProvider';
+import styles from './CombatLogToggle.module.css';
 
 export interface CombatLogToggleProps {
   open: boolean;
@@ -17,7 +18,7 @@ export function CombatLogToggle({ open, onToggle }: CombatLogToggleProps) {
       aria-keyshortcuts="L"
       aria-label={open ? t('log.close') : t('log.open')}
       title={`${t('log.title')} (${t('log.shortcut')})`}
-      style={BTN_STYLE}
+      className={styles.btn}
     >
       <svg
         width="14"
@@ -35,16 +36,3 @@ export function CombatLogToggle({ open, onToggle }: CombatLogToggleProps) {
     </button>
   );
 }
-
-const BTN_STYLE: React.CSSProperties = {
-  padding: '4px 8px',
-  background: 'transparent',
-  border: '1px solid #455a64',
-  borderRadius: 999,
-  color: '#90a4ae',
-  cursor: 'pointer',
-  fontFamily: 'inherit',
-  display: 'inline-flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-};

@@ -1,5 +1,6 @@
 'use client';
 import { useI18n } from '@/i18n/I18nProvider';
+import styles from './Footer.module.css';
 
 export interface FooterProps {
   /** Free-form provenance label for the deck source (e.g. "scryfall"),
@@ -11,21 +12,9 @@ export interface FooterProps {
 export function Footer({ source }: FooterProps = {}) {
   const { t, lang } = useI18n();
   return (
-    <footer
-      lang={lang === 'pt' ? 'pt-BR' : 'en'}
-      style={{
-        marginTop: 16,
-        padding: '16px',
-        borderTop: '1px solid #263238',
-        color: '#b0bec5',
-        fontSize: 13,
-        lineHeight: 1.5,
-        maxWidth: 1100,
-        marginInline: 'auto',
-      }}
-    >
+    <footer lang={lang === 'pt' ? 'pt-BR' : 'en'} className={styles.footer}>
       {source && (
-        <p style={{ margin: '0 0 12px', fontSize: 12, color: '#78909c' }}>
+        <p className={styles.source}>
           {t('footer.deckSource')}: <strong>{source}</strong>
         </p>
       )}
@@ -35,7 +24,7 @@ export function Footer({ source }: FooterProps = {}) {
           href="https://company.wizards.com/en/legal/fancontentpolicy"
           rel="noreferrer noopener"
           target="_blank"
-          style={{ color: '#4dd0e1' }}
+          className={styles.link}
         >
           {t('footer.fanPolicy')}
         </a>

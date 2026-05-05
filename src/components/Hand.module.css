@@ -1,0 +1,24 @@
+.section {
+  flex-shrink: 0;
+}
+
+.list {
+  display: flex;
+  gap: 10px;
+  list-style: none;
+  margin: 0;
+  padding: 6px 0;
+  justify-content: flex-start;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.compact {
+  gap: 4px;
+  padding: 2px 0;
+}
+
+.item {
+  flex-shrink: 0;
+}

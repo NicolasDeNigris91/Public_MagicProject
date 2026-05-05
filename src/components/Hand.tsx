@@ -2,6 +2,7 @@
 import { useRef, type KeyboardEvent } from 'react';
 import { Card } from './Card/Card';
 import { CardBack } from './CardBack';
+import styles from './Hand.module.css';
 import type { ICard } from '@/engine/types';
 
 /**
@@ -46,22 +47,12 @@ export function Hand({ hand, label, onActivate, hidden = false, compact = false 
   return (
     <section
       aria-label={`${label}. ${hand.length} card${hand.length === 1 ? '' : 's'}.`}
-      style={{ flexShrink: 0 }}
+      className={styles.section}
     >
       <ul
         ref={ref}
         onKeyDown={onKeyDown}
-        style={{
-          display: 'flex',
-          gap: compact ? 4 : 10,
-          listStyle: 'none',
-          margin: 0,
-          padding: compact ? '2px 0' : '6px 0',
-          justifyContent: 'flex-start',
-          flexWrap: 'nowrap',
-          overflowX: 'auto',
-          overflowY: 'hidden',
-        }}
+        className={`${styles.list}${compact ? ` ${styles.compact}` : ''}`}
       >
         {hand.map((card, i) => (
           // aria-posinset/aria-setsize live on the listitem (the <li>'s
@@ -71,7 +62,7 @@ export function Hand({ hand, label, onActivate, hidden = false, compact = false 
             key={card.id}
             aria-posinset={i + 1}
             aria-setsize={hand.length}
-            style={{ flexShrink: 0 }}
+            className={styles.item}
           >
             {hidden ? <CardBack compact={compact} /> : <Card card={card} onActivate={onActivate} />}
           </li>

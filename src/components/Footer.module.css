@@ -1,0 +1,20 @@
+.footer {
+  margin-top: 16px;
+  padding: 16px;
+  border-top: 1px solid #263238;
+  color: #b0bec5;
+  font-size: 13px;
+  line-height: 1.5;
+  max-width: 1100px;
+  margin-inline: auto;
+}
+
+.source {
+  margin: 0 0 12px;
+  font-size: 12px;
+  color: #78909c;
+}
+
+.link {
+  color: #4dd0e1;
+}
