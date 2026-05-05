@@ -77,6 +77,68 @@ a {
   }
 }
 
+/* Combat-overlay keyframes. Previously injected at runtime by
+ * CombatLayer (document.createElement('style') + appendChild), which
+ * would be blocked by `style-src 'self'` once 'unsafe-inline' is
+ * dropped. Card.tsx and PlayerHeader pull these by name for impact
+ * shake/flash; CombatLayer pulls them for damage-float and travel. */
+@keyframes combat-float {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%);
+  }
+  25% {
+    opacity: 1;
+    transform: translate(-50%, -70%);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -120%);
+  }
+}
+@keyframes combat-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-4px);
+  }
+  50% {
+    transform: translateX(4px);
+  }
+  75% {
+    transform: translateX(-4px);
+  }
+}
+@keyframes combat-flash {
+  0%,
+  100% {
+    background-color: transparent;
+  }
+  50% {
+    background-color: rgba(255, 255, 255, 0.8);
+  }
+}
+@keyframes combat-tilt-fade {
+  0% {
+    transform: rotate(0);
+    opacity: 1;
+  }
+  100% {
+    transform: rotate(12deg);
+    opacity: 0;
+  }
+}
+@keyframes combat-travel {
+  0% {
+    transform: translate(0, 0);
+  }
+  100% {
+    transform: translate(var(--tx), var(--ty));
+  }
+}
+
 @keyframes pulse-dot {
   0%,
   100% {

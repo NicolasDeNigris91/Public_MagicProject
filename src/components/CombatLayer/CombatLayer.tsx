@@ -3,39 +3,17 @@ import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { DAMAGE_FLOAT_MS, TRAVEL_MS } from '@/constants/timings';
 import { useCombatStore } from '@/store/useCombatStore';
-
-const Z = 9000;
-
-const KEYFRAMES_CSS = `
-@keyframes combat-float {
-  0%   { opacity: 0; transform: translate(-50%, -50%); }
-  25%  { opacity: 1; transform: translate(-50%, -70%); }
-  100% { opacity: 0; transform: translate(-50%, -120%); }
-}
-@keyframes combat-shake {
-  0%, 100% { transform: translateX(0); }
-  25%      { transform: translateX(-4px); }
-  50%      { transform: translateX(4px); }
-  75%      { transform: translateX(-4px); }
-}
-@keyframes combat-flash {
-  0%, 100% { background-color: transparent; }
-  50%      { background-color: rgba(255,255,255,0.8); }
-}
-@keyframes combat-tilt-fade {
-  0%   { transform: rotate(0); opacity: 1; }
-  100% { transform: rotate(12deg); opacity: 0; }
-}
-@keyframes combat-travel {
-  0%   { transform: translate(0, 0); }
-  100% { transform: translate(var(--tx), var(--ty)); }
-}
-`;
+import styles from './CombatLayer.module.css';
 
 /**
  * Portal overlay that renders combat animation visuals on top of the
  * game surface. Decorative only - aria-hidden throughout. Narration
  * flows through the existing live regions driven by useGameStore.
+ *
+ * The combat-* keyframes referenced below live in globals.css, so no
+ * runtime <style> injection is needed and CSP doesn't have to allow
+ * it. Per-frame positioning still uses inline style — that's the
+ * single remaining `style-src 'unsafe-inline'` consumer.
  */
 export function CombatLayer() {
   const flight = useCombatStore((s) => s.flight);
@@ -44,28 +22,11 @@ export function CombatLayer() {
 
   useEffect(() => setMounted(true), []);
 
-  useEffect(() => {
-    if (document.getElementById('combat-keyframes')) return;
-    const s = document.createElement('style');
-    s.id = 'combat-keyframes';
-    s.textContent = KEYFRAMES_CSS;
-    document.head.appendChild(s);
-  }, []);
-
   if (!mounted) return null;
   if (!flight && damageNumbers.length === 0) return null;
 
   return createPortal(
-    <div
-      data-combat-layer
-      aria-hidden="true"
-      style={{
-        position: 'fixed',
-        inset: 0,
-        pointerEvents: 'none',
-        zIndex: Z,
-      }}
-    >
+    <div data-combat-layer aria-hidden="true" className={styles.layer}>
       {damageNumbers.map((n) => (
         <DamageNumber key={n.id} anchorId={n.anchorId} value={n.value} />
       ))}
@@ -91,6 +52,9 @@ function DamageNumber({ anchorId, value }: { anchorId: string; value: number }) 
   }, [anchorId]);
 
   if (!rect) return null;
+  // Coordinates come from getBoundingClientRect at runtime so they
+  // can't live in a stylesheet — this is the inline-style holdout
+  // that keeps `style-src 'unsafe-inline'` necessary.
   return (
     <span
       style={{
