@@ -6,7 +6,7 @@
 
 A keyboard-first, screen-reader-first TCG demo built on the [Scryfall API](https://scryfall.com). Real _Magic: The Gathering_ cards plug into a stripped-down combat engine, and the whole UI is wired so the same information reaches you whether you're reading the card frame or hearing it through ARIA live regions. Built as a portfolio piece because most "accessible" web games stop at tab order.
 
-![Tabuleiro com uma criatura selecionada como atacante](docs/screenshots/combat.png)
+![In-match view: opponent and player headers, both battlefields, the player's hand, and the combat-log toggle](docs/screenshots/hero.png)
 
 > **Fan content notice.** Not affiliated with Wizards of the Coast. Built under the [WotC Fan Content Policy](https://company.wizards.com/en/legal/fancontentpolicy). Card data courtesy of Scryfall.
 
@@ -14,13 +14,16 @@ A keyboard-first, screen-reader-first TCG demo built on the [Scryfall API](https
 
 ## Stack
 
-| Concern   | Choice                                                   |
-| --------- | -------------------------------------------------------- |
-| Framework | Next.js 14 (App Router) + TypeScript (strict)            |
-| State     | Zustand (vanilla store, no middleware)                   |
-| Animation | Framer Motion                                            |
-| Data      | Scryfall REST API via Axios (with offline fallback deck) |
-| Tests     | Vitest (engine + AI + description utils)                 |
+| Concern    | Choice                                                                            |
+| ---------- | --------------------------------------------------------------------------------- |
+| Framework  | Next.js 14 (App Router) + TypeScript (strict, `exactOptionalPropertyTypes`)       |
+| State      | Zustand + `devtools` middleware (dev-only)                                        |
+| Animation  | Framer Motion (with `prefers-reduced-motion` honored)                             |
+| Data       | Scryfall REST API via Axios + Zod schemas at the boundary, offline fallback deck  |
+| Unit tests | Vitest + Testing Library, fast-check property tests, `vitest-axe` JSDOM sweep     |
+| E2E tests  | Playwright + `@axe-core/playwright` against the production build                  |
+| Quality    | ESLint flat config (typescript-eslint type-checked), Prettier, Husky + commitlint |
+| CI gates   | Coverage thresholds per folder, Lighthouse a11y=1.0 / perf>=0.9, security headers |
 
 ## Gameplay rules
 
@@ -59,28 +62,43 @@ For the long-form layered diagram, hard invariants, and design decisions, see [`
 
 The card's prose description is treated as data, not presentation. The adapter precomputes `accessibilityDescription` on every `ICard` (a natural sentence with name, type, mana cost, power/toughness and rules text), and that string is the single source of truth for every screen-reader-facing surface.
 
+![Card inspector modal: large card image on the left, structured Type / Mana / P-T metadata on the right, action buttons at the bottom](docs/screenshots/inspector.png)
+
 What that gives you:
 
-- **Focusable cards** - each card is a native `<button>`. Tab navigates, Enter/Space activates.
-- **Keyboard-only combat** - ArrowLeft/Right between cards in hand; select an attacker, then a blocker (or the "Attack directly" button). Skip link at the top of the page.
-- **Two live regions** - a `polite` one for info (draws, phase changes) and an `assertive` one for urgent events (damage, defeats). Identical repeated messages force a re-announce via a changing React `key`.
-- **Decorative images** - `<img alt="">` because the semantic content is already in `aria-label`. No double-read.
-- **Graceful image failure** - `onError` flips to a text fallback (`CardFallback`) with gradient + stats; the announced description doesn't change.
-- **`prefers-reduced-motion`** - Framer Motion's `useReducedMotion` is honored; animations collapse to snaps.
+- **Focusable cards** — each card is a native `<button>`. Tab navigates, Enter/Space activates, `i` opens the inspector and is exposed via `aria-keyshortcuts`.
+- **Listbox-shaped hand** — ArrowLeft/Right move focus, Home/End jump to ends, and `aria-posinset`/`aria-setsize` announce "3 of 5" on the listitem so screen readers convey position.
+- **Keyboard-only combat** — select an attacker, then a blocker (or the "Attack directly" button). Skip link at the top of the page.
+- **Two live regions** — a `polite` one for info (draws, plays, mana) and an `assertive` one for urgent events (damage, defeats). Identical repeated messages force a re-announce via a changing React `key`.
+- **`inert` modals** — the combat log and any open dialog flip the rest of the tree to `inert` so focus and AT can't leak through aria-hidden alone.
+- **Decorative images** — `<img alt="">` because the semantic content is already in `aria-label`. No double-read.
+- **Graceful image failure** — `onError` flips to a text fallback (`CardFallback`) with WCAG-AA contrast (≥4.5:1); the announced description doesn't change.
+- **`prefers-reduced-motion`** — Framer Motion's `useReducedMotion` is honored; the `LifeDisplay` lerp also subscribes to `mql.change` so the flag flips immediately when the OS preference toggles mid-game.
 
 Verified against:
 
 - NVDA + Firefox, VoiceOver + Safari (keyboard-only playthrough)
-- axe DevTools (no critical violations)
-- Lighthouse Accessibility >= 95
+- `vitest-axe` JSDOM sweep + Playwright + `@axe-core/playwright` browser sweep — both gates run in CI, zero violations on the in-game and color-selection surfaces (WCAG 2.1 AA).
+- Lighthouse Accessibility = 1.0 (CI assertion is `error`-level, not `warn`)
 
 ## Running locally
 
 ```bash
 npm install
-npm run dev        # http://localhost:3000
-npm test           # engine + ai + describe utils
-npm run typecheck
+npm run dev               # http://localhost:3000
+
+# Verification — same gates CI runs, in order
+npm run typecheck         # strict tsc, zero errors
+npm run lint              # eslint + import order + typed-checked rules
+npm run format:check      # prettier
+npm run test              # vitest: 138 unit + property + a11y sweep
+npm run test:coverage     # ratchets per-folder thresholds (engine 95/90/90/95, …)
+npm run build             # next build, static export of the home route
+npm run ci                # all of the above, single command
+
+# E2E (Playwright + browser-axe)
+npx playwright install chromium    # one-time
+npm run test:e2e
 ```
 
 ## Deploying
