@@ -26,6 +26,43 @@ const http = axios.create({
 // needs to be meaningful. Production builds default to false.
 const DETERMINISTIC = process.env.NEXT_PUBLIC_MTG_DETERMINISTIC === '1';
 
+const RETRY_MAX_ATTEMPTS = 3;
+const RETRY_BASE_DELAY_MS = 250;
+
+function shouldRetry(err: unknown): boolean {
+  // Retry on transient network failures (no response) and 5xx server
+  // errors. Do NOT retry on 4xx — those mean the caller is wrong
+  // (bad query, throttle) and another attempt won't help. 429
+  // technically benefits from retry-after handling but Scryfall
+  // documents soft rate limits; we let it fall through to the seed
+  // deck rather than risk hammering them.
+  if (!(err instanceof AxiosError)) return false;
+  if (!err.response) return true;
+  const status = err.response.status;
+  return status >= 500 && status < 600;
+}
+
+const sleep = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
+
+/**
+ * Tiny retry-with-exponential-backoff wrapper. 3 total attempts at
+ * 0 / 250 / 500ms. Exposed only inside this module so the deck and
+ * art fetches share the same policy.
+ */
+async function withRetry<T>(fn: () => Promise<T>): Promise<T> {
+  let lastErr: unknown;
+  for (let attempt = 0; attempt < RETRY_MAX_ATTEMPTS; attempt++) {
+    try {
+      return await fn();
+    } catch (err) {
+      lastErr = err;
+      if (attempt === RETRY_MAX_ATTEMPTS - 1 || !shouldRetry(err)) throw err;
+      await sleep(RETRY_BASE_DELAY_MS * 2 ** attempt);
+    }
+  }
+  throw lastErr;
+}
+
 export interface FetchResult {
   cards: ICard[];
   source: 'scryfall' | 'fallback';
@@ -45,13 +82,15 @@ export async function fetchDeckForColor(color: Color): Promise<FetchResult> {
   const seeds = fallbackDecks[color];
   if (DETERMINISTIC) return { cards: seeds, source: 'fallback' };
   try {
-    const { data } = await http.get<unknown>('/cards/search', {
-      params: {
-        q: `c=${color.toLowerCase()} t:creature cmc<=6 -t:token`,
-        order: 'random',
-        unique: 'cards',
-      },
-    });
+    const { data } = await withRetry(() =>
+      http.get<unknown>('/cards/search', {
+        params: {
+          q: `c=${color.toLowerCase()} t:creature cmc<=6 -t:token`,
+          order: 'random',
+          unique: 'cards',
+        },
+      }),
+    );
     // Validate envelope shape, then validate each card individually.
     // A schema drift on one card drops that card; the whole response
     // only fails if `data.data` itself isn't an array.
@@ -84,9 +123,11 @@ export const COLOR_ART_CARDS: Record<Color, string> = {
 
 async function fetchArtCrop(exactName: string): Promise<string | null> {
   try {
-    const { data } = await http.get<unknown>('/cards/named', {
-      params: { exact: exactName },
-    });
+    const { data } = await withRetry(() =>
+      http.get<unknown>('/cards/named', {
+        params: { exact: exactName },
+      }),
+    );
     const parsed = ScryfallCardSchema.safeParse(data);
     if (!parsed.success) return null;
     const uris = parsed.data.image_uris ?? parsed.data.card_faces?.[0]?.image_uris;
