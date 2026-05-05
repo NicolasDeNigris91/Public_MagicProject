@@ -11,6 +11,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
+    "analyze": "cross-env ANALYZE=true next build",
     "ci": "npm run typecheck && npm run lint && npm run test && npm run build"
   },
   "engines": {
@@ -25,6 +26,7 @@
     "zustand": "^4.5.5"
   },
   "devDependencies": {
+    "@next/bundle-analyzer": "^16.2.4",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
@@ -32,6 +34,7 @@
     "@types/react": "^18.3.28",
     "@types/react-dom": "^18.3.7",
     "@vitejs/plugin-react": "^4.7.0",
+    "cross-env": "^10.1.0",
     "eslint": "^8.57.1",
     "eslint-config-next": "14.2.15",
     "jsdom": "^29.0.2",

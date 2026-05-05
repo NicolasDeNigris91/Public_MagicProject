@@ -1,3 +1,5 @@
+import withBundleAnalyzer from '@next/bundle-analyzer';
+
 /** @type {import('next').NextConfig} */
 
 // Content-Security-Policy in Report-Only mode while we phase out
@@ -48,4 +50,10 @@ const nextConfig = {
   },
 };
 
-export default nextConfig;
+// Wrapping is a no-op unless ANALYZE=true; running `npm run analyze`
+// sets the env and emits .next/analyze/{client,server,edge}.html.
+const withAnalyzer = withBundleAnalyzer({
+  enabled: process.env.ANALYZE === 'true',
+});
+
+export default withAnalyzer(nextConfig);
