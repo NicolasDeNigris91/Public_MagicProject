@@ -46,18 +46,20 @@ describe('fetchDeckForColor', () => {
 
   it('builds a 10-card deck from Scryfall candidates', async () => {
     mockedGet.mockResolvedValueOnce({
-      data: { data: [
-        scryfallCard({ id: 'c1', colors: ['R'], cmc: 1, power: 2, toughness: 1 }),
-        scryfallCard({ id: 'c2', colors: ['R'], cmc: 1, power: 1, toughness: 2 }),
-        scryfallCard({ id: 'c3', colors: ['R'], cmc: 2, power: 2, toughness: 2 }),
-        scryfallCard({ id: 'c4', colors: ['R'], cmc: 2, power: 2, toughness: 3 }),
-        scryfallCard({ id: 'c5', colors: ['R'], cmc: 3, power: 3, toughness: 3 }),
-        scryfallCard({ id: 'c6', colors: ['R'], cmc: 3, power: 2, toughness: 3 }),
-        scryfallCard({ id: 'c7', colors: ['R'], cmc: 4, power: 3, toughness: 4 }),
-        scryfallCard({ id: 'c8', colors: ['R'], cmc: 5, power: 4, toughness: 4 }),
-        scryfallCard({ id: 'c9', colors: ['R'], cmc: 6, power: 5, toughness: 5 }),
-        scryfallCard({ id: 'c10', colors: ['R'], cmc: 2, power: 1, toughness: 4 }),
-      ]},
+      data: {
+        data: [
+          scryfallCard({ id: 'c1', colors: ['R'], cmc: 1, power: 2, toughness: 1 }),
+          scryfallCard({ id: 'c2', colors: ['R'], cmc: 1, power: 1, toughness: 2 }),
+          scryfallCard({ id: 'c3', colors: ['R'], cmc: 2, power: 2, toughness: 2 }),
+          scryfallCard({ id: 'c4', colors: ['R'], cmc: 2, power: 2, toughness: 3 }),
+          scryfallCard({ id: 'c5', colors: ['R'], cmc: 3, power: 3, toughness: 3 }),
+          scryfallCard({ id: 'c6', colors: ['R'], cmc: 3, power: 2, toughness: 3 }),
+          scryfallCard({ id: 'c7', colors: ['R'], cmc: 4, power: 3, toughness: 4 }),
+          scryfallCard({ id: 'c8', colors: ['R'], cmc: 5, power: 4, toughness: 4 }),
+          scryfallCard({ id: 'c9', colors: ['R'], cmc: 6, power: 5, toughness: 5 }),
+          scryfallCard({ id: 'c10', colors: ['R'], cmc: 2, power: 1, toughness: 4 }),
+        ],
+      },
     });
     const result = await fetchDeckForColor('R');
     expect(result.source).toBe('scryfall');
@@ -66,9 +68,9 @@ describe('fetchDeckForColor', () => {
   });
 
   it('falls back per slot when candidates are missing for that slot', async () => {
-    mockedGet.mockResolvedValueOnce({ data: { data: [
-      scryfallCard({ id: 'c1', colors: ['R'], cmc: 1, power: 2, toughness: 1 }),
-    ]}});
+    mockedGet.mockResolvedValueOnce({
+      data: { data: [scryfallCard({ id: 'c1', colors: ['R'], cmc: 1, power: 2, toughness: 1 })] },
+    });
     const result = await fetchDeckForColor('R');
     expect(result.source).toBe('scryfall');
     // slot 0 uses the Scryfall candidate; the rest come from R seeds.
@@ -85,18 +87,31 @@ describe('fetchDeckForColor', () => {
   });
 
   it('drops multicolor survivors returned by the search', async () => {
-    mockedGet.mockResolvedValueOnce({ data: { data: [
-      scryfallCard({ id: 'rg', colors: ['R', 'G'], cmc: 1, power: 2, toughness: 1 }),
-    ]}});
+    mockedGet.mockResolvedValueOnce({
+      data: {
+        data: [scryfallCard({ id: 'rg', colors: ['R', 'G'], cmc: 1, power: 2, toughness: 1 })],
+      },
+    });
     const result = await fetchDeckForColor('R');
     // rg is multicolor, so deriveColor yields undefined, so it's ignored.
     expect(result.cards[0]!.id).toBe(fallbackDecks.R[0]!.id);
   });
 
   it('drops candidates without an image so the deck never shows the blank fallback', async () => {
-    mockedGet.mockResolvedValueOnce({ data: { data: [
-      scryfallCard({ id: 'noimg', colors: ['R'], cmc: 1, power: 2, toughness: 1, withImage: false }),
-    ]}});
+    mockedGet.mockResolvedValueOnce({
+      data: {
+        data: [
+          scryfallCard({
+            id: 'noimg',
+            colors: ['R'],
+            cmc: 1,
+            power: 2,
+            toughness: 1,
+            withImage: false,
+          }),
+        ],
+      },
+    });
     const result = await fetchDeckForColor('R');
     // The image-less candidate is rejected; slot 0 falls back to the seed.
     expect(result.cards[0]!.id).toBe(fallbackDecks.R[0]!.id);

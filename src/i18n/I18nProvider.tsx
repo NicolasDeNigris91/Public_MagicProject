@@ -29,16 +29,25 @@ export function I18nProvider({ children }: { children: ReactNode }) {
 
   const setLang = useCallback((l: Lang) => {
     setLangState(l);
-    try { window.localStorage.setItem(STORAGE_KEY, l); } catch { /* no-op */ }
+    try {
+      window.localStorage.setItem(STORAGE_KEY, l);
+    } catch {
+      /* no-op */
+    }
     document.documentElement.lang = l;
   }, []);
 
-  useEffect(() => { document.documentElement.lang = lang; }, [lang]);
-
-  const t = useCallback((key: MessageKey, vars?: Record<string, string | number>) => {
-    const msg = messages[lang][key] ?? messages[DEFAULT_LANG][key] ?? key;
-    return format(msg, vars);
+  useEffect(() => {
+    document.documentElement.lang = lang;
   }, [lang]);
+
+  const t = useCallback(
+    (key: MessageKey, vars?: Record<string, string | number>) => {
+      const msg = messages[lang][key] ?? messages[DEFAULT_LANG][key] ?? key;
+      return format(msg, vars);
+    },
+    [lang],
+  );
 
   return <Ctx.Provider value={{ lang, setLang, t }}>{children}</Ctx.Provider>;
 }

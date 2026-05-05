@@ -28,7 +28,7 @@ to reconstruct prior state, and no code path attempts to.
    reversibility means keeping every `state` reachable in memory, or
    making every transition emit an inverse operation. Both are large
    surface areas for bugs.
-4. **Accessibility is *not* an excuse for undo.** The fix for "I
+4. **Accessibility is _not_ an excuse for undo.** The fix for "I
    couldn't tell my creature was sick" is a louder badge and a clearer
    announcement, not a do-over button.
 

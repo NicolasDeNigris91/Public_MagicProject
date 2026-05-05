@@ -29,7 +29,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <html lang="en">
       <body>
         {/* Skip link: visually hidden until focused - Tab surfaces it. */}
-        <a href="#main" className="skip-link">Skip to main content</a>
+        <a href="#main" className="skip-link">
+          Skip to main content
+        </a>
         <I18nProvider>
           <ErrorBoundary>{children}</ErrorBoundary>
           <LiveRegion />

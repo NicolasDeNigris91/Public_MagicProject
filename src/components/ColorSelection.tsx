@@ -26,7 +26,9 @@ export function ColorSelection({ onSelect }: Props) {
     fetchColorArt().then((map) => {
       if (!cancelled) setArt(map);
     });
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   function onKeyDown(e: React.KeyboardEvent<HTMLButtonElement>, idx: number) {
@@ -49,7 +51,9 @@ export function ColorSelection({ onSelect }: Props) {
             return (
               <button
                 key={c}
-                ref={(el) => { if (el) buttonsRef.current[i] = el; }}
+                ref={(el) => {
+                  if (el) buttonsRef.current[i] = el;
+                }}
                 type="button"
                 onClick={() => onSelect(c)}
                 onKeyDown={(e) => onKeyDown(e, i)}
@@ -109,12 +113,22 @@ const BUTTON_STYLE: React.CSSProperties = {
   fontFamily: 'inherit',
 };
 const SWATCH_STYLE: React.CSSProperties = {
-  width: 48, height: 48, borderRadius: '50%',
+  width: 48,
+  height: 48,
+  borderRadius: '50%',
   border: '2px solid #eceff1',
 };
 const ART_STYLE: React.CSSProperties = {
-  width: 160, height: 117, objectFit: 'cover',
-  borderRadius: 6, border: '1px solid #455a64',
+  width: 160,
+  height: 117,
+  objectFit: 'cover',
+  borderRadius: 6,
+  border: '1px solid #455a64',
 };
 const MANA_STYLE: React.CSSProperties = { width: 28, height: 28 };
-const FLAVOR_STYLE: React.CSSProperties = { fontSize: 12, color: '#90a4ae', textAlign: 'center', lineHeight: 1.35 };
+const FLAVOR_STYLE: React.CSSProperties = {
+  fontSize: 12,
+  color: '#90a4ae',
+  textAlign: 'center',
+  lineHeight: 1.35,
+};

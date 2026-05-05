@@ -27,7 +27,14 @@ export interface PlayerHeaderProps {
  * keeping mana, hand count, and color symbol as secondary affordances.
  */
 export function PlayerHeader({
-  label, color, life, handCount, pulsing, lifeAnchor, manaAvailable, manaMax,
+  label,
+  color,
+  life,
+  handCount,
+  pulsing,
+  lifeAnchor,
+  manaAvailable,
+  manaMax,
 }: PlayerHeaderProps) {
   const { t } = useI18n();
   const pulseStyle: React.CSSProperties | undefined = pulsing
@@ -50,7 +57,7 @@ export function PlayerHeader({
       <span style={LIFE_STYLE}>
         <span aria-hidden="true" style={HEART_STYLE}>
           <svg viewBox="0 0 24 24" width="22" height="22" fill="#ef5350" aria-hidden="true">
-            <path d="M12 21s-7.5-4.35-10-9.5C.5 7.5 3 4 6.5 4c2 0 3.5 1.2 4.5 2.7C12 5.2 13.5 4 15.5 4 19 4 21.5 7.5 20 11.5 19.5 16.65 12 21 12 21z"/>
+            <path d="M12 21s-7.5-4.35-10-9.5C.5 7.5 3 4 6.5 4c2 0 3.5 1.2 4.5 2.7C12 5.2 13.5 4 15.5 4 19 4 21.5 7.5 20 11.5 19.5 16.65 12 21 12 21z" />
           </svg>
         </span>
         <span className="sr-only">{t('player.lifePrefix')}</span>
@@ -62,17 +69,28 @@ export function PlayerHeader({
       </span>
 
       <span style={MANA_BLOCK_STYLE}>
-        <span className="sr-only">{t('player.manaLabel')} {manaAvailable} / {manaMax}</span>
-        <span aria-hidden="true" style={MANA_LABEL_STYLE}>{t('player.manaLabel')}</span>
-        <span aria-hidden="true" style={MANA_VALUE_STYLE}>{manaAvailable} / {manaMax}</span>
+        <span className="sr-only">
+          {t('player.manaLabel')} {manaAvailable} / {manaMax}
+        </span>
+        <span aria-hidden="true" style={MANA_LABEL_STYLE}>
+          {t('player.manaLabel')}
+        </span>
+        <span aria-hidden="true" style={MANA_VALUE_STYLE}>
+          {manaAvailable} / {manaMax}
+        </span>
       </span>
 
       <span style={HAND_STYLE}>
         <span className="sr-only">
-          {t('player.handLabel')} {handCount} {handCount === 1 ? t('player.handSingular') : t('player.handPlural')}
+          {t('player.handLabel')} {handCount}{' '}
+          {handCount === 1 ? t('player.handSingular') : t('player.handPlural')}
         </span>
-        <span aria-hidden="true" style={HAND_LABEL_STYLE}>{t('player.handLabel')}</span>
-        <span aria-hidden="true" style={HAND_COUNT_STYLE}>{handCount}</span>
+        <span aria-hidden="true" style={HAND_LABEL_STYLE}>
+          {t('player.handLabel')}
+        </span>
+        <span aria-hidden="true" style={HAND_COUNT_STYLE}>
+          {handCount}
+        </span>
       </span>
     </h2>
   );
@@ -121,7 +139,11 @@ const HAND_STYLE: React.CSSProperties = {
   color: '#90a4ae',
   fontWeight: 500,
 };
-const HAND_LABEL_STYLE: React.CSSProperties = { fontSize: 11, textTransform: 'uppercase', letterSpacing: 0.4 };
+const HAND_LABEL_STYLE: React.CSSProperties = {
+  fontSize: 11,
+  textTransform: 'uppercase',
+  letterSpacing: 0.4,
+};
 const HAND_COUNT_STYLE: React.CSSProperties = { fontSize: 15, color: '#eceff1', fontWeight: 700 };
 const MANA_BLOCK_STYLE: React.CSSProperties = {
   display: 'inline-flex',
@@ -130,5 +152,14 @@ const MANA_BLOCK_STYLE: React.CSSProperties = {
   color: '#90caf9',
   fontWeight: 500,
 };
-const MANA_LABEL_STYLE: React.CSSProperties = { fontSize: 11, textTransform: 'uppercase', letterSpacing: 0.4 };
-const MANA_VALUE_STYLE: React.CSSProperties = { fontSize: 15, color: '#eceff1', fontWeight: 700, fontVariantNumeric: 'tabular-nums' };
+const MANA_LABEL_STYLE: React.CSSProperties = {
+  fontSize: 11,
+  textTransform: 'uppercase',
+  letterSpacing: 0.4,
+};
+const MANA_VALUE_STYLE: React.CSSProperties = {
+  fontSize: 15,
+  color: '#eceff1',
+  fontWeight: 700,
+  fontVariantNumeric: 'tabular-nums',
+};

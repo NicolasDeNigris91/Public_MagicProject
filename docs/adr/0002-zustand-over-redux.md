@@ -43,9 +43,9 @@ queue.
 ## Consequences
 
 - Game-rule logic must live in `src/engine/`, not in the store
-  callbacks. The store is the *commit* layer: it computes the next
+  callbacks. The store is the _commit_ layer: it computes the next
   state via engine functions and calls `set`. Anything more is a
   smell that this ADR doesn't license.
-- We accept the cost of *not* having a single canonical action history
+- We accept the cost of _not_ having a single canonical action history
   (Redux's main superpower). Tests cover engine functions directly.
 - `persist` middleware is intentionally not used: see ADR 0001.

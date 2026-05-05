@@ -7,9 +7,17 @@ import type { ICard } from '@/engine/types';
 
 function card(id: string, p = 2, t = 2): ICard {
   return {
-    id, name: `C-${id}`, power: p, toughness: t, cmc: 0,
-    manaCost: '{1}', typeLine: 'Creature', oracleText: '',
-    imageUrl: '', imageUrlSmall: '', accessibilityDescription: `card ${id}`,
+    id,
+    name: `C-${id}`,
+    power: p,
+    toughness: t,
+    cmc: 0,
+    manaCost: '{1}',
+    typeLine: 'Creature',
+    oracleText: '',
+    imageUrl: '',
+    imageUrlSmall: '',
+    accessibilityDescription: `card ${id}`,
   };
 }
 
@@ -22,11 +30,15 @@ describe('useAIOrchestrator', () => {
     useGameStore.getState().initGame(deck, deck);
     renderHook(() => useAIOrchestrator());
 
-    act(() => { useGameStore.getState().endTurn(); });
+    act(() => {
+      useGameStore.getState().endTurn();
+    });
     // Task 2 greedy-play: the AI now plays every affordable creature in
     // hand (cmc=0 here, so all 6) at AI_PLAY_DELAY_MS each before combat
     // and end-turn. Give enough fake-time budget to cover the whole tail.
-    act(() => { vi.advanceTimersByTime(20000); });
+    act(() => {
+      vi.advanceTimersByTime(20000);
+    });
 
     // After the AI turn the store should be back on the player's turn.
     expect(useGameStore.getState().turn).toBe('player');
@@ -37,13 +49,21 @@ describe('useAIOrchestrator', () => {
     useGameStore.getState().initGame(deck, deck);
     renderHook(() => useAIOrchestrator());
 
-    act(() => { useGameStore.getState().endTurn(); });
+    act(() => {
+      useGameStore.getState().endTurn();
+    });
     // Advance partially - AI plays a card, next setTimeout is scheduled.
-    act(() => { vi.advanceTimersByTime(1000); });
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
 
     const turnBeforeReset = useGameStore.getState().turn;
-    act(() => { useGameStore.getState().initGame(deck, deck); });
-    act(() => { vi.advanceTimersByTime(10000); });
+    act(() => {
+      useGameStore.getState().initGame(deck, deck);
+    });
+    act(() => {
+      vi.advanceTimersByTime(10000);
+    });
 
     // Fresh match, it is the player's turn (initGame sets turn = 'player').
     expect(useGameStore.getState().turn).toBe('player');
@@ -70,12 +90,15 @@ describe('useAIOrchestrator x animator', () => {
       player: { ...s.player, battlefield: [] },
     }));
 
-    const spy = vi.spyOn(useCombatStore.getState(), 'playCombat')
+    const spy = vi
+      .spyOn(useCombatStore.getState(), 'playCombat')
       .mockImplementation(() => Promise.resolve());
 
     renderHook(() => useAIOrchestrator());
 
-    act(() => { useGameStore.getState().endTurn(); });
+    act(() => {
+      useGameStore.getState().endTurn();
+    });
     // Task 2 greedy-play: the orchestrator plays every affordable card
     // before combat. Opponent's whole hand is cmc=0 here, so allow
     // enough real-time budget for plays + transition to playCombat.
@@ -106,14 +129,19 @@ describe('useAIOrchestrator x animator', () => {
     }));
 
     let resolvePlay!: () => void;
-    const playPromise = new Promise<void>((r) => { resolvePlay = r; });
-    const playSpy = vi.spyOn(useCombatStore.getState(), 'playCombat')
+    const playPromise = new Promise<void>((r) => {
+      resolvePlay = r;
+    });
+    const playSpy = vi
+      .spyOn(useCombatStore.getState(), 'playCombat')
       .mockImplementation(() => playPromise);
     const attackSpy = vi.spyOn(useGameStore.getState(), 'attack');
 
     renderHook(() => useAIOrchestrator());
 
-    act(() => { useGameStore.getState().endTurn(); });
+    act(() => {
+      useGameStore.getState().endTurn();
+    });
 
     // Wait for the AI to reach the await.
     // Task 2 greedy-play: give enough real-time for all plays + combat
@@ -121,12 +149,14 @@ describe('useAIOrchestrator x animator', () => {
     await vi.waitFor(() => expect(playSpy).toHaveBeenCalled(), { timeout: 15000 });
 
     // Simulate "Play again" - bumps generation, resets turn to 'player'.
-    act(() => { useGameStore.getState().initGame(deck, deck); });
+    act(() => {
+      useGameStore.getState().initGame(deck, deck);
+    });
 
     // Now release the animation promise.
     resolvePlay();
-    await Promise.resolve();  // drain microtasks
-    await Promise.resolve();  // and the then-chain
+    await Promise.resolve(); // drain microtasks
+    await Promise.resolve(); // and the then-chain
 
     // attack() was NOT called because post-await stillLive() returned false.
     expect(attackSpy).not.toHaveBeenCalled();

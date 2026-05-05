@@ -78,17 +78,19 @@ async function endTurn() {
   await btn.waitFor({ state: 'visible' });
   await btn.click({ force: true });
   // wait until it's the player's turn again AND combat animations have settled
-  await page.waitForFunction(
-    () => {
-      const turnEl = document.querySelector('header strong + strong');
-      if (!turnEl?.textContent?.includes('Your move')) return false;
-      const endBtn = [...document.querySelectorAll('button')].find((b) =>
-        /end turn/i.test(b.textContent ?? ''),
-      );
-      return !!endBtn && !endBtn.hasAttribute('disabled');
-    },
-    { timeout: 20_000 },
-  ).catch(() => {});
+  await page
+    .waitForFunction(
+      () => {
+        const turnEl = document.querySelector('header strong + strong');
+        if (!turnEl?.textContent?.includes('Your move')) return false;
+        const endBtn = [...document.querySelectorAll('button')].find((b) =>
+          /end turn/i.test(b.textContent ?? ''),
+        );
+        return !!endBtn && !endBtn.hasAttribute('disabled');
+      },
+      { timeout: 20_000 },
+    )
+    .catch(() => {});
   await page.waitForTimeout(1500);
 }
 

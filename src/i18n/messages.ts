@@ -9,25 +9,51 @@ export const LANGS: readonly Lang[] = ['pt', 'en'] as const;
 
 export type MessageKey =
   | 'app.title'
-  | 'turn.label' | 'turn.yourMove' | 'turn.opponent'
-  | 'game.loading' | 'game.victory' | 'game.defeat'
-  | 'game.playAgain' | 'game.changeColor'
-  | 'color.selectTitle' | 'color.toolbarLabel'
-  | 'color.W.name' | 'color.W.flavor'
-  | 'color.U.name' | 'color.U.flavor'
-  | 'color.B.name' | 'color.B.flavor'
-  | 'color.R.name' | 'color.R.flavor'
-  | 'color.G.name' | 'color.G.flavor'
+  | 'turn.label'
+  | 'turn.yourMove'
+  | 'turn.opponent'
+  | 'game.loading'
+  | 'game.victory'
+  | 'game.defeat'
+  | 'game.playAgain'
+  | 'game.changeColor'
+  | 'color.selectTitle'
+  | 'color.toolbarLabel'
+  | 'color.W.name'
+  | 'color.W.flavor'
+  | 'color.U.name'
+  | 'color.U.flavor'
+  | 'color.B.name'
+  | 'color.B.flavor'
+  | 'color.R.name'
+  | 'color.R.flavor'
+  | 'color.G.name'
+  | 'color.G.flavor'
   | 'color.announceChoice'
-  | 'player.you' | 'player.opponent'
-  | 'player.lifePrefix' | 'player.handLabel' | 'player.handSingular' | 'player.handPlural'
+  | 'player.you'
+  | 'player.opponent'
+  | 'player.lifePrefix'
+  | 'player.handLabel'
+  | 'player.handSingular'
+  | 'player.handPlural'
   | 'player.manaLabel'
-  | 'action.attackDirect' | 'action.endTurn'
-  | 'action.opponentThinking' | 'action.attackBlocked'
-  | 'battlefield.yourLabel' | 'battlefield.opponentLabel' | 'battlefield.empty'
-  | 'hand.your' | 'hand.opponent'
-  | 'lang.toggle' | 'lang.pt' | 'lang.en'
-  | 'log.title' | 'log.empty' | 'log.open' | 'log.close' | 'log.shortcut'
+  | 'action.attackDirect'
+  | 'action.endTurn'
+  | 'action.opponentThinking'
+  | 'action.attackBlocked'
+  | 'battlefield.yourLabel'
+  | 'battlefield.opponentLabel'
+  | 'battlefield.empty'
+  | 'hand.your'
+  | 'hand.opponent'
+  | 'lang.toggle'
+  | 'lang.pt'
+  | 'lang.en'
+  | 'log.title'
+  | 'log.empty'
+  | 'log.open'
+  | 'log.close'
+  | 'log.shortcut'
   | 'log.cannotPlay.noMana'
   | 'hand.cannotPlay.mana';
 
@@ -65,7 +91,8 @@ export const messages: Record<Lang, Record<MessageKey, string>> = {
     'action.attackDirect': 'Atacar oponente diretamente',
     'action.endTurn': 'Encerrar turno',
     'action.opponentThinking': 'Oponente pensando…',
-    'action.attackBlocked': 'Não pode atacar diretamente enquanto o oponente tiver criaturas no campo.',
+    'action.attackBlocked':
+      'Não pode atacar diretamente enquanto o oponente tiver criaturas no campo.',
     'battlefield.yourLabel': 'Seu campo de batalha',
     'battlefield.opponentLabel': 'Campo do oponente',
     'battlefield.empty': '{label} - sem criaturas em jogo',
@@ -115,7 +142,8 @@ export const messages: Record<Lang, Record<MessageKey, string>> = {
     'action.attackDirect': 'Attack opponent directly',
     'action.endTurn': 'End turn',
     'action.opponentThinking': 'Opponent thinking…',
-    'action.attackBlocked': 'Cannot attack directly while the opponent has creatures on the battlefield.',
+    'action.attackBlocked':
+      'Cannot attack directly while the opponent has creatures on the battlefield.',
     'battlefield.yourLabel': 'Your battlefield',
     'battlefield.opponentLabel': 'Opponent battlefield',
     'battlefield.empty': '{label} - no creatures in play',

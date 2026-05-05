@@ -7,9 +7,17 @@ import type { ICard } from '@/engine/types';
 
 function makeCard(id: string, p = 2, t = 2): ICard {
   return {
-    id, name: `C-${id}`, power: p, toughness: t, cmc: 0,
-    manaCost: '{1}', typeLine: 'Creature', oracleText: '',
-    imageUrl: '', imageUrlSmall: '', accessibilityDescription: `card ${id}`,
+    id,
+    name: `C-${id}`,
+    power: p,
+    toughness: t,
+    cmc: 0,
+    manaCost: '{1}',
+    typeLine: 'Creature',
+    oracleText: '',
+    imageUrl: '',
+    imageUrlSmall: '',
+    accessibilityDescription: `card ${id}`,
   };
 }
 
@@ -30,7 +38,9 @@ describe('useAttackerSelection', () => {
     useCombatStore.setState({ isAnimating: true });
 
     const prevLife = useGameStore.getState().opponent.life;
-    act(() => { result.current.attackDirectly(); });
+    act(() => {
+      result.current.attackDirectly();
+    });
 
     expect(useGameStore.getState().opponent.life).toBe(prevLife);
     expect(result.current.selected).toBeNull();
@@ -50,13 +60,18 @@ describe('useAttackerSelection', () => {
       opponent: { ...s.opponent, battlefield: [blocker] },
     }));
 
-    const spy = vi.spyOn(useCombatStore.getState(), 'playCombat')
+    const spy = vi
+      .spyOn(useCombatStore.getState(), 'playCombat')
       .mockImplementation(() => Promise.resolve());
 
     const { result } = renderHook(() => useAttackerSelection());
 
-    act(() => { result.current.select(attacker); });
-    act(() => { result.current.handleBattlefieldActivate(blocker); });
+    act(() => {
+      result.current.select(attacker);
+    });
+    act(() => {
+      result.current.handleBattlefieldActivate(blocker);
+    });
 
     await vi.waitFor(() => expect(spy).toHaveBeenCalledTimes(1));
 

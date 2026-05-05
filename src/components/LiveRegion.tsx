@@ -7,20 +7,10 @@ export function LiveRegion() {
   const { polite, politeKey, assertive, assertiveKey } = useAnnouncer();
   return (
     <>
-      <div
-        key={`polite-${politeKey}`}
-        role="status"
-        aria-atomic="true"
-        className="sr-only"
-      >
+      <div key={`polite-${politeKey}`} role="status" aria-atomic="true" className="sr-only">
         {polite}
       </div>
-      <div
-        key={`assertive-${assertiveKey}`}
-        role="alert"
-        aria-atomic="true"
-        className="sr-only"
-      >
+      <div key={`assertive-${assertiveKey}`} role="alert" aria-atomic="true" className="sr-only">
         {assertive}
       </div>
     </>

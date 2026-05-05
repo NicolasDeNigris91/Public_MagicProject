@@ -61,11 +61,7 @@ export function Hand({ hand, label, onActivate, hidden = false, compact = false 
       >
         {hand.map((card) => (
           <li key={card.id} style={{ flexShrink: 0 }}>
-            {hidden ? (
-              <CardBack compact={compact} />
-            ) : (
-              <Card card={card} onActivate={onActivate} />
-            )}
+            {hidden ? <CardBack compact={compact} /> : <Card card={card} onActivate={onActivate} />}
           </li>
         ))}
       </ul>

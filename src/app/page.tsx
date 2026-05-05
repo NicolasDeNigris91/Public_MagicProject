@@ -18,10 +18,9 @@ import { PlayerHeader } from '@/components/PlayerHeader';
 // nodes during animations. Keeping them out of the entry chunk pays
 // for itself on first load. ssr:false because all three are pure
 // client overlays.
-const CombatLog = dynamic(
-  () => import('@/components/CombatLog').then((m) => m.CombatLog),
-  { ssr: false },
-);
+const CombatLog = dynamic(() => import('@/components/CombatLog').then((m) => m.CombatLog), {
+  ssr: false,
+});
 const CardInspector = dynamic(
   () => import('@/components/CardInspector/CardInspector').then((m) => m.CardInspector),
   { ssr: false },
@@ -117,7 +116,8 @@ export default function GamePage() {
       if (e.ctrlKey || e.metaKey || e.altKey) return;
       if (e.key !== 'l' && e.key !== 'L') return;
       const tgt = e.target as HTMLElement | null;
-      if (tgt && (tgt.tagName === 'INPUT' || tgt.tagName === 'TEXTAREA' || tgt.isContentEditable)) return;
+      if (tgt && (tgt.tagName === 'INPUT' || tgt.tagName === 'TEXTAREA' || tgt.isContentEditable))
+        return;
       e.preventDefault();
       setLogOpen((prev) => !prev);
     };
@@ -202,10 +202,20 @@ export default function GamePage() {
       <main id="main" ref={mainRef} style={MAIN_STYLE}>
         <header style={HEADER_STYLE}>
           <h1 style={{ margin: 0, fontSize: 'clamp(14px, 3.5vw, 18px)' }}>{t('app.title')}</h1>
-          <div style={{ fontSize: 'clamp(11px, 2.6vw, 13px)', color: '#90a4ae', display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+          <div
+            style={{
+              fontSize: 'clamp(11px, 2.6vw, 13px)',
+              color: '#90a4ae',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              flexWrap: 'wrap',
+            }}
+          >
             <span>
               {t('turn.label')} <strong>{turnNumber}</strong>
-              {' · '}<strong>{turn === 'player' ? t('turn.yourMove') : t('turn.opponent')}</strong>
+              {' · '}
+              <strong>{turn === 'player' ? t('turn.yourMove') : t('turn.opponent')}</strong>
             </span>
             <CombatLogToggle open={logOpen} onToggle={() => setLogOpen((o) => !o)} />
             <LangToggle />
@@ -218,10 +228,14 @@ export default function GamePage() {
             tabIndex={-1}
             aria-labelledby="game-over-title"
             style={{
-              padding: 12, borderRadius: 12,
+              padding: 12,
+              borderRadius: 12,
               border: `2px solid ${winner === 'player' ? '#66bb6a' : '#ef5350'}`,
               background: 'rgba(0,0,0,0.4)',
-              display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12,
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              gap: 12,
             }}
           >
             <strong id="game-over-title" style={{ fontSize: 16 }}>
@@ -249,7 +263,13 @@ export default function GamePage() {
             manaAvailable={opponent.manaAvailable}
             manaMax={opponent.manaMax}
           />
-          <Hand hand={opponent.hand} label={t('hand.opponent')} onActivate={() => undefined} hidden compact />
+          <Hand
+            hand={opponent.hand}
+            label={t('hand.opponent')}
+            onActivate={() => undefined}
+            hidden
+            compact
+          />
           <Battlefield
             label={t('battlefield.opponentLabel')}
             variant="opponent"
@@ -303,11 +323,7 @@ export default function GamePage() {
       </div>
 
       {inspected && (
-        <CardInspector
-          card={inspected.card}
-          actions={inspectorActions}
-          onClose={closeInspector}
-        />
+        <CardInspector card={inspected.card} actions={inspectorActions} onClose={closeInspector} />
       )}
 
       <Footer source={source} />

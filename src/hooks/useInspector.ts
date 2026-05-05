@@ -45,9 +45,7 @@ export function useInspector() {
       const originId = current?.card.id ?? null;
       if (originId) {
         requestAnimationFrame(() => {
-          document
-            .querySelector<HTMLElement>(`[data-card-id="${originId}"]`)
-            ?.focus();
+          document.querySelector<HTMLElement>(`[data-card-id="${originId}"]`)?.focus();
         });
       }
       return null;

@@ -9,7 +9,9 @@ import {
 
 function raw(partial: Partial<ScryfallCard>): ScryfallCard {
   return {
-    id: 'x', name: 'X', type_line: 'Creature',
+    id: 'x',
+    name: 'X',
+    type_line: 'Creature',
     ...partial,
   };
 }
@@ -40,21 +42,26 @@ describe('adaptScryfallCard colors + cmc', () => {
 describe('zod schemas at the scryfall boundary', () => {
   it('parses a minimal valid card', () => {
     const ok = ScryfallCardSchema.safeParse({
-      id: 'a', name: 'A', type_line: 'Creature',
+      id: 'a',
+      name: 'A',
+      type_line: 'Creature',
     });
     expect(ok.success).toBe(true);
   });
 
   it('rejects a card missing id', () => {
     const bad = ScryfallCardSchema.safeParse({
-      name: 'A', type_line: 'Creature',
+      name: 'A',
+      type_line: 'Creature',
     });
     expect(bad.success).toBe(false);
   });
 
   it('rejects a card with non-string name (drift simulation)', () => {
     const bad = ScryfallCardSchema.safeParse({
-      id: 'a', name: 42, type_line: 'Creature',
+      id: 'a',
+      name: 42,
+      type_line: 'Creature',
     });
     expect(bad.success).toBe(false);
   });

@@ -30,30 +30,34 @@ export function useDeck(playerColor: Color | null): UseDeckResult {
   const [ready, setReady] = useState(false);
   const cancelledRef = useRef(false);
 
-  const loadBoth = useCallback(async (player: Color) => {
-    const opponent = pickOpponentColor(player);
-    setOpponentColor(opponent);
-    const [p, o] = await Promise.all([
-      fetchDeckForColor(player),
-      fetchDeckForColor(opponent),
-    ]);
-    if (cancelledRef.current) return;
-    initGame(p.cards, o.cards);
-    const combinedSource: DeckSource = p.source === 'scryfall' && o.source === 'scryfall'
-      ? 'scryfall'
-      : 'fallback';
-    setSource(combinedSource);
-    setReady(true);
-    if (combinedSource === 'fallback') {
-      announce('Could not reach Scryfall. Playing with the built-in offline deck.', 'assertive');
-    }
-  }, [initGame, announce]);
+  const loadBoth = useCallback(
+    async (player: Color) => {
+      const opponent = pickOpponentColor(player);
+      setOpponentColor(opponent);
+      const [p, o] = await Promise.all([fetchDeckForColor(player), fetchDeckForColor(opponent)]);
+      if (cancelledRef.current) return;
+      initGame(p.cards, o.cards);
+      const combinedSource: DeckSource =
+        p.source === 'scryfall' && o.source === 'scryfall' ? 'scryfall' : 'fallback';
+      setSource(combinedSource);
+      setReady(true);
+      if (combinedSource === 'fallback') {
+        announce('Could not reach Scryfall. Playing with the built-in offline deck.', 'assertive');
+      }
+    },
+    [initGame, announce],
+  );
 
   useEffect(() => {
     cancelledRef.current = false;
-    if (!playerColor) { setReady(false); return; }
+    if (!playerColor) {
+      setReady(false);
+      return;
+    }
     loadBoth(playerColor);
-    return () => { cancelledRef.current = true; };
+    return () => {
+      cancelledRef.current = true;
+    };
   }, [playerColor, loadBoth]);
 
   const restart = useCallback(() => {

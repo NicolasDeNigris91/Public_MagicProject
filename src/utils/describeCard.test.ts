@@ -4,9 +4,12 @@ import { buildA11yDescription } from './describeCard';
 describe('buildA11yDescription', () => {
   it('describes a creature with cost, P/T and text', () => {
     const out = buildA11yDescription({
-      name: 'Shivan Dragon', manaCost: '{4}{R}{R}',
-      typeLine: 'Creature - Dragon', oracleText: 'Flying.',
-      power: 5, toughness: 5,
+      name: 'Shivan Dragon',
+      manaCost: '{4}{R}{R}',
+      typeLine: 'Creature - Dragon',
+      oracleText: 'Flying.',
+      power: 5,
+      toughness: 5,
     });
     expect(out).toContain('Shivan Dragon');
     expect(out).toContain('Creature - Dragon');
@@ -17,17 +20,24 @@ describe('buildA11yDescription', () => {
 
   it('omits P/T for non-creatures', () => {
     const out = buildA11yDescription({
-      name: 'Lightning Bolt', manaCost: '{R}',
-      typeLine: 'Instant', oracleText: 'Deal 3 damage.',
-      power: 0, toughness: 0,
+      name: 'Lightning Bolt',
+      manaCost: '{R}',
+      typeLine: 'Instant',
+      oracleText: 'Deal 3 damage.',
+      power: 0,
+      toughness: 0,
     });
     expect(out).not.toContain('Power');
   });
 
   it('handles missing mana cost', () => {
     const out = buildA11yDescription({
-      name: 'Emrakul', manaCost: '', typeLine: 'Creature - Eldrazi',
-      oracleText: '', power: 15, toughness: 15,
+      name: 'Emrakul',
+      manaCost: '',
+      typeLine: 'Creature - Eldrazi',
+      oracleText: '',
+      power: 15,
+      toughness: 15,
     });
     expect(out).toContain('No mana cost');
   });

@@ -50,14 +50,7 @@ export interface IPlayer {
  * from this; the announcer (live region) ignores it and reads
  * `message` verbatim. 'info' is the catch-all default.
  */
-export type LogKind =
-  | 'info'
-  | 'turn'
-  | 'draw'
-  | 'play'
-  | 'combat'
-  | 'mana'
-  | 'game-over';
+export type LogKind = 'info' | 'turn' | 'draw' | 'play' | 'combat' | 'mana' | 'game-over';
 
 export interface LogEntry {
   id: string;

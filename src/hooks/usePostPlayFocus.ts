@@ -22,8 +22,12 @@ export function usePostPlayFocus() {
 
   return useMemo(
     () => ({
-      schedule(id: string) { pending.current = id; },
-      clear() { pending.current = null; },
+      schedule(id: string) {
+        pending.current = id;
+      },
+      clear() {
+        pending.current = null;
+      },
     }),
     [],
   );

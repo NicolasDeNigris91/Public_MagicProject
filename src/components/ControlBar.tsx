@@ -35,18 +35,18 @@ export function ControlBar({
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { t } = useI18n();
 
-  useEffect(() => () => {
-    if (timerRef.current) clearTimeout(timerRef.current);
-  }, []);
+  useEffect(
+    () => () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    },
+    [],
+  );
 
   const tryAttackDirectly = () => {
     if (opponentCreatureCount > 0) {
       setShowFaceBlockedNote(true);
       if (timerRef.current) clearTimeout(timerRef.current);
-      timerRef.current = setTimeout(
-        () => setShowFaceBlockedNote(false),
-        FACE_BLOCKED_NOTE_MS,
-      );
+      timerRef.current = setTimeout(() => setShowFaceBlockedNote(false), FACE_BLOCKED_NOTE_MS);
       return;
     }
     setShowFaceBlockedNote(false);
@@ -103,12 +103,21 @@ export function ControlBar({
           className="btn-attack"
           style={ATTACK_STYLE}
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"
-               stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M14.5 17.5L3 6V3h3l11.5 11.5"/>
-            <path d="M13 19l6-6"/>
-            <path d="M16 16l4 4"/>
-            <path d="M19 21l2-2"/>
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            aria-hidden="true"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M14.5 17.5L3 6V3h3l11.5 11.5" />
+            <path d="M13 19l6-6" />
+            <path d="M16 16l4 4" />
+            <path d="M19 21l2-2" />
           </svg>
           <span>{t('action.attackDirect')}</span>
         </button>
@@ -120,11 +129,20 @@ export function ControlBar({
           className="btn-end"
           style={END_STYLE}
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"
-               stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M6 2h12M6 22h12"/>
-            <path d="M6 2v4a6 6 0 0 0 12 0V2"/>
-            <path d="M6 22v-4a6 6 0 0 1 12 0v4"/>
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            aria-hidden="true"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M6 2h12M6 22h12" />
+            <path d="M6 2v4a6 6 0 0 0 12 0V2" />
+            <path d="M6 22v-4a6 6 0 0 1 12 0v4" />
           </svg>
           <span>{t('action.endTurn')}</span>
         </button>

@@ -60,7 +60,10 @@ export function CombatLayer() {
       data-combat-layer
       aria-hidden="true"
       style={{
-        position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: Z,
+        position: 'fixed',
+        inset: 0,
+        pointerEvents: 'none',
+        zIndex: Z,
       }}
     >
       {damageNumbers.map((n) => (
@@ -121,7 +124,8 @@ function FlightClone({
         ? `[data-card-id="${flight.targetId}"]`
         : `[data-life-anchor="${flight.targetId}"]`,
     );
-    if (src && dst) setRects({ from: src.getBoundingClientRect(), to: dst.getBoundingClientRect() });
+    if (src && dst)
+      setRects({ from: src.getBoundingClientRect(), to: dst.getBoundingClientRect() });
   }, [flight]);
 
   if (!rects) return null;

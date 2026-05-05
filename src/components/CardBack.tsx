@@ -46,8 +46,12 @@ export function CardBack({ compact = false }: CardBackProps) {
         </g>
         {/* Inner frame for a "card" feel */}
         <rect
-          x="2" y="2" width="36" height="56"
-          rx="2" ry="2"
+          x="2"
+          y="2"
+          width="36"
+          height="56"
+          rx="2"
+          ry="2"
           fill="none"
           stroke="#7c94ff"
           strokeOpacity="0.3"

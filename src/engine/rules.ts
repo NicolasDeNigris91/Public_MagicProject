@@ -5,9 +5,7 @@ export function drawCard(player: IPlayer): { player: IPlayer; drawn: ICard | nul
   const [drawn, ...rest] = player.deck;
   return {
     drawn: drawn ?? null,
-    player: drawn
-      ? { ...player, deck: rest, hand: [...player.hand, drawn] }
-      : player,
+    player: drawn ? { ...player, deck: rest, hand: [...player.hand, drawn] } : player,
   };
 }
 

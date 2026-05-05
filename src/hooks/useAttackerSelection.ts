@@ -41,7 +41,7 @@ export function useAttackerSelection() {
         return;
       }
       const blocker = blockerId
-        ? state.opponent.battlefield.find((c) => c.id === blockerId) ?? null
+        ? (state.opponent.battlefield.find((c) => c.id === blockerId) ?? null)
         : null;
       const result = resolveCombat(attacker, blocker);
 
@@ -62,46 +62,42 @@ export function useAttackerSelection() {
         const nextState = useGameStore.getState();
         const attackerStillPresent = nextState.player.battlefield.some((c) => c.id === attackerId);
         if (attackerStillPresent) {
-          document
-            .querySelector<HTMLElement>(`[data-card-id="${attackerId}"]`)
-            ?.focus();
+          document.querySelector<HTMLElement>(`[data-card-id="${attackerId}"]`)?.focus();
           return;
         }
         const survivors = nextState.player.battlefield.filter((c) => canAttack(c));
         const nextTarget =
           (survivors[0]
             ? document.querySelector<HTMLElement>(`[data-card-id="${survivors[0].id}"]`)
-            : null) ??
-          document.querySelector<HTMLButtonElement>('button[aria-label="End turn"]');
+            : null) ?? document.querySelector<HTMLButtonElement>('button[aria-label="End turn"]');
         nextTarget?.focus();
       });
     },
     [attack],
   );
 
-  const handleBattlefieldActivate = useCallback((card: ICard) => {
-    if (useCombatStore.getState().isAnimating) return;
-    const mine = useGameStore
-      .getState()
-      .player.battlefield.some((c) => c.id === card.id);
-    if (mine) {
+  const handleBattlefieldActivate = useCallback(
+    (card: ICard) => {
+      if (useCombatStore.getState().isAnimating) return;
+      const mine = useGameStore.getState().player.battlefield.some((c) => c.id === card.id);
+      if (mine) {
+        setSelected((prev) => {
+          const isDeselecting = prev === card.id;
+          announce(
+            isDeselecting ? `${card.name} deselected.` : `${card.name} ${SELECT_HINT}`,
+            'polite',
+          );
+          return isDeselecting ? null : card.id;
+        });
+        return;
+      }
       setSelected((prev) => {
-        const isDeselecting = prev === card.id;
-        announce(
-          isDeselecting
-            ? `${card.name} deselected.`
-            : `${card.name} ${SELECT_HINT}`,
-          'polite',
-        );
-        return isDeselecting ? null : card.id;
+        if (prev) fireCombat(runCombat(prev, card.id));
+        return null;
       });
-      return;
-    }
-    setSelected((prev) => {
-      if (prev) fireCombat(runCombat(prev, card.id));
-      return null;
-    });
-  }, [announce, runCombat]);
+    },
+    [announce, runCombat],
+  );
 
   const attackDirectly = useCallback(() => {
     if (useCombatStore.getState().isAnimating) return;
@@ -112,15 +108,21 @@ export function useAttackerSelection() {
     });
   }, [runCombat]);
 
-  const select = useCallback((card: ICard) => {
-    setSelected(card.id);
-    announce(`${card.name} ${SELECT_HINT}`, 'polite');
-  }, [announce]);
+  const select = useCallback(
+    (card: ICard) => {
+      setSelected(card.id);
+      announce(`${card.name} ${SELECT_HINT}`, 'polite');
+    },
+    [announce],
+  );
 
-  const deselect = useCallback((card: ICard) => {
-    setSelected(null);
-    announce(`${card.name} deselected.`, 'polite');
-  }, [announce]);
+  const deselect = useCallback(
+    (card: ICard) => {
+      setSelected(null);
+      announce(`${card.name} deselected.`, 'polite');
+    },
+    [announce],
+  );
 
   const clear = useCallback(() => setSelected(null), []);
 

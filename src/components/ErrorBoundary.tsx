@@ -1,7 +1,9 @@
 'use client';
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 
-interface State { error: Error | null }
+interface State {
+  error: Error | null;
+}
 
 export class ErrorBoundary extends Component<{ children: ReactNode }, State> {
   override state: State = { error: null };
@@ -21,8 +23,12 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, State> {
         <div
           role="alert"
           style={{
-            maxWidth: 640, margin: '80px auto', padding: 24,
-            border: '1px solid #b71c1c', borderRadius: 12, background: '#1a0a0a',
+            maxWidth: 640,
+            margin: '80px auto',
+            padding: 24,
+            border: '1px solid #b71c1c',
+            borderRadius: 12,
+            background: '#1a0a0a',
           }}
         >
           <h2 style={{ marginTop: 0 }}>Something broke.</h2>
@@ -32,7 +38,15 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, State> {
           </pre>
           <button
             onClick={() => window.location.reload()}
-            style={{ marginTop: 12, padding: '10px 18px', background: '#b71c1c', color: '#fff', border: 0, borderRadius: 8, cursor: 'pointer' }}
+            style={{
+              marginTop: 12,
+              padding: '10px 18px',
+              background: '#b71c1c',
+              color: '#fff',
+              border: 0,
+              borderRadius: 8,
+              cursor: 'pointer',
+            }}
           >
             Reload
           </button>

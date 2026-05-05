@@ -3,9 +3,7 @@
 import type { ICard, IPlayer } from './types';
 
 export function pickCardToPlay(hand: ICard[], manaAvailable: number): ICard | null {
-  const affordable = hand.filter(
-    (c) => /creature/i.test(c.typeLine) && c.cmc <= manaAvailable,
-  );
+  const affordable = hand.filter((c) => /creature/i.test(c.typeLine) && c.cmc <= manaAvailable);
   if (affordable.length === 0) return null;
   return [...affordable].sort((a, b) => b.power - a.power)[0] ?? null;
 }

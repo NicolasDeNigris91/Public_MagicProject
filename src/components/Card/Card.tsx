@@ -19,7 +19,13 @@ export interface CardProps {
   animateEntry?: boolean;
 }
 
-export function Card({ card, selected = false, onActivate, onInspect, animateEntry = false }: CardProps) {
+export function Card({
+  card,
+  selected = false,
+  onActivate,
+  onInspect,
+  animateEntry = false,
+}: CardProps) {
   const [imgFailed, setImgFailed] = useState(!card.imageUrl);
   const reduceMotion = useReducedMotion();
   const inFlight = useCombatStore((s) => s.flight?.attackerId === card.id);
@@ -39,9 +45,13 @@ export function Card({ card, selected = false, onActivate, onInspect, animateEnt
   };
 
   const targetOpacity = inFlight ? 0.3 : 1;
-  const entry = animateEntry && !reduceMotion
-    ? { initial: { rotateY: 180, y: -30, opacity: 0 }, animate: { rotateY: 0, y: 0, opacity: targetOpacity } }
-    : { initial: false, animate: { rotateY: 0, y: 0, opacity: targetOpacity } };
+  const entry =
+    animateEntry && !reduceMotion
+      ? {
+          initial: { rotateY: 180, y: -30, opacity: 0 },
+          animate: { rotateY: 0, y: 0, opacity: targetOpacity },
+        }
+      : { initial: false, animate: { rotateY: 0, y: 0, opacity: targetOpacity } };
 
   // Impact/dying animations are driven by CSS keyframes defined in
   // CombatLayer's KEYFRAMES_CSS. `isDying` takes precedence over
@@ -94,10 +104,14 @@ export function Card({ card, selected = false, onActivate, onInspect, animateEnt
           <CardFallback card={card} />
         )}
         {card.summoningSick && (
-          <span aria-hidden="true" className={styles.sickBadge}>Summoning sickness</span>
+          <span aria-hidden="true" className={styles.sickBadge}>
+            Summoning sickness
+          </span>
         )}
         {exhausted && (
-          <span aria-hidden="true" className={styles.sickBadge}>Already attacked</span>
+          <span aria-hidden="true" className={styles.sickBadge}>
+            Already attacked
+          </span>
         )}
       </motion.button>
       {onInspect && (

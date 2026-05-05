@@ -1,7 +1,7 @@
 name: Bug report
 description: Report unexpected gameplay behavior, an accessibility regression, or a UI bug.
-title: "[bug] "
-labels: ["bug", "triage"]
+title: '[bug] '
+labels: ['bug', 'triage']
 body:
   - type: dropdown
     id: area
@@ -44,7 +44,7 @@ body:
     id: env
     attributes:
       label: Browser / OS / AT
-      placeholder: "Firefox 132 + NVDA on Windows 11; Safari + VoiceOver on macOS 15; ..."
+      placeholder: 'Firefox 132 + NVDA on Windows 11; Safari + VoiceOver on macOS 15; ...'
 
   - type: checkboxes
     id: checks

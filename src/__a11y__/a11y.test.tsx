@@ -26,13 +26,16 @@ import type { ICard } from '@/engine/types';
 const sampleCard: ICard = {
   id: 'a11y-c1',
   name: 'Test Goblin',
-  power: 1, toughness: 1, cmc: 1,
+  power: 1,
+  toughness: 1,
+  cmc: 1,
   manaCost: '{R}',
   typeLine: 'Creature - Goblin',
   oracleText: 'Haste.',
   imageUrl: '',
   imageUrlSmall: '',
-  accessibilityDescription: 'Test Goblin. Creature - Goblin. Mana cost red. Power 1, toughness 1. Haste.',
+  accessibilityDescription:
+    'Test Goblin. Creature - Goblin. Mana cost red. Power 1, toughness 1. Haste.',
 };
 
 async function expectNoViolations(ui: React.ReactElement) {
@@ -48,7 +51,15 @@ describe('a11y sweep', () => {
 
   it('PlayerHeader has no axe violations', async () => {
     await expectNoViolations(
-      <PlayerHeader label="You" color="R" life={20} handCount={5} lifeAnchor="player-life" manaAvailable={1} manaMax={1} />,
+      <PlayerHeader
+        label="You"
+        color="R"
+        life={20}
+        handCount={5}
+        lifeAnchor="player-life"
+        manaAvailable={1}
+        manaMax={1}
+      />,
     );
   });
 
@@ -67,9 +78,7 @@ describe('a11y sweep', () => {
   });
 
   it('empty Battlefield has no axe violations', async () => {
-    await expectNoViolations(
-      <Battlefield label="Your battlefield" variant="player" cards={[]} />,
-    );
+    await expectNoViolations(<Battlefield label="Your battlefield" variant="player" cards={[]} />);
   });
 
   it('populated Battlefield has no axe violations', async () => {

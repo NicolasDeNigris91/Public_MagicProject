@@ -18,9 +18,18 @@ export function CombatLogToggle({ open, onToggle }: CombatLogToggleProps) {
       title={`${t('log.title')} (${t('log.shortcut')})`}
       style={BTN_STYLE}
     >
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"
-           stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M3 6h18M3 12h18M3 18h12"/>
+      <svg
+        width="14"
+        height="14"
+        viewBox="0 0 24 24"
+        fill="none"
+        aria-hidden="true"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M3 6h18M3 12h18M3 18h12" />
       </svg>
     </button>
   );

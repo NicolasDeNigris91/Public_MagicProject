@@ -33,12 +33,12 @@ npm run typecheck
 
 ## Test bar
 
-| Change touches              | Required                                           |
-| --------------------------- | -------------------------------------------------- |
-| `src/engine/`               | New unit tests covering the rule change            |
-| `src/store/`                | `npm test` passes                                  |
-| Components / hooks (a11y)   | Keyboard-only playthrough + screen reader sweep    |
-| Animation                   | `prefers-reduced-motion` still collapses motion    |
+| Change touches            | Required                                        |
+| ------------------------- | ----------------------------------------------- |
+| `src/engine/`             | New unit tests covering the rule change         |
+| `src/store/`              | `npm test` passes                               |
+| Components / hooks (a11y) | Keyboard-only playthrough + screen reader sweep |
+| Animation                 | `prefers-reduced-motion` still collapses motion |
 
 CI runs `typecheck` and `test` on every PR.
 

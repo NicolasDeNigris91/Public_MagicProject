@@ -26,12 +26,20 @@ export function Footer({ source }: FooterProps = {}) {
         </p>
       )}
       <p>
-        <strong>Aviso Legal:</strong> Este é um projeto de portfólio não oficial, sem fins lucrativos.
-        {' '}<em>Magic: The Gathering</em>, nomes de cartas, arte e marcas registradas são propriedade da{' '}
-        <strong>Wizards of the Coast LLC</strong>, subsidiária da Hasbro, Inc. Este projeto não é produzido,
-        endossado, apoiado ou afiliado à Wizards of the Coast. Dados e imagens das cartas são fornecidos pela
-        API pública <a href="https://scryfall.com" rel="noreferrer noopener" target="_blank" style={{ color: '#4dd0e1' }}>Scryfall</a>,
-        a quem agradecemos. Este conteúdo de fã é permitido sob a{' '}
+        <strong>Aviso Legal:</strong> Este é um projeto de portfólio não oficial, sem fins
+        lucrativos. <em>Magic: The Gathering</em>, nomes de cartas, arte e marcas registradas são
+        propriedade da <strong>Wizards of the Coast LLC</strong>, subsidiária da Hasbro, Inc. Este
+        projeto não é produzido, endossado, apoiado ou afiliado à Wizards of the Coast. Dados e
+        imagens das cartas são fornecidos pela API pública{' '}
+        <a
+          href="https://scryfall.com"
+          rel="noreferrer noopener"
+          target="_blank"
+          style={{ color: '#4dd0e1' }}
+        >
+          Scryfall
+        </a>
+        , a quem agradecemos. Este conteúdo de fã é permitido sob a{' '}
         <a
           href="https://company.wizards.com/en/legal/fancontentpolicy"
           rel="noreferrer noopener"
@@ -39,7 +47,8 @@ export function Footer({ source }: FooterProps = {}) {
           style={{ color: '#4dd0e1' }}
         >
           Política de Conteúdo de Fãs da Wizards of the Coast
-        </a>.
+        </a>
+        .
       </p>
     </footer>
   );

@@ -4,7 +4,7 @@
 [![CodeQL](https://github.com/NicolasDeNigris91/Public_MagicProject/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/NicolasDeNigris91/Public_MagicProject/actions/workflows/codeql.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 
-A keyboard-first, screen-reader-first TCG demo built on the [Scryfall API](https://scryfall.com). Real *Magic: The Gathering* cards plug into a stripped-down combat engine, and the whole UI is wired so the same information reaches you whether you're reading the card frame or hearing it through ARIA live regions. Built as a portfolio piece because most "accessible" web games stop at tab order.
+A keyboard-first, screen-reader-first TCG demo built on the [Scryfall API](https://scryfall.com). Real _Magic: The Gathering_ cards plug into a stripped-down combat engine, and the whole UI is wired so the same information reaches you whether you're reading the card frame or hearing it through ARIA live regions. Built as a portfolio piece because most "accessible" web games stop at tab order.
 
 ![Tabuleiro com uma criatura selecionada como atacante](docs/screenshots/combat.png)
 
@@ -14,13 +14,13 @@ A keyboard-first, screen-reader-first TCG demo built on the [Scryfall API](https
 
 ## Stack
 
-| Concern         | Choice                                                       |
-| --------------- | ------------------------------------------------------------ |
-| Framework       | Next.js 14 (App Router) + TypeScript (strict)                |
-| State           | Zustand (vanilla store, no middleware)                       |
-| Animation       | Framer Motion                                                |
-| Data            | Scryfall REST API via Axios (with offline fallback deck)     |
-| Tests           | Vitest (engine + AI + description utils)                     |
+| Concern   | Choice                                                   |
+| --------- | -------------------------------------------------------- |
+| Framework | Next.js 14 (App Router) + TypeScript (strict)            |
+| State     | Zustand (vanilla store, no middleware)                   |
+| Animation | Framer Motion                                            |
+| Data      | Scryfall REST API via Axios (with offline fallback deck) |
+| Tests     | Vitest (engine + AI + description utils)                 |
 
 ## Gameplay rules
 
@@ -53,7 +53,7 @@ src/
 
 `engine/` doesn't import from anywhere else in the tree, so swapping Scryfall for Lorcana, Pokemon TCG or a homebrew JSON only means rewriting `adapters/`.
 
-For the long-form layered diagram, hard invariants, and design decisions, see [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md). Architectural choices that are intentionally permanent (e.g. *no undo*) are recorded as ADRs under [`docs/adr/`](./docs/adr/).
+For the long-form layered diagram, hard invariants, and design decisions, see [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md). Architectural choices that are intentionally permanent (e.g. _no undo_) are recorded as ADRs under [`docs/adr/`](./docs/adr/).
 
 ## Accessibility
 
@@ -99,4 +99,4 @@ If Scryfall is unreachable at runtime, the UI announces the switch and plays wit
 
 ## Disclaimer
 
-Este é um projeto de portfólio não oficial, sem fins lucrativos. *Magic: The Gathering*, nomes de cartas, arte e marcas registradas são propriedade da **Wizards of the Coast LLC**, subsidiária da Hasbro, Inc. Este projeto não é produzido, endossado, apoiado ou afiliado à Wizards of the Coast. Dados e imagens das cartas são fornecidos pela API pública [Scryfall](https://scryfall.com). Este conteúdo de fã é permitido sob a [Política de Conteúdo de Fãs da Wizards of the Coast](https://company.wizards.com/en/legal/fancontentpolicy).
+Este é um projeto de portfólio não oficial, sem fins lucrativos. _Magic: The Gathering_, nomes de cartas, arte e marcas registradas são propriedade da **Wizards of the Coast LLC**, subsidiária da Hasbro, Inc. Este projeto não é produzido, endossado, apoiado ou afiliado à Wizards of the Coast. Dados e imagens das cartas são fornecidos pela API pública [Scryfall](https://scryfall.com). Este conteúdo de fã é permitido sob a [Política de Conteúdo de Fãs da Wizards of the Coast](https://company.wizards.com/en/legal/fancontentpolicy).

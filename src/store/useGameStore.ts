@@ -1,8 +1,24 @@
 import { create } from 'zustand';
-import type { AnnouncePriority, GameResult, ICard, IGameState, IPlayer, LogEntry, LogKind, PlayerId } from '@/engine/types';
+import type {
+  AnnouncePriority,
+  GameResult,
+  ICard,
+  IGameState,
+  IPlayer,
+  LogEntry,
+  LogKind,
+  PlayerId,
+} from '@/engine/types';
 import {
-  applyDamage, beginTurn, canAfford, canAttack, canAttackFace,
-  drawCard, playCardToField, removeFromField, resolveCombat,
+  applyDamage,
+  beginTurn,
+  canAfford,
+  canAttack,
+  canAttackFace,
+  drawCard,
+  playCardToField,
+  removeFromField,
+  resolveCombat,
 } from '@/engine/rules';
 import { shortCardLabel } from '@/utils/describeCard';
 
@@ -41,7 +57,10 @@ function makePlayer(id: PlayerId, deck: ICard[]): IPlayer {
   // already (manaMax=1, manaAvailable=1). Opponent starts at 0 and
   // gets ramped by beginTurn when their turn begins.
   return {
-    id, life: STARTING_LIFE, hand, battlefield: [],
+    id,
+    life: STARTING_LIFE,
+    hand,
+    battlefield: [],
     deck: deck.slice(STARTING_HAND),
     manaMax: id === 'player' ? 1 : 0,
     manaAvailable: id === 'player' ? 1 : 0,
@@ -69,8 +88,24 @@ function log(
 }
 
 export const useGameStore = create<GameStore>((set, get) => ({
-  player: { id: 'player', life: STARTING_LIFE, hand: [], battlefield: [], deck: [], manaMax: 0, manaAvailable: 0 },
-  opponent: { id: 'opponent', life: STARTING_LIFE, hand: [], battlefield: [], deck: [], manaMax: 0, manaAvailable: 0 },
+  player: {
+    id: 'player',
+    life: STARTING_LIFE,
+    hand: [],
+    battlefield: [],
+    deck: [],
+    manaMax: 0,
+    manaAvailable: 0,
+  },
+  opponent: {
+    id: 'opponent',
+    life: STARTING_LIFE,
+    hand: [],
+    battlefield: [],
+    deck: [],
+    manaMax: 0,
+    manaAvailable: 0,
+  },
   turn: 'player',
   phase: 'main',
   gameLog: [],
@@ -89,12 +124,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
       turnNumber: 1,
       initialized: true,
       generation: s.generation + 1,
-      gameLog: [log(
-        `New match. Turn 1. You have ${STARTING_LIFE} life, ${STARTING_HAND} cards, and 1 mana. Your turn.`,
-        'polite',
-        'turn',
-        { turnNumber: 1, player: 'player' },
-      )],
+      gameLog: [
+        log(
+          `New match. Turn 1. You have ${STARTING_LIFE} life, ${STARTING_HAND} cards, and 1 mana. Your turn.`,
+          'polite',
+          'turn',
+          { turnNumber: 1, player: 'player' },
+        ),
+      ],
     }));
   },
 
@@ -188,7 +225,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       return;
     }
     const blocker = blockerId
-      ? s[defendingSide].battlefield.find((c) => c.id === blockerId) ?? null
+      ? (s[defendingSide].battlefield.find((c) => c.id === blockerId) ?? null)
       : null;
 
     if (!blocker && !canAttackFace(s[defendingSide])) {
@@ -236,7 +273,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
         'assertive',
         'combat',
         {
-          attackingSide, attacker: attacker.name, blocker: blocker.name,
+          attackingSide,
+          attacker: attacker.name,
+          blocker: blocker.name,
           attackerDies: result.attackerDies ? 1 : 0,
           blockerDies: result.blockerDies ? 1 : 0,
         },
@@ -249,8 +288,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
         'assertive',
         'combat',
         {
-          attackingSide, attacker: attacker.name,
-          damage: result.playerDamage, defenderLife: defenderPlayer.life,
+          attackingSide,
+          attacker: attacker.name,
+          damage: result.playerDamage,
+          defenderLife: defenderPlayer.life,
         },
       );
     }
@@ -279,20 +320,17 @@ export const useGameStore = create<GameStore>((set, get) => ({
       [next]: updatedNext,
     } as Partial<GameStore>);
     get().announce(
-      next === 'player'
-        ? `Turn ${s.turnNumber + bumpTurn}. Your turn.`
-        : "Opponent's turn.",
+      next === 'player' ? `Turn ${s.turnNumber + bumpTurn}. Your turn.` : "Opponent's turn.",
       'polite',
       'turn',
       { turnNumber: s.turnNumber + bumpTurn, player: next },
     );
     if (next === 'player') {
-      get().announce(
-        `${updatedNext.manaMax} mana available.`,
-        'polite',
-        'mana',
-        { player: 'player', manaMax: updatedNext.manaMax, manaAvailable: updatedNext.manaAvailable },
-      );
+      get().announce(`${updatedNext.manaMax} mana available.`, 'polite', 'mana', {
+        player: 'player',
+        manaMax: updatedNext.manaMax,
+        manaAvailable: updatedNext.manaAvailable,
+      });
     }
     get().drawCard(next);
   },

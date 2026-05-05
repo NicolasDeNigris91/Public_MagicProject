@@ -62,15 +62,17 @@ describe('useCombatStore', () => {
       statesSeen.push(state.lifePulse);
     });
 
-    const p = playCombat(intent({
-      targetId: 'player-life',
-      targetKind: 'face',
-      faceDamage: 3,
-      attackerDamage: 0,
-      targetDamage: 0,
-      attackerDies: false,
-      targetDies: false,
-    }));
+    const p = playCombat(
+      intent({
+        targetId: 'player-life',
+        targetKind: 'face',
+        faceDamage: 3,
+        attackerDamage: 0,
+        targetDamage: 0,
+        attackerDies: false,
+        targetDies: false,
+      }),
+    );
     await vi.advanceTimersByTimeAsync(1200);
     await p;
     unsubscribe();
@@ -86,15 +88,17 @@ describe('useCombatStore', () => {
       statesSeen.push(state.lifePulse);
     });
 
-    const p = playCombat(intent({
-      targetId: 'opponent-life',
-      targetKind: 'face',
-      faceDamage: 3,
-      attackerDamage: 0,
-      targetDamage: 0,
-      attackerDies: false,
-      targetDies: false,
-    }));
+    const p = playCombat(
+      intent({
+        targetId: 'opponent-life',
+        targetKind: 'face',
+        faceDamage: 3,
+        attackerDamage: 0,
+        targetDamage: 0,
+        attackerDies: false,
+        targetDies: false,
+      }),
+    );
     await vi.advanceTimersByTimeAsync(1200);
     await p;
     unsubscribe();

@@ -7,13 +7,16 @@ import type { ICard } from '@/engine/types';
 const sample: ICard = {
   id: 'c1',
   name: 'Test Goblin',
-  power: 1, toughness: 1, cmc: 1,
+  power: 1,
+  toughness: 1,
+  cmc: 1,
   manaCost: '{R}',
   typeLine: 'Creature - Goblin',
   oracleText: 'Haste.',
   imageUrl: '',
   imageUrlSmall: '',
-  accessibilityDescription: 'Test Goblin. Creature - Goblin. Mana cost red. Power 1, toughness 1. Haste.',
+  accessibilityDescription:
+    'Test Goblin. Creature - Goblin. Mana cost red. Power 1, toughness 1. Haste.',
 };
 
 describe('Card - onInspect', () => {

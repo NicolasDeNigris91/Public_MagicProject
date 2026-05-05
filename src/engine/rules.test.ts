@@ -1,19 +1,39 @@
 import { describe, expect, it } from 'vitest';
 import type { ICard, IPlayer } from './types';
 import {
-  applyDamage, beginTurn, canAfford, canAttack, canAttackFace,
-  drawCard, playCardToField, resolveCombat,
+  applyDamage,
+  beginTurn,
+  canAfford,
+  canAttack,
+  canAttackFace,
+  drawCard,
+  playCardToField,
+  resolveCombat,
 } from './rules';
 
 const makeCard = (id: string, power = 2, toughness = 2): ICard => ({
-  id, name: `Card ${id}`, power, toughness, cmc: 0,
-  manaCost: '{1}', typeLine: 'Creature', oracleText: '',
-  imageUrl: '', imageUrlSmall: '', accessibilityDescription: `Card ${id}`,
+  id,
+  name: `Card ${id}`,
+  power,
+  toughness,
+  cmc: 0,
+  manaCost: '{1}',
+  typeLine: 'Creature',
+  oracleText: '',
+  imageUrl: '',
+  imageUrlSmall: '',
+  accessibilityDescription: `Card ${id}`,
 });
 
 const makePlayer = (overrides: Partial<IPlayer> = {}): IPlayer => ({
-  id: 'player', life: 20, hand: [], battlefield: [], deck: [],
-  manaMax: 0, manaAvailable: 0, ...overrides,
+  id: 'player',
+  life: 20,
+  hand: [],
+  battlefield: [],
+  deck: [],
+  manaMax: 0,
+  manaAvailable: 0,
+  ...overrides,
 });
 
 describe('drawCard', () => {

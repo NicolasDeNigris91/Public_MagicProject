@@ -11,13 +11,13 @@ export type TargetKind = 'creature' | 'face';
 
 export interface CombatIntent {
   attackerId: string;
-  targetId: string;         // creature id OR 'opponent-life' / 'player-life' for face
+  targetId: string; // creature id OR 'opponent-life' / 'player-life' for face
   targetKind: TargetKind;
-  attackerDamage: number;   // dealt to attacker by blocker (0 on face hits)
-  targetDamage: number;     // dealt to blocker by attacker (0 on face hits)
+  attackerDamage: number; // dealt to attacker by blocker (0 on face hits)
+  targetDamage: number; // dealt to blocker by attacker (0 on face hits)
   attackerDies: boolean;
   targetDies: boolean;
-  faceDamage: number;       // damage to defending player (0 on creature combat)
+  faceDamage: number; // damage to defending player (0 on creature combat)
 }
 
 export interface DamageNumber {
@@ -63,8 +63,10 @@ export const useCombatStore = create<CombatStore>((set, get) => {
   const buildDamageNumbers = (intent: CombatIntent): DamageNumber[] => {
     if (intent.targetKind === 'creature') {
       const out: DamageNumber[] = [];
-      if (intent.targetDamage > 0) out.push({ id: 't', anchorId: intent.targetId, value: intent.targetDamage });
-      if (intent.attackerDamage > 0) out.push({ id: 'a', anchorId: intent.attackerId, value: intent.attackerDamage });
+      if (intent.targetDamage > 0)
+        out.push({ id: 't', anchorId: intent.targetId, value: intent.targetDamage });
+      if (intent.attackerDamage > 0)
+        out.push({ id: 'a', anchorId: intent.attackerId, value: intent.attackerDamage });
       return out;
     }
     return intent.faceDamage > 0
@@ -83,7 +85,11 @@ export const useCombatStore = create<CombatStore>((set, get) => {
     const damageNumbers = buildDamageNumbers(intent);
 
     set({
-      flight: { attackerId: intent.attackerId, targetId: intent.targetId, targetKind: intent.targetKind },
+      flight: {
+        attackerId: intent.attackerId,
+        targetId: intent.targetId,
+        targetKind: intent.targetKind,
+      },
       impactIds: [],
       deathIds: [],
       damageNumbers: [],
@@ -91,15 +97,17 @@ export const useCombatStore = create<CombatStore>((set, get) => {
     });
     await sleep(TRAVEL_MS);
 
-    const impactIds = intent.targetKind === 'creature'
-      ? [intent.attackerId, intent.targetId]
-      : [intent.attackerId];
+    const impactIds =
+      intent.targetKind === 'creature' ? [intent.attackerId, intent.targetId] : [intent.attackerId];
     set({
       impactIds,
       damageNumbers,
-      lifePulse: intent.targetKind === 'face'
-        ? (intent.targetId === 'player-life' ? 'player' : 'opponent')
-        : null,
+      lifePulse:
+        intent.targetKind === 'face'
+          ? intent.targetId === 'player-life'
+            ? 'player'
+            : 'opponent'
+          : null,
     });
     await sleep(IMPACT_MS);
 
@@ -113,13 +121,17 @@ export const useCombatStore = create<CombatStore>((set, get) => {
   const runReduced = async (intent: CombatIntent) => {
     const damageNumbers = buildDamageNumbers(intent);
     set({
-      impactIds: intent.targetKind === 'creature'
-        ? [intent.attackerId, intent.targetId]
-        : [intent.attackerId],
+      impactIds:
+        intent.targetKind === 'creature'
+          ? [intent.attackerId, intent.targetId]
+          : [intent.attackerId],
       damageNumbers,
-      lifePulse: intent.targetKind === 'face'
-        ? (intent.targetId === 'player-life' ? 'player' : 'opponent')
-        : null,
+      lifePulse:
+        intent.targetKind === 'face'
+          ? intent.targetId === 'player-life'
+            ? 'player'
+            : 'opponent'
+          : null,
     });
     await sleep(REDUCED_FLASH_MS);
     set({ impactIds: [] });

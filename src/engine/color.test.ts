@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { COLORS, COLOR_LABELS, pickOpponentColor, buildDeckFromCandidates, SKELETON } from './color';
+import {
+  COLORS,
+  COLOR_LABELS,
+  pickOpponentColor,
+  buildDeckFromCandidates,
+  SKELETON,
+} from './color';
 import type { ICard } from './types';
 
 describe('COLORS', () => {
@@ -36,7 +42,9 @@ describe('pickOpponentColor', () => {
   });
 });
 
-function card(partial: Partial<ICard> & { id: string; cmc: number; power: number; toughness: number }): ICard {
+function card(
+  partial: Partial<ICard> & { id: string; cmc: number; power: number; toughness: number },
+): ICard {
   return {
     name: partial.id,
     color: 'R',
@@ -66,10 +74,7 @@ function makeSeeds(): ICard[] {
     { id: 'seed-8', cmc: 6, power: 5, toughness: 5 },
     { id: 'seed-9', cmc: 2, power: 1, toughness: 2 },
   ];
-  return [
-    ...base.map(card),
-    ...base.map((b) => card({ ...b, id: `${b.id}-b` })),
-  ];
+  return [...base.map(card), ...base.map((b) => card({ ...b, id: `${b.id}-b` }))];
 }
 
 describe('buildDeckFromCandidates', () => {

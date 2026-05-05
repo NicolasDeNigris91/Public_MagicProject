@@ -28,8 +28,13 @@ export interface BuildInspectorActionsArgs {
 
 export function buildInspectorActions(args: BuildInspectorActionsArgs): InspectorAction[] {
   const {
-    source, isCurrentlySelectedAttacker,
-    onPlay, onSelectAttacker, onDeselectAttacker, onClose, playDisabledReason,
+    source,
+    isCurrentlySelectedAttacker,
+    onPlay,
+    onSelectAttacker,
+    onDeselectAttacker,
+    onClose,
+    playDisabledReason,
   } = args;
 
   const close: InspectorAction = { label: 'Close', variant: 'secondary', onClick: onClose };
@@ -39,10 +44,11 @@ export function buildInspectorActions(args: BuildInspectorActionsArgs): Inspecto
     const play: InspectorAction = {
       label: 'Play to field',
       variant: 'primary',
-      onClick: () => { onPlay(); onClose(); },
-      ...(playDisabledReason
-        ? { disabled: true, ariaLabel: playDisabledReason }
-        : {}),
+      onClick: () => {
+        onPlay();
+        onClose();
+      },
+      ...(playDisabledReason ? { disabled: true, ariaLabel: playDisabledReason } : {}),
     };
     return [play, cancel];
   }
@@ -50,12 +56,26 @@ export function buildInspectorActions(args: BuildInspectorActionsArgs): Inspecto
   if (source === 'own-field') {
     if (isCurrentlySelectedAttacker) {
       return [
-        { label: 'Deselect attacker', variant: 'primary', onClick: () => { onDeselectAttacker(); onClose(); } },
+        {
+          label: 'Deselect attacker',
+          variant: 'primary',
+          onClick: () => {
+            onDeselectAttacker();
+            onClose();
+          },
+        },
         close,
       ];
     }
     return [
-      { label: 'Select as attacker', variant: 'primary', onClick: () => { onSelectAttacker(); onClose(); } },
+      {
+        label: 'Select as attacker',
+        variant: 'primary',
+        onClick: () => {
+          onSelectAttacker();
+          onClose();
+        },
+      },
       close,
     ];
   }

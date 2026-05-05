@@ -19,7 +19,10 @@ export function useAnnouncer(): AnnouncerState {
   const log = useGameStore((s) => s.gameLog);
   const generation = useGameStore((s) => s.generation);
   const [state, setState] = useState<AnnouncerState>({
-    polite: '', politeKey: 0, assertive: '', assertiveKey: 0,
+    polite: '',
+    politeKey: 0,
+    assertive: '',
+    assertiveKey: 0,
   });
 
   const lastSeenId = useRef<string | null>(null);

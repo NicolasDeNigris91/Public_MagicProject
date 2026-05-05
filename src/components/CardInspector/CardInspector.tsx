@@ -10,8 +10,14 @@ const focusableSelector =
   'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
 const MANA_SYMBOLS: Record<string, string> = {
-  W: 'white', U: 'blue', B: 'black', R: 'red', G: 'green',
-  C: 'colorless', X: 'variable', S: 'snow',
+  W: 'white',
+  U: 'blue',
+  B: 'black',
+  R: 'red',
+  G: 'green',
+  C: 'colorless',
+  X: 'variable',
+  S: 'snow',
 };
 
 function humanizeManaCostInline(cost: string): string {
@@ -23,7 +29,10 @@ function humanizeManaCostInline(cost: string): string {
   for (const sym of symbols) {
     const inner = sym.slice(1, -1);
     const asNum = parseInt(inner, 10);
-    if (!Number.isNaN(asNum)) { generic += asNum; continue; }
+    if (!Number.isNaN(asNum)) {
+      generic += asNum;
+      continue;
+    }
     parts.push(MANA_SYMBOLS[inner] ?? inner.toLowerCase());
   }
   if (generic > 0) parts.unshift(`${generic} generic`);
@@ -64,16 +73,26 @@ export function CardInspector({ card, actions, onClose }: CardInspectorProps) {
       if (e.key !== 'Tab') return;
       const root = dialogRef.current;
       if (!root) return;
-      const items = Array.from(root.querySelectorAll<HTMLElement>(focusableSelector))
-        .filter((el) => !el.hasAttribute('disabled'));
+      const items = Array.from(root.querySelectorAll<HTMLElement>(focusableSelector)).filter(
+        (el) => !el.hasAttribute('disabled'),
+      );
       if (items.length === 0) return;
       const first = items[0]!;
       const last = items[items.length - 1]!;
       const active = document.activeElement as HTMLElement | null;
       const isInside = !!active && root.contains(active);
-      if (!isInside) { e.preventDefault(); first.focus(); return; }
-      if (e.shiftKey && active === first) { e.preventDefault(); last.focus(); }
-      else if (!e.shiftKey && active === last) { e.preventDefault(); first.focus(); }
+      if (!isInside) {
+        e.preventDefault();
+        first.focus();
+        return;
+      }
+      if (e.shiftKey && active === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && active === last) {
+        e.preventDefault();
+        first.focus();
+      }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
@@ -93,7 +112,9 @@ export function CardInspector({ card, actions, onClose }: CardInspectorProps) {
   return createPortal(
     <div
       className={styles.backdrop}
-      onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}
+      onMouseDown={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
     >
       <div
         ref={dialogRef}
@@ -118,11 +139,22 @@ export function CardInspector({ card, actions, onClose }: CardInspectorProps) {
           )}
         </div>
         <div className={styles.textCell}>
-          <h2 id="inspector-title" className={styles.title}>{card.name}</h2>
+          <h2 id="inspector-title" className={styles.title}>
+            {card.name}
+          </h2>
           <dl className={styles.metaList}>
-            <dt>Type</dt><dd>{card.typeLine}</dd>
-            <dt>Mana</dt><dd>{manaText}</dd>
-            {isCreature && (<><dt>P / T</dt><dd>{card.power} / {card.toughness}</dd></>)}
+            <dt>Type</dt>
+            <dd>{card.typeLine}</dd>
+            <dt>Mana</dt>
+            <dd>{manaText}</dd>
+            {isCreature && (
+              <>
+                <dt>P / T</dt>
+                <dd>
+                  {card.power} / {card.toughness}
+                </dd>
+              </>
+            )}
           </dl>
           {card.oracleText && <p className={styles.rules}>{card.oracleText}</p>}
           <div className={styles.actions}>

@@ -36,7 +36,7 @@ client-side via Axios from the browser, behind a thin
 ## Constraints we accept
 
 - **English-only oracle text from Scryfall.** Our UI translates the
-  *chrome* (buttons, headings, announcements) but the card text
+  _chrome_ (buttons, headings, announcements) but the card text
   itself stays English. Translating Magic rules text is a project
   unto itself; out of scope. The choice is documented at the top of
   `src/i18n/messages.ts`.

@@ -13,8 +13,14 @@ export interface RawCardFields {
 }
 
 const MANA_SYMBOLS: Record<string, string> = {
-  W: 'white', U: 'blue', B: 'black', R: 'red', G: 'green',
-  C: 'colorless', X: 'variable', S: 'snow',
+  W: 'white',
+  U: 'blue',
+  B: 'black',
+  R: 'red',
+  G: 'green',
+  C: 'colorless',
+  X: 'variable',
+  S: 'snow',
 };
 
 function humanizeManaCost(cost: string): string {
@@ -26,7 +32,10 @@ function humanizeManaCost(cost: string): string {
   for (const sym of symbols) {
     const inner = sym.slice(1, -1);
     const asNum = parseInt(inner, 10);
-    if (!Number.isNaN(asNum)) { generic += asNum; continue; }
+    if (!Number.isNaN(asNum)) {
+      generic += asNum;
+      continue;
+    }
     parts.push(MANA_SYMBOLS[inner] ?? inner.toLowerCase());
   }
   if (generic > 0) parts.unshift(`${generic} generic`);
@@ -50,7 +59,9 @@ export function buildA11yDescription(raw: RawCardFields): string {
   return parts.join(' ');
 }
 
-export function shortCardLabel(card: Pick<ICard, 'name' | 'power' | 'toughness' | 'typeLine'>): string {
+export function shortCardLabel(
+  card: Pick<ICard, 'name' | 'power' | 'toughness' | 'typeLine'>,
+): string {
   if (isCreature(card.typeLine)) {
     return `${card.name}, ${card.power} over ${card.toughness}`;
   }

@@ -15,11 +15,15 @@ describe('LifeDisplay', () => {
     const { rerender } = render(<LifeDisplay value={20} />);
     rerender(<LifeDisplay value={17} />);
     // Halfway through the 400ms lerp we should see an intermediate integer.
-    await act(async () => { vi.advanceTimersByTime(200); });
+    await act(async () => {
+      vi.advanceTimersByTime(200);
+    });
     const shown = Number(screen.getByRole('status').textContent);
     expect(shown).toBeGreaterThan(17);
     expect(shown).toBeLessThan(20);
-    await act(async () => { vi.advanceTimersByTime(300); });
+    await act(async () => {
+      vi.advanceTimersByTime(300);
+    });
     expect(screen.getByText('17')).toBeInTheDocument();
   });
 

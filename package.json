@@ -9,11 +9,23 @@
     "lint": "next lint --max-warnings=0",
     "lint:fix": "next lint --fix",
     "typecheck": "tsc --noEmit",
+    "format": "prettier --write \"**/*.{ts,tsx,js,mjs,cjs,json,md,yml,yaml}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,mjs,cjs,json,md,yml,yaml}\"",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "analyze": "cross-env ANALYZE=true next build",
-    "ci": "npm run typecheck && npm run lint && npm run test:coverage && npm run build"
+    "ci": "npm run typecheck && npm run lint && npm run format:check && npm run test:coverage && npm run build",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "next lint --fix --file",
+      "prettier --write"
+    ],
+    "*.{js,mjs,cjs,json,md,yml,yaml,css}": [
+      "prettier --write"
+    ]
   },
   "engines": {
     "node": ">=20.0.0 <21"
@@ -28,6 +40,8 @@
     "zustand": "^4.5.5"
   },
   "devDependencies": {
+    "@commitlint/cli": "^20.5.3",
+    "@commitlint/config-conventional": "^20.5.3",
     "@next/bundle-analyzer": "^16.2.4",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
@@ -40,7 +54,11 @@
     "cross-env": "^10.1.0",
     "eslint": "^8.57.1",
     "eslint-config-next": "14.2.15",
+    "eslint-config-prettier": "^10.1.8",
+    "husky": "^9.1.7",
     "jsdom": "^29.0.2",
+    "lint-staged": "^16.4.0",
+    "prettier": "^3.8.3",
     "typescript": "^5.6.2",
     "vitest": "^2.1.2",
     "vitest-axe": "^0.1.0"

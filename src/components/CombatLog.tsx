@@ -35,12 +35,7 @@ export function CombatLog({ open, onClose }: CombatLogProps) {
         <strong style={{ fontSize: 13, letterSpacing: 0.4, textTransform: 'uppercase' }}>
           {t('log.title')}
         </strong>
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label={t('log.close')}
-          style={CLOSE_STYLE}
-        >
+        <button type="button" onClick={onClose} aria-label={t('log.close')} style={CLOSE_STYLE}>
           ×
         </button>
       </header>
@@ -50,7 +45,9 @@ export function CombatLog({ open, onClose }: CombatLogProps) {
         <ol ref={listRef} style={LIST_STYLE}>
           {log.map((entry) => (
             <li key={entry.id} style={entryStyle(entry.kind ?? 'info')}>
-              <span aria-hidden="true" style={ICON_STYLE}>{ICON_FOR[entry.kind ?? 'info']}</span>
+              <span aria-hidden="true" style={ICON_STYLE}>
+                {ICON_FOR[entry.kind ?? 'info']}
+              </span>
               <span style={MSG_STYLE}>{entry.message}</span>
             </li>
           ))}
@@ -61,23 +58,23 @@ export function CombatLog({ open, onClose }: CombatLogProps) {
 }
 
 const ICON_FOR: Record<LogKind, string> = {
-  'info': '•',
-  'turn': '◆',
-  'draw': '↓',
-  'play': '+',
-  'combat': '⚔',
-  'mana': '◎',
+  info: '•',
+  turn: '◆',
+  draw: '↓',
+  play: '+',
+  combat: '⚔',
+  mana: '◎',
   'game-over': '★',
 };
 
 const KIND_TINT: Record<LogKind, { border: string; bg: string; icon: string }> = {
-  'info':      { border: '#37474f',             bg: 'transparent',             icon: '#90a4ae' },
-  'turn':      { border: '#455a64',             bg: 'rgba(77,208,225,0.04)',   icon: '#b0bec5' },
-  'draw':      { border: 'rgba(77,208,225,0.6)', bg: 'rgba(77,208,225,0.05)',  icon: '#4dd0e1' },
-  'play':      { border: 'rgba(255,179,66,0.6)', bg: 'rgba(255,179,66,0.05)',  icon: '#ffb74d' },
-  'combat':    { border: 'rgba(239,83,80,0.6)',  bg: 'rgba(239,83,80,0.05)',   icon: '#ef5350' },
-  'mana':      { border: 'rgba(144,202,249,0.6)',bg: 'rgba(144,202,249,0.05)', icon: '#90caf9' },
-  'game-over': { border: '#ffb300',              bg: 'rgba(255,179,0,0.08)',   icon: '#ffca28' },
+  info: { border: '#37474f', bg: 'transparent', icon: '#90a4ae' },
+  turn: { border: '#455a64', bg: 'rgba(77,208,225,0.04)', icon: '#b0bec5' },
+  draw: { border: 'rgba(77,208,225,0.6)', bg: 'rgba(77,208,225,0.05)', icon: '#4dd0e1' },
+  play: { border: 'rgba(255,179,66,0.6)', bg: 'rgba(255,179,66,0.05)', icon: '#ffb74d' },
+  combat: { border: 'rgba(239,83,80,0.6)', bg: 'rgba(239,83,80,0.05)', icon: '#ef5350' },
+  mana: { border: 'rgba(144,202,249,0.6)', bg: 'rgba(144,202,249,0.05)', icon: '#90caf9' },
+  'game-over': { border: '#ffb300', bg: 'rgba(255,179,0,0.08)', icon: '#ffca28' },
 };
 
 function entryStyle(kind: LogKind): React.CSSProperties {

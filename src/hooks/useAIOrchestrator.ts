@@ -5,11 +5,7 @@ import { useCombatStore } from '@/store/useCombatStore';
 import { resolveCombat } from '@/engine/rules';
 import { pickCardToPlay, planAttacks } from '@/engine/ai';
 import type { IPlayer } from '@/engine/types';
-import {
-  AI_ATTACK_DELAY_MS,
-  AI_END_DELAY_MS,
-  AI_PLAY_DELAY_MS,
-} from '@/constants/timings';
+import { AI_ATTACK_DELAY_MS, AI_END_DELAY_MS, AI_PLAY_DELAY_MS } from '@/constants/timings';
 
 /**
  * Runs the opponent's turn from the UI layer. Fires when `turn`
@@ -74,7 +70,7 @@ export function useAIOrchestrator() {
         const curr = useGameStore.getState();
         const attacker = curr.opponent.battlefield.find((c) => c.id === plan.attackerId);
         const blocker = plan.blockerId
-          ? curr.player.battlefield.find((c) => c.id === plan.blockerId) ?? null
+          ? (curr.player.battlefield.find((c) => c.id === plan.blockerId) ?? null)
           : null;
         if (attacker) {
           const result = resolveCombat(attacker, blocker);
@@ -96,9 +92,7 @@ export function useAIOrchestrator() {
         useGameStore.getState().attack(plan.attackerId, plan.blockerId);
         schedule(attackTick, AI_ATTACK_DELAY_MS);
       };
-      Promise.resolve(attackTick()).catch((err) =>
-        console.error('[ai] attackTick failed', err),
-      );
+      Promise.resolve(attackTick()).catch((err) => console.error('[ai] attackTick failed', err));
     };
 
     // Greedy main phase: pick the highest-power affordable creature each

@@ -22,7 +22,14 @@ const PLAYMAT: Record<NonNullable<BattlefieldProps['variant']>, string> = {
     'linear-gradient(180deg, rgba(0,0,0,0.12), rgba(255,255,255,0.015))',
 };
 
-export function Battlefield({ label, cards, variant = 'player', onCardActivate, onCardInspect, selectedId }: BattlefieldProps) {
+export function Battlefield({
+  label,
+  cards,
+  variant = 'player',
+  onCardActivate,
+  onCardInspect,
+  selectedId,
+}: BattlefieldProps) {
   const { t } = useI18n();
   return (
     <section
@@ -55,9 +62,18 @@ export function Battlefield({ label, cards, variant = 'player', onCardActivate, 
       >
         {cards.length === 0 && (
           <li style={EMPTY_STYLE}>
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true"
-                 stroke="#546e7a" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M4 4l7 7m9-7l-7 7M4 20l7-7m9 7l-7-7"/>
+            <svg
+              width="28"
+              height="28"
+              viewBox="0 0 24 24"
+              fill="none"
+              aria-hidden="true"
+              stroke="#546e7a"
+              strokeWidth="1.6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M4 4l7 7m9-7l-7 7M4 20l7-7m9 7l-7-7" />
             </svg>
             <span>{t('battlefield.empty', { label })}</span>
           </li>

@@ -13,6 +13,8 @@ export function useInertWhile(ref: RefObject<HTMLElement>, active: boolean) {
     if (!el) return;
     if (active) el.setAttribute('inert', '');
     else el.removeAttribute('inert');
-    return () => { el.removeAttribute('inert'); };
+    return () => {
+      el.removeAttribute('inert');
+    };
   }, [ref, active]);
 }
