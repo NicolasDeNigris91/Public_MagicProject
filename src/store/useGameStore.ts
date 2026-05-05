@@ -21,6 +21,7 @@ import type {
   IGameState,
   IPlayer,
   LogEntry,
+  LogEntryId,
   LogKind,
   PlayerId,
 } from '@/engine/types';
@@ -79,276 +80,308 @@ function makePlayer(id: PlayerId, deck: ICard[]): IPlayer {
   };
 }
 
-// Monotonic sequence guarantees unique log ids even when several entries
-// are appended in the same millisecond. The announcer uses id as its
-// cursor, so any collision would cause a message to be re-spoken.
-let logSeq = 0;
-function log(
-  msg: string,
-  priority: AnnouncePriority,
-  kind: LogKind = 'info',
-  meta?: Record<string, string | number>,
-): LogEntry {
-  return {
-    id: logEntryId(`log-${++logSeq}`),
-    message: msg,
-    priority,
-    timestamp: Date.now(),
-    kind,
-    ...(meta ? { meta } : {}),
-  };
+/** Wall-clock function. Defaults to Date.now; tests inject a fixed
+ *  value via createGameStore({ clock }). */
+export type Clock = () => number;
+/** Log-id minter. Default is a monotonic `log-N` sequence; tests
+ *  inject a deterministic generator via createGameStore({ idGen }). */
+export type IdGen = () => LogEntryId;
+
+export interface GameStoreDependencies {
+  clock?: Clock;
+  idGen?: IdGen;
 }
 
-// devtools is wrapped only in development so the production bundle
-// stays free of the Redux DevTools adapter (it short-circuits to an
-// identity function when window.__REDUX_DEVTOOLS_EXTENSION__ is absent
-// but still costs bytes). The action labels passed to set() show up
-// as discrete entries in the timeline.
-export const useGameStore = create<GameStore>()(
-  devtools(
-    (set, get) => ({
-      player: {
-        id: 'player',
-        life: STARTING_LIFE,
-        hand: [],
-        battlefield: [],
-        deck: [],
-        manaMax: 0,
-        manaAvailable: 0,
-      },
-      opponent: {
-        id: 'opponent',
-        life: STARTING_LIFE,
-        hand: [],
-        battlefield: [],
-        deck: [],
-        manaMax: 0,
-        manaAvailable: 0,
-      },
-      turn: 'player',
-      gameLog: [],
-      winner: null as GameResult,
-      turnNumber: 1,
-      generation: 0,
-      initialized: false,
+function defaultIdGen(): IdGen {
+  // Monotonic sequence guarantees unique log ids even when several
+  // entries are appended in the same millisecond. The announcer uses
+  // id as its cursor, so any collision would cause a message to be
+  // re-spoken.
+  let seq = 0;
+  return () => logEntryId(`log-${++seq}`);
+}
 
-      initGame: (playerDeck, opponentDeck) => {
-        set((s) => ({
-          player: makePlayer('player', playerDeck),
-          opponent: makePlayer('opponent', opponentDeck),
-          turn: 'player',
-          winner: null,
-          turnNumber: 1,
-          initialized: true,
-          generation: s.generation + 1,
-          gameLog: [
-            log(
-              `New match. Turn 1. You have ${STARTING_LIFE} life, ${STARTING_HAND} cards, and 1 mana. Your turn.`,
-              'polite',
-              'turn',
-              { turnNumber: 1, player: 'player' },
-            ),
-          ],
-        }));
-      },
+/**
+ * Build a fresh game store with optional clock + id-generator
+ * overrides. The default singleton (`useGameStore`) is created at
+ * module load with `Date.now` and an in-process counter; tests may
+ * call `createGameStore({ clock, idGen })` to get an isolated store
+ * whose log timestamps and ids are byte-stable across runs.
+ *
+ * devtools is wrapped only in development so the production bundle
+ * stays free of the Redux DevTools adapter (it short-circuits to an
+ * identity function when `window.__REDUX_DEVTOOLS_EXTENSION__` is
+ * absent but still costs bytes). The action labels passed to set()
+ * show up as discrete entries in the timeline.
+ */
+export function createGameStore(deps: GameStoreDependencies = {}) {
+  const clock: Clock = deps.clock ?? (() => Date.now());
+  const idGen: IdGen = deps.idGen ?? defaultIdGen();
 
-      announce: (message, priority = 'polite', kind = 'info', meta) => {
-        set((s) => {
-          const next = [...s.gameLog, log(message, priority, kind, meta)];
-          return { gameLog: next.length > MAX_LOG ? next.slice(-MAX_LOG) : next };
-        });
-      },
+  function log(
+    msg: string,
+    priority: AnnouncePriority,
+    kind: LogKind = 'info',
+    meta?: Record<string, string | number>,
+  ): LogEntry {
+    return {
+      id: idGen(),
+      message: msg,
+      priority,
+      timestamp: clock(),
+      kind,
+      ...(meta ? { meta } : {}),
+    };
+  }
 
-      drawCard: (who) => {
-        const s = get();
-        if (s.winner) return;
-        const target = s[who];
-        const { player: updated, drawn } = drawCard(target);
-        if (!drawn) {
-          // Decking out is a loss condition in MTG. We trigger it here so
-          // that "tried to draw from an empty deck" is a terminal event.
-          const winner: GameResult = who === 'player' ? 'opponent' : 'player';
-          set({ winner });
-          get().announce(
-            who === 'player'
-              ? 'You tried to draw from an empty deck. You lose the match.'
-              : 'Opponent tried to draw from an empty deck. You win the match.',
-            'assertive',
-            'game-over',
-            { winner: who === 'player' ? 'opponent' : 'player', reason: 'decking' },
-          );
-          return;
-        }
-        setPlayer(set, who, updated);
-        if (who === 'player') {
-          get().announce(
-            `You drew ${drawn.name}. Hand size ${updated.hand.length}.`,
-            'polite',
-            'draw',
-            { player: 'player', card: drawn.name, handSize: updated.hand.length },
-          );
-        } else {
-          get().announce(
-            `Opponent drew a card. Their hand size is ${updated.hand.length}.`,
-            'polite',
-            'draw',
-            { player: 'opponent', handSize: updated.hand.length },
-          );
-        }
-      },
+  return create<GameStore>()(
+    devtools(
+      (set, get) => ({
+        player: {
+          id: 'player',
+          life: STARTING_LIFE,
+          hand: [],
+          battlefield: [],
+          deck: [],
+          manaMax: 0,
+          manaAvailable: 0,
+        },
+        opponent: {
+          id: 'opponent',
+          life: STARTING_LIFE,
+          hand: [],
+          battlefield: [],
+          deck: [],
+          manaMax: 0,
+          manaAvailable: 0,
+        },
+        turn: 'player',
+        gameLog: [],
+        winner: null as GameResult,
+        turnNumber: 1,
+        generation: 0,
+        initialized: false,
 
-      playCardToField: (who, cardId) => {
-        const s = get();
-        if (s.winner) return;
-        if (s.turn !== who) return;
-        const card = s[who].hand.find((c) => c.id === cardId);
-        if (!card) return;
-        if (!canAfford(s[who], card)) {
+        initGame: (playerDeck, opponentDeck) => {
+          set((s) => ({
+            player: makePlayer('player', playerDeck),
+            opponent: makePlayer('opponent', opponentDeck),
+            turn: 'player',
+            winner: null,
+            turnNumber: 1,
+            initialized: true,
+            generation: s.generation + 1,
+            gameLog: [
+              log(
+                `New match. Turn 1. You have ${STARTING_LIFE} life, ${STARTING_HAND} cards, and 1 mana. Your turn.`,
+                'polite',
+                'turn',
+                { turnNumber: 1, player: 'player' },
+              ),
+            ],
+          }));
+        },
+
+        announce: (message, priority = 'polite', kind = 'info', meta) => {
+          set((s) => {
+            const next = [...s.gameLog, log(message, priority, kind, meta)];
+            return { gameLog: next.length > MAX_LOG ? next.slice(-MAX_LOG) : next };
+          });
+        },
+
+        drawCard: (who) => {
+          const s = get();
+          if (s.winner) return;
+          const target = s[who];
+          const { player: updated, drawn } = drawCard(target);
+          if (!drawn) {
+            // Decking out is a loss condition in MTG. We trigger it here so
+            // that "tried to draw from an empty deck" is a terminal event.
+            const winner: GameResult = who === 'player' ? 'opponent' : 'player';
+            set({ winner });
+            get().announce(
+              who === 'player'
+                ? 'You tried to draw from an empty deck. You lose the match.'
+                : 'Opponent tried to draw from an empty deck. You win the match.',
+              'assertive',
+              'game-over',
+              { winner: who === 'player' ? 'opponent' : 'player', reason: 'decking' },
+            );
+            return;
+          }
+          setPlayer(set, who, updated);
           if (who === 'player') {
             get().announce(
-              `Cannot play ${card.name} - costs ${card.cmc}, you have ${s[who].manaAvailable} mana.`,
+              `You drew ${drawn.name}. Hand size ${updated.hand.length}.`,
               'polite',
+              'draw',
+              { player: 'player', card: drawn.name, handSize: updated.hand.length },
             );
-          }
-          return;
-        }
-        const updated = playCardToField(s[who], cardId);
-        setPlayer(set, who, updated);
-        const label = shortCardLabel(card);
-        get().announce(
-          who === 'player'
-            ? `You played ${label} to the battlefield. It has summoning sickness and cannot attack this turn.`
-            : `Opponent played ${label}. It has summoning sickness.`,
-          'polite',
-          'play',
-          { player: who, card: card.name },
-        );
-      },
-
-      attack: (attackerId, blockerId) => {
-        const s = get();
-        if (s.winner) return;
-        const attackingSide = s.turn;
-        const defendingSide: PlayerId = attackingSide === 'player' ? 'opponent' : 'player';
-        const attacker = s[attackingSide].battlefield.find((c) => c.id === attackerId);
-        if (!attacker) return;
-        if (!canAttack(attacker)) {
-          if (attackingSide === 'player') {
-            const reason = attacker.summoningSick
-              ? 'has summoning sickness'
-              : 'has already attacked this turn';
-            get().announce(`${attacker.name} ${reason} and cannot attack.`, 'polite');
-          }
-          return;
-        }
-        const blocker = blockerId
-          ? (s[defendingSide].battlefield.find((c) => c.id === blockerId) ?? null)
-          : null;
-
-        if (!blocker && !canAttackFace(s[defendingSide])) {
-          if (attackingSide === 'player') {
+          } else {
             get().announce(
-              'Cannot attack directly while the opponent has creatures on the battlefield.',
+              `Opponent drew a card. Their hand size is ${updated.hand.length}.`,
               'polite',
+              'draw',
+              { player: 'opponent', handSize: updated.hand.length },
             );
           }
-          return;
-        }
+        },
 
-        const result = resolveCombat(attacker, blocker);
-
-        let attackerPlayer = s[attackingSide];
-        let defenderPlayer = s[defendingSide];
-
-        if (result.attackerDies) {
-          attackerPlayer = removeFromField(attackerPlayer, attacker.id);
-        } else {
-          attackerPlayer = {
-            ...attackerPlayer,
-            battlefield: attackerPlayer.battlefield.map((c) =>
-              c.id === attacker.id ? { ...c, attackedThisTurn: true } : c,
-            ),
-          };
-        }
-        if (result.blockerDies && blocker)
-          defenderPlayer = removeFromField(defenderPlayer, blocker.id);
-        if (result.playerDamage > 0)
-          defenderPlayer = applyDamage(defenderPlayer, result.playerDamage);
-
-        const winner: GameResult = defenderPlayer.life <= 0 ? attackingSide : null;
-
-        setPlayer(set, attackingSide, attackerPlayer);
-        setPlayer(set, defendingSide, defenderPlayer);
-        if (winner) set({ winner });
-
-        const who = attackingSide === 'player' ? 'You' : 'Opponent';
-        if (blocker) {
+        playCardToField: (who, cardId) => {
+          const s = get();
+          if (s.winner) return;
+          if (s.turn !== who) return;
+          const card = s[who].hand.find((c) => c.id === cardId);
+          if (!card) return;
+          if (!canAfford(s[who], card)) {
+            if (who === 'player') {
+              get().announce(
+                `Cannot play ${card.name} - costs ${card.cmc}, you have ${s[who].manaAvailable} mana.`,
+                'polite',
+              );
+            }
+            return;
+          }
+          const updated = playCardToField(s[who], cardId);
+          setPlayer(set, who, updated);
+          const label = shortCardLabel(card);
           get().announce(
-            `${who} attacked with ${shortCardLabel(attacker)}, blocked by ${shortCardLabel(blocker)}. ${
-              result.attackerDies ? `${attacker.name} dies. ` : ''
-            }${result.blockerDies ? `${blocker.name} dies.` : ''}`.trim(),
-            'assertive',
-            'combat',
-            {
-              attackingSide,
-              attacker: attacker.name,
-              blocker: blocker.name,
-              attackerDies: result.attackerDies ? 1 : 0,
-              blockerDies: result.blockerDies ? 1 : 0,
-            },
+            who === 'player'
+              ? `You played ${label} to the battlefield. It has summoning sickness and cannot attack this turn.`
+              : `Opponent played ${label}. It has summoning sickness.`,
+            'polite',
+            'play',
+            { player: who, card: card.name },
           );
-        } else {
-          get().announce(
-            `${who} attacked with ${shortCardLabel(attacker)}, dealing ${result.playerDamage} damage. ${
-              defendingSide === 'player' ? 'Your' : "Opponent's"
-            } life is now ${defenderPlayer.life}.`,
-            'assertive',
-            'combat',
-            {
-              attackingSide,
-              attacker: attacker.name,
-              damage: result.playerDamage,
-              defenderLife: defenderPlayer.life,
-            },
-          );
-        }
+        },
 
-        if (winner) {
-          get().announce(
-            winner === 'player'
-              ? 'Victory! You defeated the opponent.'
-              : 'Defeat. The opponent reduced your life to zero.',
-            'assertive',
-            'game-over',
-            { winner },
-          );
-        }
-      },
+        attack: (attackerId, blockerId) => {
+          const s = get();
+          if (s.winner) return;
+          const attackingSide = s.turn;
+          const defendingSide: PlayerId = attackingSide === 'player' ? 'opponent' : 'player';
+          const attacker = s[attackingSide].battlefield.find((c) => c.id === attackerId);
+          if (!attacker) return;
+          if (!canAttack(attacker)) {
+            if (attackingSide === 'player') {
+              const reason = attacker.summoningSick
+                ? 'has summoning sickness'
+                : 'has already attacked this turn';
+              get().announce(`${attacker.name} ${reason} and cannot attack.`, 'polite');
+            }
+            return;
+          }
+          const blocker = blockerId
+            ? (s[defendingSide].battlefield.find((c) => c.id === blockerId) ?? null)
+            : null;
 
-      endTurn: () => {
-        const s = get();
-        if (s.winner) return;
-        const next: PlayerId = s.turn === 'player' ? 'opponent' : 'player';
-        const bumpTurn = next === 'player' ? 1 : 0;
-        const updatedNext = beginTurn(s[next]);
-        set({ turn: next, turnNumber: s.turnNumber + bumpTurn });
-        setPlayer(set, next, updatedNext);
-        get().announce(
-          next === 'player' ? `Turn ${s.turnNumber + bumpTurn}. Your turn.` : "Opponent's turn.",
-          'polite',
-          'turn',
-          { turnNumber: s.turnNumber + bumpTurn, player: next },
-        );
-        if (next === 'player') {
-          get().announce(`${updatedNext.manaMax} mana available.`, 'polite', 'mana', {
-            player: 'player',
-            manaMax: updatedNext.manaMax,
-            manaAvailable: updatedNext.manaAvailable,
-          });
-        }
-        get().drawCard(next);
-      },
-    }),
-    { name: 'game', enabled: process.env.NODE_ENV === 'development' },
-  ),
-);
+          if (!blocker && !canAttackFace(s[defendingSide])) {
+            if (attackingSide === 'player') {
+              get().announce(
+                'Cannot attack directly while the opponent has creatures on the battlefield.',
+                'polite',
+              );
+            }
+            return;
+          }
+
+          const result = resolveCombat(attacker, blocker);
+
+          let attackerPlayer = s[attackingSide];
+          let defenderPlayer = s[defendingSide];
+
+          if (result.attackerDies) {
+            attackerPlayer = removeFromField(attackerPlayer, attacker.id);
+          } else {
+            attackerPlayer = {
+              ...attackerPlayer,
+              battlefield: attackerPlayer.battlefield.map((c) =>
+                c.id === attacker.id ? { ...c, attackedThisTurn: true } : c,
+              ),
+            };
+          }
+          if (result.blockerDies && blocker)
+            defenderPlayer = removeFromField(defenderPlayer, blocker.id);
+          if (result.playerDamage > 0)
+            defenderPlayer = applyDamage(defenderPlayer, result.playerDamage);
+
+          const winner: GameResult = defenderPlayer.life <= 0 ? attackingSide : null;
+
+          setPlayer(set, attackingSide, attackerPlayer);
+          setPlayer(set, defendingSide, defenderPlayer);
+          if (winner) set({ winner });
+
+          const who = attackingSide === 'player' ? 'You' : 'Opponent';
+          if (blocker) {
+            get().announce(
+              `${who} attacked with ${shortCardLabel(attacker)}, blocked by ${shortCardLabel(blocker)}. ${
+                result.attackerDies ? `${attacker.name} dies. ` : ''
+              }${result.blockerDies ? `${blocker.name} dies.` : ''}`.trim(),
+              'assertive',
+              'combat',
+              {
+                attackingSide,
+                attacker: attacker.name,
+                blocker: blocker.name,
+                attackerDies: result.attackerDies ? 1 : 0,
+                blockerDies: result.blockerDies ? 1 : 0,
+              },
+            );
+          } else {
+            get().announce(
+              `${who} attacked with ${shortCardLabel(attacker)}, dealing ${result.playerDamage} damage. ${
+                defendingSide === 'player' ? 'Your' : "Opponent's"
+              } life is now ${defenderPlayer.life}.`,
+              'assertive',
+              'combat',
+              {
+                attackingSide,
+                attacker: attacker.name,
+                damage: result.playerDamage,
+                defenderLife: defenderPlayer.life,
+              },
+            );
+          }
+
+          if (winner) {
+            get().announce(
+              winner === 'player'
+                ? 'Victory! You defeated the opponent.'
+                : 'Defeat. The opponent reduced your life to zero.',
+              'assertive',
+              'game-over',
+              { winner },
+            );
+          }
+        },
+
+        endTurn: () => {
+          const s = get();
+          if (s.winner) return;
+          const next: PlayerId = s.turn === 'player' ? 'opponent' : 'player';
+          const bumpTurn = next === 'player' ? 1 : 0;
+          const updatedNext = beginTurn(s[next]);
+          set({ turn: next, turnNumber: s.turnNumber + bumpTurn });
+          setPlayer(set, next, updatedNext);
+          get().announce(
+            next === 'player' ? `Turn ${s.turnNumber + bumpTurn}. Your turn.` : "Opponent's turn.",
+            'polite',
+            'turn',
+            { turnNumber: s.turnNumber + bumpTurn, player: next },
+          );
+          if (next === 'player') {
+            get().announce(`${updatedNext.manaMax} mana available.`, 'polite', 'mana', {
+              player: 'player',
+              manaMax: updatedNext.manaMax,
+              manaAvailable: updatedNext.manaAvailable,
+            });
+          }
+          get().drawCard(next);
+        },
+      }),
+      { name: 'game', enabled: process.env.NODE_ENV === 'development' },
+    ),
+  );
+}
+
+export const useGameStore = createGameStore();
