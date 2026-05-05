@@ -64,6 +64,19 @@ a {
   top: 0;
 }
 
+/* Loading skeleton shimmer. Lives here rather than as an inline
+ * <style> block in GameSkeleton so it doesn't need
+ * `style-src 'unsafe-inline'`. The reduced-motion media query at the
+ * bottom of this file zeros the animation duration globally. */
+@keyframes mtg-skeleton {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
 @keyframes pulse-dot {
   0%,
   100% {
