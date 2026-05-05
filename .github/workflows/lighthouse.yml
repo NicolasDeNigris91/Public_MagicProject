@@ -18,8 +18,9 @@ jobs:
       - run: npm ci
       - run: npm run build
       - name: Run Lighthouse CI
-        run: npx --yes @lhci/cli@0.14.x autorun
+        # Reads lighthouserc.json: starts `next start`, runs 3 audits,
+        # asserts a11y=1 (error), perf/best-practices/seo>=0.9 (warn),
+        # CLS<=0.1 (error). Fails the job on any error-level miss.
+        run: npx --yes @lhci/cli@0.14.x autorun --config=./lighthouserc.json
         env:
-          # Publishes an anonymous report to temporary-public-storage; the
-          # URL shows up in the job log so you can click through from PRs.
           LHCI_BUILD_CONTEXT__CURRENT_HASH: ${{ github.sha }}
