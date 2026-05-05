@@ -29,13 +29,17 @@ export function Hand({ hand, label, onActivate, hidden = false, compact = false 
   const ref = useRef<HTMLUListElement>(null);
 
   const onKeyDown = (e: KeyboardEvent<HTMLUListElement>) => {
-    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+    const k = e.key;
+    if (k !== 'ArrowLeft' && k !== 'ArrowRight' && k !== 'Home' && k !== 'End') return;
     const buttons = Array.from(ref.current?.querySelectorAll('button') ?? []);
+    if (buttons.length === 0) return;
     const idx = buttons.indexOf(document.activeElement as HTMLButtonElement);
-    if (idx < 0) return;
-    const next = e.key === 'ArrowRight' ? idx + 1 : idx - 1;
-    const target = buttons[(next + buttons.length) % buttons.length];
-    target?.focus();
+    if (idx < 0 && k !== 'Home' && k !== 'End') return;
+    let next: number;
+    if (k === 'Home') next = 0;
+    else if (k === 'End') next = buttons.length - 1;
+    else next = ((k === 'ArrowRight' ? idx + 1 : idx - 1) + buttons.length) % buttons.length;
+    buttons[next]?.focus();
     e.preventDefault();
   };
 
@@ -59,9 +63,13 @@ export function Hand({ hand, label, onActivate, hidden = false, compact = false 
           overflowY: 'hidden',
         }}
       >
-        {hand.map((card) => (
+        {hand.map((card, i) => (
           <li key={card.id} style={{ flexShrink: 0 }}>
-            {hidden ? <CardBack compact={compact} /> : <Card card={card} onActivate={onActivate} />}
+            {hidden ? (
+              <CardBack compact={compact} />
+            ) : (
+              <Card card={card} onActivate={onActivate} posInSet={i + 1} setSize={hand.length} />
+            )}
           </li>
         ))}
       </ul>
