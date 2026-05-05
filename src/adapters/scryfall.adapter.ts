@@ -5,9 +5,9 @@
  * only this file.
  */
 import { z } from 'zod';
+import { buildA11yDescription } from '@/utils/describeCard';
 import type { Color } from '@/engine/color';
 import type { ICard } from '@/engine/types';
-import { buildA11yDescription } from '@/utils/describeCard';
 
 // Zod schemas at the network boundary. Anything matching the schema
 // can be safely fed to `adaptScryfallCard`; anything that doesn't is

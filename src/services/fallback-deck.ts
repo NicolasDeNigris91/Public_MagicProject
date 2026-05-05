@@ -1,6 +1,6 @@
+import { buildA11yDescription } from '@/utils/describeCard';
 import type { Color } from '@/engine/color';
 import type { ICard } from '@/engine/types';
-import { buildA11yDescription } from '@/utils/describeCard';
 
 interface Seed {
   id: string;

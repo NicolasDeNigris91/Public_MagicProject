@@ -1,10 +1,10 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import type { ICard } from '@/engine/types';
 import { CardFallback } from '../Card/CardFallback';
-import type { InspectorAction } from '@/utils/buildInspectorActions';
 import styles from './CardInspector.module.css';
+import type { ICard } from '@/engine/types';
+import type { InspectorAction } from '@/utils/buildInspectorActions';
 
 const focusableSelector =
   'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';

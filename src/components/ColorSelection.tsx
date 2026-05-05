@@ -1,8 +1,8 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import { COLORS, MANA_SYMBOL_URL, type Color } from '@/engine/color';
-import { fetchColorArt } from '@/services/scryfall.client';
 import { useI18n } from '@/i18n/I18nProvider';
+import { fetchColorArt } from '@/services/scryfall.client';
 
 const SWATCH: Record<Color, string> = {
   W: '#f8f1d9',
@@ -23,7 +23,7 @@ export function ColorSelection({ onSelect }: Props) {
 
   useEffect(() => {
     let cancelled = false;
-    fetchColorArt().then((map) => {
+    void fetchColorArt().then((map) => {
       if (!cancelled) setArt(map);
     });
     return () => {

@@ -1,11 +1,11 @@
 'use client';
 import { useEffect } from 'react';
-import { useGameStore } from '@/store/useGameStore';
-import { useCombatStore } from '@/store/useCombatStore';
-import { resolveCombat } from '@/engine/rules';
-import { pickCardToPlay, planAttacks } from '@/engine/ai';
-import type { IPlayer } from '@/engine/types';
 import { AI_ATTACK_DELAY_MS, AI_END_DELAY_MS, AI_PLAY_DELAY_MS } from '@/constants/timings';
+import { pickCardToPlay, planAttacks } from '@/engine/ai';
+import { resolveCombat } from '@/engine/rules';
+import { useCombatStore } from '@/store/useCombatStore';
+import { useGameStore } from '@/store/useGameStore';
+import type { IPlayer } from '@/engine/types';
 
 /**
  * Runs the opponent's turn from the UI layer. Fires when `turn`
@@ -32,8 +32,8 @@ export function useAIOrchestrator() {
         timers.delete(id);
         try {
           const result = fn();
-          if (result && typeof (result as Promise<void>).catch === 'function') {
-            (result as Promise<void>).catch((err) => {
+          if (result && typeof result.catch === 'function') {
+            result.catch((err) => {
               console.error('[ai] scheduled task failed', err);
             });
           }

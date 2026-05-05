@@ -1,7 +1,7 @@
-import { describe, it, expect, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { CombatLayer } from './CombatLayer';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { useCombatStore } from '@/store/useCombatStore';
+import { CombatLayer } from './CombatLayer';
 
 describe('CombatLayer', () => {
   beforeEach(() => useCombatStore.getState().reset());

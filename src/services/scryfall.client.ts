@@ -1,14 +1,14 @@
 import axios, { AxiosError } from 'axios';
-import type { ICard } from '@/engine/types';
-import type { Color } from '@/engine/color';
-import { COLORS, buildDeckFromCandidates } from '@/engine/color';
 import {
   adaptScryfallCard,
   parseScryfallCards,
   ScryfallCardSchema,
   ScryfallSearchResponseSchema,
 } from '@/adapters/scryfall.adapter';
+import { COLORS, buildDeckFromCandidates } from '@/engine/color';
 import { fallbackDecks } from './fallback-deck';
+import type { Color } from '@/engine/color';
+import type { ICard } from '@/engine/types';
 
 const http = axios.create({
   baseURL: 'https://api.scryfall.com',

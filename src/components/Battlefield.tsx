@@ -1,7 +1,7 @@
 'use client';
-import type { ICard } from '@/engine/types';
-import { Card } from './Card/Card';
 import { useI18n } from '@/i18n/I18nProvider';
+import { Card } from './Card/Card';
+import type { ICard } from '@/engine/types';
 
 export interface BattlefieldProps {
   label: string;

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import type { ICard, IPlayer } from './types';
 import { pickCardToPlay, planAttacks } from './ai';
+import type { ICard, IPlayer } from './types';
 
 const makeCard = (id: string, power = 2, toughness = 2, typeLine = 'Creature'): ICard => ({
   id,

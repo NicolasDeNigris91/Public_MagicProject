@@ -1,8 +1,8 @@
+import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { LiveRegion } from '@/components/LiveRegion';
+import { I18nProvider } from '@/i18n/I18nProvider';
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
-import { LiveRegion } from '@/components/LiveRegion';
-import { ErrorBoundary } from '@/components/ErrorBoundary';
-import { I18nProvider } from '@/i18n/I18nProvider';
 import './globals.css';
 
 export const metadata: Metadata = {

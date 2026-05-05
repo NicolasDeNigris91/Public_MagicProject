@@ -1,16 +1,27 @@
 'use client';
-import { useEffect, useMemo, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
-import { ColorSelection } from '@/components/ColorSelection';
-import { type Color } from '@/engine/color';
-import { Hand } from '@/components/Hand';
-import { LangToggle } from '@/components/LangToggle';
-import { CombatLogToggle } from '@/components/CombatLogToggle';
-import { useI18n } from '@/i18n/I18nProvider';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Battlefield } from '@/components/Battlefield';
+import { ColorSelection } from '@/components/ColorSelection';
+import { CombatLogToggle } from '@/components/CombatLogToggle';
 import { ControlBar } from '@/components/ControlBar';
 import { Footer } from '@/components/Footer';
+import { Hand } from '@/components/Hand';
+import { LangToggle } from '@/components/LangToggle';
 import { PlayerHeader } from '@/components/PlayerHeader';
+import { type Color } from '@/engine/color';
+import { canAfford } from '@/engine/rules';
+import { useAIOrchestrator } from '@/hooks/useAIOrchestrator';
+import { useAttackerSelection } from '@/hooks/useAttackerSelection';
+import { useDeck } from '@/hooks/useDeck';
+import { useInertWhile } from '@/hooks/useInertWhile';
+import { useInspector } from '@/hooks/useInspector';
+import { usePostPlayFocus } from '@/hooks/usePostPlayFocus';
+import { useI18n } from '@/i18n/I18nProvider';
+import { format } from '@/i18n/messages';
+import { useCombatStore } from '@/store/useCombatStore';
+import { useGameStore } from '@/store/useGameStore';
+import { buildInspectorActions } from '@/utils/buildInspectorActions';
 
 // Code-split modal/overlay surfaces. None of these contribute to the
 // initial paint: CombatLog only mounts when the user presses L,
@@ -29,17 +40,6 @@ const CombatLayer = dynamic(
   () => import('@/components/CombatLayer/CombatLayer').then((m) => m.CombatLayer),
   { ssr: false },
 );
-import { useGameStore } from '@/store/useGameStore';
-import { useCombatStore } from '@/store/useCombatStore';
-import { useDeck } from '@/hooks/useDeck';
-import { useInspector } from '@/hooks/useInspector';
-import { useAttackerSelection } from '@/hooks/useAttackerSelection';
-import { useInertWhile } from '@/hooks/useInertWhile';
-import { usePostPlayFocus } from '@/hooks/usePostPlayFocus';
-import { useAIOrchestrator } from '@/hooks/useAIOrchestrator';
-import { buildInspectorActions } from '@/utils/buildInspectorActions';
-import { canAfford } from '@/engine/rules';
-import { format } from '@/i18n/messages';
 
 export default function GamePage() {
   const player = useGameStore((s) => s.player);

@@ -1,14 +1,4 @@
 import { create } from 'zustand';
-import type {
-  AnnouncePriority,
-  GameResult,
-  ICard,
-  IGameState,
-  IPlayer,
-  LogEntry,
-  LogKind,
-  PlayerId,
-} from '@/engine/types';
 import {
   applyDamage,
   beginTurn,
@@ -21,6 +11,16 @@ import {
   resolveCombat,
 } from '@/engine/rules';
 import { shortCardLabel } from '@/utils/describeCard';
+import type {
+  AnnouncePriority,
+  GameResult,
+  ICard,
+  IGameState,
+  IPlayer,
+  LogEntry,
+  LogKind,
+  PlayerId,
+} from '@/engine/types';
 
 interface GameActions {
   initGame: (playerDeck: ICard[], opponentDeck: ICard[]) => void;
@@ -162,7 +162,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       );
       return;
     }
-    set({ [who]: updated } as Partial<GameStore>);
+    set({ [who]: updated });
     if (who === 'player') {
       get().announce(
         `You drew ${drawn.name}. Hand size ${updated.hand.length}.`,
@@ -196,7 +196,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       return;
     }
     const updated = playCardToField(s[who], cardId);
-    set({ [who]: updated } as Partial<GameStore>);
+    set({ [who]: updated });
     const label = shortCardLabel(card);
     get().announce(
       who === 'player'
@@ -262,7 +262,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       [attackingSide]: attackerPlayer,
       [defendingSide]: defenderPlayer,
       ...(winner ? { winner } : {}),
-    } as Partial<GameStore>);
+    });
 
     const who = attackingSide === 'player' ? 'You' : 'Opponent';
     if (blocker) {
@@ -318,7 +318,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       turn: next,
       turnNumber: s.turnNumber + bumpTurn,
       [next]: updatedNext,
-    } as Partial<GameStore>);
+    });
     get().announce(
       next === 'player' ? `Turn ${s.turnNumber + bumpTurn}. Your turn.` : "Opponent's turn.",
       'polite',

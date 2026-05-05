@@ -1,8 +1,8 @@
 'use client';
 import { useRef, type KeyboardEvent } from 'react';
-import type { ICard } from '@/engine/types';
 import { Card } from './Card/Card';
 import { CardBack } from './CardBack';
+import type { ICard } from '@/engine/types';
 
 /**
  * The player's hand is a listbox-like keyboard group:

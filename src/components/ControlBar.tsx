@@ -1,8 +1,8 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
-import type { GameResult, PlayerId } from '@/engine/types';
 import { FACE_BLOCKED_NOTE_MS, OPPONENT_PULSE_MS } from '@/constants/timings';
 import { useI18n } from '@/i18n/I18nProvider';
+import type { GameResult, PlayerId } from '@/engine/types';
 
 export interface ControlBarProps {
   turn: PlayerId;

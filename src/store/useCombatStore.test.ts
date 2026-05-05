@@ -128,14 +128,14 @@ describe('useCombatStore', () => {
     // Patch setState to throw on the first invocation, then restore itself.
     const originalSet = useCombatStore.setState;
     let thrown = false;
-    useCombatStore.setState = ((partial: unknown) => {
+    useCombatStore.setState = (partial: unknown) => {
       if (!thrown) {
         thrown = true;
         useCombatStore.setState = originalSet;
         throw new Error('simulated');
       }
       return originalSet(partial as never);
-    }) as typeof originalSet;
+    };
 
     // First call should reject; catch so the test itself doesn't fail on that.
     const p1 = playCombat(intent()).catch(() => undefined);

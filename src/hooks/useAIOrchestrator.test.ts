@@ -1,7 +1,7 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
-import { useGameStore } from '@/store/useGameStore';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { useCombatStore } from '@/store/useCombatStore';
+import { useGameStore } from '@/store/useGameStore';
 import { useAIOrchestrator } from './useAIOrchestrator';
 import type { ICard } from '@/engine/types';
 

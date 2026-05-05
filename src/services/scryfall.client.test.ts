@@ -10,9 +10,9 @@ vi.mock('axios', () => {
 });
 
 import axios from 'axios';
-import { fetchDeckForColor } from './scryfall.client';
 import { SKELETON } from '@/engine/color';
 import { fallbackDecks } from './fallback-deck';
+import { fetchDeckForColor } from './scryfall.client';
 
 const mockedGet = (axios.create() as unknown as { get: ReturnType<typeof vi.fn> }).get;
 

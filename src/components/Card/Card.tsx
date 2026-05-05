@@ -1,11 +1,11 @@
 'use client';
 import { motion, useReducedMotion } from 'framer-motion';
 import { useState, type KeyboardEvent } from 'react';
-import type { ICard } from '@/engine/types';
-import { CardFallback } from './CardFallback';
-import styles from './Card.module.css';
-import { useCombatStore } from '@/store/useCombatStore';
 import { IMPACT_MS, TILT_FADE_MS } from '@/constants/timings';
+import { useCombatStore } from '@/store/useCombatStore';
+import styles from './Card.module.css';
+import { CardFallback } from './CardFallback';
+import type { ICard } from '@/engine/types';
 
 export interface CardProps {
   card: ICard;

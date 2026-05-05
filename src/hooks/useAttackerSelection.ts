@@ -1,8 +1,8 @@
 'use client';
 import { useCallback, useState } from 'react';
-import { useGameStore } from '@/store/useGameStore';
-import { useCombatStore } from '@/store/useCombatStore';
 import { resolveCombat, canAttack } from '@/engine/rules';
+import { useCombatStore } from '@/store/useCombatStore';
+import { useGameStore } from '@/store/useGameStore';
 import type { ICard } from '@/engine/types';
 
 const SELECT_HINT =

@@ -1,8 +1,8 @@
 'use client';
-import { createPortal } from 'react-dom';
 import { useEffect, useState } from 'react';
-import { useCombatStore } from '@/store/useCombatStore';
+import { createPortal } from 'react-dom';
 import { DAMAGE_FLOAT_MS, TRAVEL_MS } from '@/constants/timings';
+import { useCombatStore } from '@/store/useCombatStore';
 
 const Z = 9000;
 

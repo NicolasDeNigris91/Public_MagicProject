@@ -84,5 +84,5 @@ export function buildInspectorActions(args: BuildInspectorActionsArgs): Inspecto
     return [{ label: 'Close', variant: 'primary', onClick: onClose }];
   }
   const _exhaustive: never = source;
-  throw new Error(`Unhandled InspectorSource: ${_exhaustive}`);
+  throw new Error(`Unhandled InspectorSource: ${String(_exhaustive)}`);
 }

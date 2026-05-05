@@ -1,6 +1,6 @@
 'use client';
 import { useI18n } from '@/i18n/I18nProvider';
-import { LANGS, type Lang } from '@/i18n/messages';
+import { LANGS } from '@/i18n/messages';
 
 /**
  * Two-button segmented toggle for switching UI language.
@@ -22,7 +22,7 @@ export function LangToggle() {
             aria-pressed={active}
             style={{ ...BTN_STYLE, ...(active ? ACTIVE_STYLE : {}) }}
           >
-            {t(`lang.${l}` as `lang.${Lang}`)}
+            {t(`lang.${l}`)}
           </button>
         );
       })}

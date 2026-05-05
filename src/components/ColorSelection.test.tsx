@@ -1,6 +1,6 @@
-import { describe, it, expect, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { describe, it, expect, vi } from 'vitest';
 
 vi.mock('@/services/scryfall.client', () => ({
   // Default: never-resolving promise so existing tests don't trigger
@@ -9,9 +9,9 @@ vi.mock('@/services/scryfall.client', () => ({
   fetchColorArt: vi.fn(() => new Promise(() => {})),
 }));
 
-import { ColorSelection } from './ColorSelection';
-import { fetchColorArt } from '@/services/scryfall.client';
 import { COLORS, COLOR_LABELS } from '@/engine/color';
+import { fetchColorArt } from '@/services/scryfall.client';
+import { ColorSelection } from './ColorSelection';
 
 describe('ColorSelection', () => {
   it('renders one button per color with name + flavor in its aria-label', () => {

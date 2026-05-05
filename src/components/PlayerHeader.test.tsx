@@ -1,7 +1,7 @@
-import { describe, expect, it } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { PlayerHeader } from './PlayerHeader';
+import { describe, expect, it } from 'vitest';
 import { I18nProvider } from '@/i18n/I18nProvider';
+import { PlayerHeader } from './PlayerHeader';
 
 function renderWith(ui: React.ReactElement) {
   return render(<I18nProvider>{ui}</I18nProvider>);

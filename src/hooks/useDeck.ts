@@ -1,8 +1,8 @@
 'use client';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useGameStore } from '@/store/useGameStore';
-import { fetchDeckForColor } from '@/services/scryfall.client';
 import { pickOpponentColor, type Color } from '@/engine/color';
+import { fetchDeckForColor } from '@/services/scryfall.client';
+import { useGameStore } from '@/store/useGameStore';
 
 export type DeckSource = 'scryfall' | 'fallback';
 
@@ -54,7 +54,7 @@ export function useDeck(playerColor: Color | null): UseDeckResult {
       setReady(false);
       return;
     }
-    loadBoth(playerColor);
+    void loadBoth(playerColor);
     return () => {
       cancelledRef.current = true;
     };
@@ -62,7 +62,7 @@ export function useDeck(playerColor: Color | null): UseDeckResult {
 
   const restart = useCallback(() => {
     if (!playerColor) return;
-    loadBoth(playerColor);
+    void loadBoth(playerColor);
   }, [playerColor, loadBoth]);
 
   return { ready, source, restart, opponentColor };

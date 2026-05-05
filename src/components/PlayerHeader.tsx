@@ -1,8 +1,8 @@
 'use client';
-import { MANA_SYMBOL_URL, type Color } from '@/engine/color';
-import { LifeDisplay } from './LifeDisplay';
 import { IMPACT_MS } from '@/constants/timings';
+import { MANA_SYMBOL_URL, type Color } from '@/engine/color';
 import { useI18n } from '@/i18n/I18nProvider';
+import { LifeDisplay } from './LifeDisplay';
 
 export interface PlayerHeaderProps {
   /** Human-facing label, e.g. "You" or "Opponent". */

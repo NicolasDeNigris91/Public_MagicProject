@@ -168,7 +168,8 @@ export const messages: Record<Lang, Record<MessageKey, string>> = {
  */
 export function format(template: string, vars?: Record<string, string | number>): string {
   if (!vars) return template;
-  return template.replace(/\{(\w+)\}/g, (_, k) =>
-    vars[k] !== undefined ? String(vars[k]) : `{${k}}`,
-  );
+  return template.replace(/\{(\w+)\}/g, (_, key: string) => {
+    const v = vars[key];
+    return v !== undefined ? String(v) : `{${key}}`;
+  });
 }

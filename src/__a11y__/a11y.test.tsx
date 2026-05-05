@@ -5,22 +5,22 @@
  * - not a substitute for manual screen-reader review, but a CI gate
  * that fails on known-bad patterns.
  */
-import { describe, it, expect, vi } from 'vitest';
 import { render } from '@testing-library/react';
+import { describe, it, expect, vi } from 'vitest';
 import { axe } from 'vitest-axe';
 
 vi.mock('@/services/scryfall.client', () => ({
   fetchColorArt: vi.fn(() => new Promise(() => {})),
 }));
 
-import { ColorSelection } from '@/components/ColorSelection';
-import { PlayerHeader } from '@/components/PlayerHeader';
-import { ControlBar } from '@/components/ControlBar';
 import { Battlefield } from '@/components/Battlefield';
 import { Card } from '@/components/Card/Card';
-import { Hand } from '@/components/Hand';
+import { ColorSelection } from '@/components/ColorSelection';
 import { CombatLog } from '@/components/CombatLog';
 import { CombatLogToggle } from '@/components/CombatLogToggle';
+import { ControlBar } from '@/components/ControlBar';
+import { Hand } from '@/components/Hand';
+import { PlayerHeader } from '@/components/PlayerHeader';
 import type { ICard } from '@/engine/types';
 
 const sampleCard: ICard = {

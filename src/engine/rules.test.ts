@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest';
-import type { ICard, IPlayer } from './types';
 import {
   applyDamage,
   beginTurn,
@@ -10,6 +9,7 @@ import {
   playCardToField,
   resolveCombat,
 } from './rules';
+import type { ICard, IPlayer } from './types';
 
 const makeCard = (id: string, power = 2, toughness = 2): ICard => ({
   id,

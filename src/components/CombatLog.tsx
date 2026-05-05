@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useRef } from 'react';
-import { useGameStore } from '@/store/useGameStore';
 import { useI18n } from '@/i18n/I18nProvider';
+import { useGameStore } from '@/store/useGameStore';
 import type { LogKind } from '@/engine/types';
 
 export interface CombatLogProps {
