@@ -37,20 +37,20 @@ describe('Card - onInspect', () => {
 
   it('renders a hidden-by-default "ⓘ" inspect button when onInspect is provided', () => {
     render(<Card card={sample} onActivate={vi.fn()} onInspect={vi.fn()} />);
-    const inspectBtn = screen.getByRole('button', { name: /inspect/i });
+    const inspectBtn = screen.getByRole('button', { name: /inspe(cionar|ct)/i });
     expect(inspectBtn).toBeInTheDocument();
   });
 
   it('does NOT render the "ⓘ" button when onInspect is omitted', () => {
     render(<Card card={sample} onActivate={vi.fn()} />);
-    expect(screen.queryByRole('button', { name: /inspect/i })).toBeNull();
+    expect(screen.queryByRole('button', { name: /inspe(cionar|ct)/i })).toBeNull();
   });
 
   it('clicking the "ⓘ" button calls onInspect (not onActivate)', async () => {
     const onActivate = vi.fn();
     const onInspect = vi.fn();
     render(<Card card={sample} onActivate={onActivate} onInspect={onInspect} />);
-    await userEvent.click(screen.getByRole('button', { name: /inspect/i }));
+    await userEvent.click(screen.getByRole('button', { name: /inspe(cionar|ct)/i }));
     expect(onInspect).toHaveBeenCalledTimes(1);
     expect(onActivate).not.toHaveBeenCalled();
   });

@@ -2,6 +2,7 @@
 import { IMPACT_MS } from '@/constants/timings';
 import { MANA_SYMBOL_URL, type Color } from '@/engine/color';
 import { useI18n } from '@/i18n/I18nProvider';
+import { format } from '@/i18n/messages';
 import { LifeDisplay } from './LifeDisplay';
 
 export interface PlayerHeaderProps {
@@ -59,7 +60,7 @@ export function PlayerHeader({
         <span style={LABEL_STYLE}>{label}</span>
       </h2>
 
-      <dl style={DL_STYLE} aria-label={`${label} status`}>
+      <dl style={DL_STYLE} aria-label={format(t('inspector.statusLabel'), { label })}>
         <div style={LIFE_STYLE}>
           <dt className="sr-only">{t('player.lifePrefix')}</dt>
           <dd style={LIFE_DD_STYLE}>

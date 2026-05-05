@@ -55,7 +55,20 @@ export type MessageKey =
   | 'log.close'
   | 'log.shortcut'
   | 'log.cannotPlay.noMana'
-  | 'hand.cannotPlay.mana';
+  | 'hand.cannotPlay.mana'
+  | 'card.sickBadge'
+  | 'card.exhaustedBadge'
+  | 'card.sickAriaSuffix'
+  | 'card.exhaustedAriaSuffix'
+  | 'card.inspect'
+  | 'inspector.type'
+  | 'inspector.mana'
+  | 'inspector.pt'
+  | 'inspector.statusLabel'
+  | 'footer.deckSource'
+  | 'footer.disclaimer'
+  | 'footer.fanPolicy'
+  | 'footer.scryfallThanks';
 
 export const messages: Record<Lang, Record<MessageKey, string>> = {
   pt: {
@@ -108,6 +121,22 @@ export const messages: Record<Lang, Record<MessageKey, string>> = {
     'log.shortcut': 'Atalho: L',
     'log.cannotPlay.noMana': 'Não pode jogar {name} - custa {cmc}, você tem {available} de mana.',
     'hand.cannotPlay.mana': 'Não pode jogar {name} - custa {cmc}, você tem {available} de mana.',
+    'card.sickBadge': 'Enjoo de invocação',
+    'card.exhaustedBadge': 'Já atacou',
+    'card.sickAriaSuffix': 'Enjoo de invocação: não pode atacar neste turno.',
+    'card.exhaustedAriaSuffix': 'Já atacou neste turno.',
+    'card.inspect': 'Inspecionar {name}',
+    'inspector.type': 'Tipo',
+    'inspector.mana': 'Mana',
+    'inspector.pt': 'P / R',
+    'inspector.statusLabel': 'Status de {label}',
+    'footer.deckSource': 'Origem do deck',
+    'footer.disclaimer':
+      'Este é um projeto de portfólio não oficial, sem fins lucrativos. Magic: The Gathering, nomes de cartas, arte e marcas registradas são propriedade da Wizards of the Coast LLC, subsidiária da Hasbro, Inc. Este projeto não é produzido, endossado, apoiado ou afiliado à Wizards of the Coast.',
+    'footer.scryfallThanks':
+      'Dados e imagens das cartas são fornecidos pela API pública Scryfall, a quem agradecemos.',
+    'footer.fanPolicy':
+      'Este conteúdo de fã é permitido sob a Política de Conteúdo de Fãs da Wizards of the Coast.',
   },
   en: {
     'app.title': 'MTG Combat Demo',
@@ -159,6 +188,22 @@ export const messages: Record<Lang, Record<MessageKey, string>> = {
     'log.shortcut': 'Shortcut: L',
     'log.cannotPlay.noMana': 'Cannot play {name} - costs {cmc}, you have {available} mana.',
     'hand.cannotPlay.mana': 'Cannot play {name} - costs {cmc}, you have {available} mana.',
+    'card.sickBadge': 'Summoning sickness',
+    'card.exhaustedBadge': 'Already attacked',
+    'card.sickAriaSuffix': 'Summoning sickness: cannot attack this turn.',
+    'card.exhaustedAriaSuffix': 'Already attacked this turn.',
+    'card.inspect': 'Inspect {name}',
+    'inspector.type': 'Type',
+    'inspector.mana': 'Mana',
+    'inspector.pt': 'P / T',
+    'inspector.statusLabel': '{label} status',
+    'footer.deckSource': 'Deck source',
+    'footer.disclaimer':
+      'This is an unofficial, non-profit portfolio project. Magic: The Gathering, card names, art, and trademarks are property of Wizards of the Coast LLC, a subsidiary of Hasbro, Inc. This project is not produced, endorsed, supported, or affiliated with Wizards of the Coast.',
+    'footer.scryfallThanks':
+      'Card data and images are provided by the public Scryfall API, with thanks.',
+    'footer.fanPolicy':
+      'This fan content is permitted under the Wizards of the Coast Fan Content Policy.',
   },
 };
 

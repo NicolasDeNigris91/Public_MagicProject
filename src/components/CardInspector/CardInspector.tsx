@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { useI18n } from '@/i18n/I18nProvider';
 import { CardFallback } from '../Card/CardFallback';
 import styles from './CardInspector.module.css';
 import type { ICard } from '@/engine/types';
@@ -58,6 +59,7 @@ export function CardInspector({ card, actions, onClose }: CardInspectorProps) {
   const [imgFailed, setImgFailed] = useState(!card.imageUrl);
   const isCreature = /creature/i.test(card.typeLine);
   const manaText = humanizeManaCostInline(card.manaCost);
+  const { t } = useI18n();
 
   const dialogRef = useRef<HTMLDivElement>(null);
 
@@ -143,13 +145,13 @@ export function CardInspector({ card, actions, onClose }: CardInspectorProps) {
             {card.name}
           </h2>
           <dl className={styles.metaList}>
-            <dt>Type</dt>
+            <dt>{t('inspector.type')}</dt>
             <dd>{card.typeLine}</dd>
-            <dt>Mana</dt>
+            <dt>{t('inspector.mana')}</dt>
             <dd>{manaText}</dd>
             {isCreature && (
               <>
-                <dt>P / T</dt>
+                <dt>{t('inspector.pt')}</dt>
                 <dd>
                   {card.power} / {card.toughness}
                 </dd>

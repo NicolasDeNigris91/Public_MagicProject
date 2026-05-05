@@ -2,6 +2,8 @@
 import { motion, useReducedMotion } from 'framer-motion';
 import { useState, type KeyboardEvent } from 'react';
 import { IMPACT_MS, TILT_FADE_MS } from '@/constants/timings';
+import { useI18n } from '@/i18n/I18nProvider';
+import { format } from '@/i18n/messages';
 import { useCombatStore } from '@/store/useCombatStore';
 import styles from './Card.module.css';
 import { CardFallback } from './CardFallback';
@@ -34,6 +36,7 @@ export function Card({
 }: CardProps) {
   const [imgFailed, setImgFailed] = useState(!card.imageUrl);
   const reduceMotion = useReducedMotion();
+  const { t } = useI18n();
   const inFlight = useCombatStore((s) => s.flight?.attackerId === card.id);
   const isImpacting = useCombatStore((s) => s.impactIds.includes(card.id));
   const isDying = useCombatStore((s) => s.deathIds.includes(card.id));
@@ -72,9 +75,9 @@ export function Card({
   // the adapter. Summoning sickness takes precedence over already-attacked.
   const exhausted = card.attackedThisTurn && !card.summoningSick;
   const ariaLabel = card.summoningSick
-    ? `${card.accessibilityDescription} Summoning sickness: cannot attack this turn.`
+    ? `${card.accessibilityDescription} ${t('card.sickAriaSuffix')}`
     : exhausted
-      ? `${card.accessibilityDescription} Already attacked this turn.`
+      ? `${card.accessibilityDescription} ${t('card.exhaustedAriaSuffix')}`
       : card.accessibilityDescription;
 
   return (
@@ -114,12 +117,12 @@ export function Card({
         )}
         {card.summoningSick && (
           <span aria-hidden="true" className={styles.sickBadge}>
-            Summoning sickness
+            {t('card.sickBadge')}
           </span>
         )}
         {exhausted && (
           <span aria-hidden="true" className={styles.sickBadge}>
-            Already attacked
+            {t('card.exhaustedBadge')}
           </span>
         )}
       </motion.button>
@@ -127,7 +130,7 @@ export function Card({
         <button
           type="button"
           tabIndex={-1}
-          aria-label={`Inspect ${card.name}`}
+          aria-label={format(t('card.inspect'), { name: card.name })}
           className={styles.inspectBtn}
           onClick={() => onInspect(card)}
         >
