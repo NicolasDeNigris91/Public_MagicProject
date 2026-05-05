@@ -1,0 +1,126 @@
+.wrap {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 2px 0;
+  flex-shrink: 0;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.heading {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.symbol {
+  width: 20px;
+  height: 20px;
+}
+
+.label {
+  letter-spacing: 0.2px;
+}
+
+.dl {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 0;
+  flex: 1 1 auto;
+}
+
+.life {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: rgba(239, 83, 80, 0.08);
+  border: 1px solid rgba(239, 83, 80, 0.35);
+}
+
+.lifeDd {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+}
+
+.heart {
+  display: inline-flex;
+  align-items: center;
+}
+
+.lifeNumber {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1;
+  min-width: 28px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Damage flash. Combat keyframes live in CombatLayer's runtime
+ * <style> block today; once those move into globals.css this rule
+ * keeps working unchanged. Duration must match IMPACT_MS in
+ * src/constants/timings.ts. */
+.lifePulse {
+  animation:
+    combat-flash 150ms ease-in-out,
+    combat-shake 150ms ease-in-out;
+  color: #ef5350;
+}
+
+.ddReset {
+  margin: 0;
+  display: inline-flex;
+  align-items: baseline;
+}
+
+.manaBlock {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  color: #90caf9;
+  font-weight: 500;
+}
+
+.manaLabel {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.manaValue {
+  font-size: 15px;
+  color: #eceff1;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.hand {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  color: #90a4ae;
+  font-weight: 500;
+}
+
+.handLabel {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.handCount {
+  font-size: 15px;
+  color: #eceff1;
+  font-weight: 700;
+}
