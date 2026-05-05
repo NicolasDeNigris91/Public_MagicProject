@@ -17,6 +17,11 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, State> {
     console.error('[ErrorBoundary]', error, info);
   }
 
+  // Clears the captured error and re-renders children. Useful when the
+  // failure is transient (e.g. a render glitch from a stale ref) and a
+  // full reload would throw away the user's match state.
+  reset = (): void => this.setState({ error: null });
+
   override render() {
     if (this.state.error) {
       return (
@@ -32,24 +37,38 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, State> {
           }}
         >
           <h2 style={{ marginTop: 0 }}>Something broke.</h2>
-          <p>The match crashed. Refresh to start a new game.</p>
+          <p>The match crashed. Try recovering, or reload to start fresh.</p>
           <pre style={{ whiteSpace: 'pre-wrap', fontSize: 12, color: '#ef9a9a' }}>
             {this.state.error.message}
           </pre>
-          <button
-            onClick={() => window.location.reload()}
-            style={{
-              marginTop: 12,
-              padding: '10px 18px',
-              background: '#b71c1c',
-              color: '#fff',
-              border: 0,
-              borderRadius: 8,
-              cursor: 'pointer',
-            }}
-          >
-            Reload
-          </button>
+          <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+            <button
+              onClick={this.reset}
+              style={{
+                padding: '10px 18px',
+                background: 'transparent',
+                color: '#fff',
+                border: '1px solid #b0bec5',
+                borderRadius: 8,
+                cursor: 'pointer',
+              }}
+            >
+              Try again
+            </button>
+            <button
+              onClick={() => window.location.reload()}
+              style={{
+                padding: '10px 18px',
+                background: '#b71c1c',
+                color: '#fff',
+                border: 0,
+                borderRadius: 8,
+                cursor: 'pointer',
+              }}
+            >
+              Reload
+            </button>
+          </div>
         </div>
       );
     }

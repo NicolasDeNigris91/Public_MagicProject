@@ -6,6 +6,7 @@ import { ColorSelection } from '@/components/ColorSelection';
 import { CombatLogToggle } from '@/components/CombatLogToggle';
 import { ControlBar } from '@/components/ControlBar';
 import { Footer } from '@/components/Footer';
+import { GameSkeleton } from '@/components/GameSkeleton';
 import { Hand } from '@/components/Hand';
 import { LangToggle } from '@/components/LangToggle';
 import { PlayerHeader } from '@/components/PlayerHeader';
@@ -183,18 +184,7 @@ export default function GamePage() {
   }
 
   if (!ready || !initialized) {
-    return (
-      <main
-        id="main"
-        ref={loadingRef}
-        tabIndex={-1}
-        aria-busy="true"
-        aria-live="polite"
-        style={{ padding: 32, textAlign: 'center' }}
-      >
-        <p>{t('game.loading')}</p>
-      </main>
-    );
+    return <GameSkeleton ref={loadingRef} />;
   }
 
   return (
