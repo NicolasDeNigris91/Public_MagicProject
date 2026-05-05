@@ -1,0 +1,31 @@
+name: Release Please
+
+# Open and maintain a release PR that bumps package.json + CHANGELOG.md
+# from the conventional commits landed on main since the last release.
+# When the PR merges, release-please tags the repo and publishes a
+# GitHub release. Bump rules follow conventional commits: feat -> minor,
+# fix -> patch, BREAKING CHANGE in body -> major.
+#
+# This project does not publish to npm; the Action only manages the
+# git tag + release notes, never npm publish. Keep it that way unless
+# the package is intentionally publicized.
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: googleapis/release-please-action@v4
+        with:
+          release-type: node
+          # Single-package repo: no monorepo manifest needed; the action
+          # tracks state in .release-please-manifest.json + reads the
+          # current version from package.json.
+          target-branch: main
