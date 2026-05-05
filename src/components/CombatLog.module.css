@@ -1,0 +1,115 @@
+.panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100dvh;
+  width: 320px;
+  max-width: 92vw;
+  background: rgba(13, 17, 23, 0.97);
+  border-left: 1px solid #37474f;
+  box-shadow: -8px 0 24px rgba(0, 0, 0, 0.35);
+  display: flex;
+  flex-direction: column;
+  transition: transform 220ms ease;
+  z-index: 40;
+  transform: translateX(100%);
+}
+
+.panelOpen {
+  transform: translateX(0);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-bottom: 1px solid #37474f;
+  flex-shrink: 0;
+}
+
+.title {
+  font-size: 13px;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+
+.close {
+  background: transparent;
+  border: 1px solid #455a64;
+  color: #eceff1;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.empty {
+  padding: 16px 12px;
+  color: #78909c;
+  font-size: 12px;
+  font-style: italic;
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 6px 8px;
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.entry {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 6px 10px;
+  border-left: 3px solid #37474f;
+  background: transparent;
+  font-size: 12px;
+  line-height: 1.4;
+  color: #cfd8dc;
+}
+
+.entryTurn {
+  border-left-color: #455a64;
+  background: rgba(77, 208, 225, 0.04);
+}
+.entryDraw {
+  border-left-color: rgba(77, 208, 225, 0.6);
+  background: rgba(77, 208, 225, 0.05);
+}
+.entryPlay {
+  border-left-color: rgba(255, 179, 66, 0.6);
+  background: rgba(255, 179, 66, 0.05);
+}
+.entryCombat {
+  border-left-color: rgba(239, 83, 80, 0.6);
+  background: rgba(239, 83, 80, 0.05);
+}
+.entryMana {
+  border-left-color: rgba(144, 202, 249, 0.6);
+  background: rgba(144, 202, 249, 0.05);
+}
+.entryGameOver {
+  border-left-color: #ffb300;
+  background: rgba(255, 179, 0, 0.08);
+}
+
+.icon {
+  flex-shrink: 0;
+  width: 14px;
+  text-align: center;
+  font-size: 12px;
+}
+
+.message {
+  flex: 1;
+  min-width: 0;
+  word-break: break-word;
+}

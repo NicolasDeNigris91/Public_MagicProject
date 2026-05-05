@@ -4,13 +4,14 @@ import { useEffect, useRef, useState } from 'react';
 import { COLORS, MANA_SYMBOL_URL, type Color } from '@/engine/color';
 import { useI18n } from '@/i18n/I18nProvider';
 import { fetchColorArt } from '@/services/scryfall.client';
+import styles from './ColorSelection.module.css';
 
-const SWATCH: Record<Color, string> = {
-  W: '#f8f1d9',
-  U: '#5686c7',
-  B: '#2b2a2a',
-  R: '#d04a3e',
-  G: '#3d9a5f',
+const SWATCH_CLASS: Record<Color, string> = {
+  W: styles.swatchW ?? '',
+  U: styles.swatchU ?? '',
+  B: styles.swatchB ?? '',
+  R: styles.swatchR ?? '',
+  G: styles.swatchG ?? '',
 };
 
 interface Props {
@@ -41,10 +42,10 @@ export function ColorSelection({ onSelect }: Props) {
   }
 
   return (
-    <main id="main" style={WRAPPER_STYLE}>
-      <fieldset style={FIELDSET_STYLE}>
-        <legend style={LEGEND_STYLE}>{t('color.selectTitle')}</legend>
-        <div role="toolbar" aria-label={t('color.toolbarLabel')} style={GRID_STYLE}>
+    <main id="main" className={styles.wrapper}>
+      <fieldset className={styles.fieldset}>
+        <legend className={styles.legend}>{t('color.selectTitle')}</legend>
+        <div role="toolbar" aria-label={t('color.toolbarLabel')} className={styles.grid}>
           {COLORS.map((c, i) => {
             const name = t(`color.${c}.name`);
             const flavor = t(`color.${c}.flavor`);
@@ -59,7 +60,7 @@ export function ColorSelection({ onSelect }: Props) {
                 onClick={() => onSelect(c)}
                 onKeyDown={(e) => onKeyDown(e, i)}
                 aria-label={`${name} - ${flavor}`}
-                style={BUTTON_STYLE}
+                className={styles.button}
               >
                 {artUrl ? (
                   <Image
@@ -68,15 +69,15 @@ export function ColorSelection({ onSelect }: Props) {
                     width={160}
                     height={117}
                     sizes="160px"
-                    style={ART_STYLE}
+                    className={styles.art}
                     loading="lazy"
                   />
                 ) : (
-                  <span aria-hidden="true" style={{ ...SWATCH_STYLE, background: SWATCH[c] }} />
+                  <span aria-hidden="true" className={`${styles.swatch} ${SWATCH_CLASS[c]}`} />
                 )}
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={MANA_SYMBOL_URL[c]} alt="" style={MANA_STYLE} loading="lazy" />
-                <span style={FLAVOR_STYLE}>{flavor}</span>
+                <img src={MANA_SYMBOL_URL[c]} alt="" className={styles.mana} loading="lazy" />
+                <span className={styles.flavor}>{flavor}</span>
               </button>
             );
           })}
@@ -85,58 +86,3 @@ export function ColorSelection({ onSelect }: Props) {
     </main>
   );
 }
-
-const WRAPPER_STYLE: React.CSSProperties = {
-  minHeight: '100dvh',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  padding: 24,
-};
-const FIELDSET_STYLE: React.CSSProperties = {
-  border: '1px solid #455a64',
-  borderRadius: 12,
-  padding: 24,
-  background: 'rgba(0,0,0,0.35)',
-  maxWidth: 920,
-  width: '100%',
-};
-const LEGEND_STYLE: React.CSSProperties = { padding: '0 8px', fontSize: 16 };
-const GRID_STYLE: React.CSSProperties = {
-  display: 'grid',
-  gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
-  gap: 12,
-};
-const BUTTON_STYLE: React.CSSProperties = {
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  gap: 8,
-  padding: '14px 10px',
-  background: '#263238',
-  border: '1px solid #455a64',
-  borderRadius: 10,
-  color: '#eceff1',
-  cursor: 'pointer',
-  fontFamily: 'inherit',
-};
-const SWATCH_STYLE: React.CSSProperties = {
-  width: 48,
-  height: 48,
-  borderRadius: '50%',
-  border: '2px solid #eceff1',
-};
-const ART_STYLE: React.CSSProperties = {
-  width: 160,
-  height: 117,
-  objectFit: 'cover',
-  borderRadius: 6,
-  border: '1px solid #455a64',
-};
-const MANA_STYLE: React.CSSProperties = { width: 28, height: 28 };
-const FLAVOR_STYLE: React.CSSProperties = {
-  fontSize: 12,
-  color: '#90a4ae',
-  textAlign: 'center',
-  lineHeight: 1.35,
-};
