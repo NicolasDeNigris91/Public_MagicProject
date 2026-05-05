@@ -44,15 +44,34 @@ const cardArb: fc.Arbitrary<ICard> = fc.record({
   accessibilityDescription: fc.constant(''),
 });
 
-const playerArb: fc.Arbitrary<IPlayer> = fc.record({
-  id: fc.constant<'player'>('player'),
-  life: fc.integer({ min: 0, max: 40 }),
-  hand: fc.array(cardArb, { maxLength: 10 }),
-  battlefield: fc.array(cardArb, { maxLength: 10 }),
-  deck: fc.array(cardArb, { maxLength: 30 }),
-  manaMax: fc.integer({ min: 0, max: 12 }),
-  manaAvailable: fc.integer({ min: 0, max: 12 }),
-});
+// Cards are partitioned into zones from a single unique-id pool so a
+// given id never appears in two zones at once — that would shadow the
+// freshly-played copy in playCardToField and is impossible in real play.
+const playerArb: fc.Arbitrary<IPlayer> = fc
+  .uniqueArray(cardArb, { selector: (c) => c.id, maxLength: 50 })
+  .chain((cards) =>
+    fc
+      .tuple(
+        fc.integer({ min: 0, max: 40 }),
+        fc.integer({ min: 0, max: 12 }),
+        fc.integer({ min: 0, max: 12 }),
+        fc.nat(Math.min(cards.length, 10)),
+        fc.nat(Math.min(cards.length, 20)),
+      )
+      .map(([life, manaMax, manaAvailable, handLen, fieldLen]) => {
+        const handEnd = Math.min(handLen, cards.length);
+        const fieldEnd = Math.min(handEnd + fieldLen, cards.length);
+        return {
+          id: 'player' as const,
+          life,
+          hand: cards.slice(0, handEnd),
+          battlefield: cards.slice(handEnd, fieldEnd),
+          deck: cards.slice(fieldEnd),
+          manaMax,
+          manaAvailable,
+        };
+      }),
+  );
 
 describe('engine invariants (property-based)', () => {
   it('applyDamage never drops life below 0', () => {
