@@ -73,8 +73,8 @@ export function Card({ card, selected = false, onActivate, onInspect, animateEnt
         onClick={() => onActivate?.(card)}
         onKeyDown={handleKey}
         transition={{ duration: 0.45, ease: 'easeOut' }}
-        whileHover={reduceMotion ? undefined : { y: -6 }}
-        style={combatAnimation ? { animation: combatAnimation } : undefined}
+        {...(reduceMotion ? {} : { whileHover: { y: -6 } })}
+        {...(combatAnimation ? { style: { animation: combatAnimation } } : {})}
         {...entry}
       >
         {!imgFailed && card.imageUrl ? (

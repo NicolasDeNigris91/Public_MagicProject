@@ -54,13 +54,14 @@ export function adaptScryfallCard(raw: ScryfallCard): ICard {
   const power = parseStat(raw.power);
   const toughness = parseStat(raw.toughness);
   const imgs = pickImageUris(raw);
+  const color = deriveColor(raw.colors);
   return {
     id: raw.id,
     name: raw.name,
     power,
     toughness,
     cmc: raw.cmc ?? 0,
-    color: deriveColor(raw.colors),
+    ...(color ? { color } : {}),
     manaCost: raw.mana_cost ?? '',
     typeLine: raw.type_line,
     oracleText: raw.oracle_text ?? '',

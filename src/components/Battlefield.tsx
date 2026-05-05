@@ -68,8 +68,8 @@ export function Battlefield({ label, cards, variant = 'player', onCardActivate, 
               card={card}
               animateEntry
               selected={card.id === selectedId}
-              onActivate={onCardActivate}
-              onInspect={onCardInspect}
+              {...(onCardActivate ? { onActivate: onCardActivate } : {})}
+              {...(onCardInspect ? { onInspect: onCardInspect } : {})}
             />
           </li>
         ))}
