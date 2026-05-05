@@ -1,18 +1,35 @@
 'use client';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import dynamic from 'next/dynamic';
 import { ColorSelection } from '@/components/ColorSelection';
 import { type Color } from '@/engine/color';
 import { Hand } from '@/components/Hand';
 import { LangToggle } from '@/components/LangToggle';
-import { CombatLog } from '@/components/CombatLog';
 import { CombatLogToggle } from '@/components/CombatLogToggle';
 import { useI18n } from '@/i18n/I18nProvider';
 import { Battlefield } from '@/components/Battlefield';
 import { ControlBar } from '@/components/ControlBar';
 import { Footer } from '@/components/Footer';
-import { CardInspector } from '@/components/CardInspector/CardInspector';
-import { CombatLayer } from '@/components/CombatLayer/CombatLayer';
 import { PlayerHeader } from '@/components/PlayerHeader';
+
+// Code-split modal/overlay surfaces. None of these contribute to the
+// initial paint: CombatLog only mounts when the user presses L,
+// CardInspector only when a card is opened, CombatLayer only renders
+// nodes during animations. Keeping them out of the entry chunk pays
+// for itself on first load. ssr:false because all three are pure
+// client overlays.
+const CombatLog = dynamic(
+  () => import('@/components/CombatLog').then((m) => m.CombatLog),
+  { ssr: false },
+);
+const CardInspector = dynamic(
+  () => import('@/components/CardInspector/CardInspector').then((m) => m.CardInspector),
+  { ssr: false },
+);
+const CombatLayer = dynamic(
+  () => import('@/components/CombatLayer/CombatLayer').then((m) => m.CombatLayer),
+  { ssr: false },
+);
 import { useGameStore } from '@/store/useGameStore';
 import { useCombatStore } from '@/store/useCombatStore';
 import { useDeck } from '@/hooks/useDeck';
