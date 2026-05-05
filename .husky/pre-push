@@ -1,0 +1,7 @@
+#!/usr/bin/env sh
+# Run typecheck + unit tests before letting a push reach the remote.
+# Catches the class of regression where pre-commit (lint-staged) was
+# fine on a single file but tests now fail because of a downstream
+# break. Skip with `git push --no-verify` only when intentionally
+# pushing a WIP branch for review.
+npm run typecheck && npm test
