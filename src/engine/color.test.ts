@@ -6,6 +6,7 @@ import {
   buildDeckFromCandidates,
   SKELETON,
 } from './color';
+import { cardId } from './types';
 import type { ICard } from './types';
 
 describe('COLORS', () => {
@@ -43,7 +44,12 @@ describe('pickOpponentColor', () => {
 });
 
 function card(
-  partial: Partial<ICard> & { id: string; cmc: number; power: number; toughness: number },
+  partial: Omit<Partial<ICard>, 'id'> & {
+    id: string;
+    cmc: number;
+    power: number;
+    toughness: number;
+  },
 ): ICard {
   return {
     name: partial.id,
@@ -55,6 +61,7 @@ function card(
     imageUrlSmall: '',
     accessibilityDescription: '',
     ...partial,
+    id: cardId(partial.id),
   };
 }
 

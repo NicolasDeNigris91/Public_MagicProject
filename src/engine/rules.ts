@@ -1,4 +1,4 @@
-import type { ICard, ICombatResult, IPlayer } from './types';
+import type { CardId, ICard, ICombatResult, IPlayer } from './types';
 
 export function drawCard(player: IPlayer): { player: IPlayer; drawn: ICard | null } {
   if (player.deck.length === 0) return { player, drawn: null };
@@ -11,7 +11,7 @@ export function drawCard(player: IPlayer): { player: IPlayer; drawn: ICard | nul
 
 // Spends card.cmc from manaAvailable. Caller should check canAfford first;
 // the store does, the engine clamps defensively.
-export function playCardToField(player: IPlayer, cardId: string): IPlayer {
+export function playCardToField(player: IPlayer, cardId: CardId): IPlayer {
   const card = player.hand.find((c) => c.id === cardId);
   if (!card) return player;
   const entering: ICard = { ...card, summoningSick: true };
@@ -60,7 +60,7 @@ export function applyDamage(player: IPlayer, amount: number): IPlayer {
   return { ...player, life: Math.max(0, player.life - amount) };
 }
 
-export function removeFromField(player: IPlayer, cardId: string): IPlayer {
+export function removeFromField(player: IPlayer, cardId: CardId): IPlayer {
   return { ...player, battlefield: player.battlefield.filter((c) => c.id !== cardId) };
 }
 

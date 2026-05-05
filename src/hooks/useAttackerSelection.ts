@@ -3,7 +3,7 @@ import { useCallback, useState } from 'react';
 import { resolveCombat, canAttack } from '@/engine/rules';
 import { useCombatStore } from '@/store/useCombatStore';
 import { useGameStore } from '@/store/useGameStore';
-import type { ICard } from '@/engine/types';
+import type { CardId, ICard } from '@/engine/types';
 
 const SELECT_HINT =
   "selected as attacker. Press a creature on the opponent's side to attack it, or press Attack Directly.";
@@ -21,7 +21,7 @@ const fireCombat = (p: Promise<void>) => {
 export function useAttackerSelection() {
   const attack = useGameStore((s) => s.attack);
   const announce = useGameStore((s) => s.announce);
-  const [selected, setSelected] = useState<string | null>(null);
+  const [selected, setSelected] = useState<CardId | null>(null);
 
   /**
    * Preview-then-commit: resolve the combat purely from the current
@@ -32,7 +32,7 @@ export function useAttackerSelection() {
    * attack entry point (player + AI).
    */
   const runCombat = useCallback(
-    async (attackerId: string, blockerId: string | null) => {
+    async (attackerId: CardId, blockerId: CardId | null) => {
       if (useCombatStore.getState().isAnimating) return;
       const state = useGameStore.getState();
       const attacker = state.player.battlefield.find((c) => c.id === attackerId);

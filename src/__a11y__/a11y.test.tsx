@@ -21,10 +21,11 @@ import { CombatLogToggle } from '@/components/CombatLogToggle';
 import { ControlBar } from '@/components/ControlBar';
 import { Hand } from '@/components/Hand';
 import { PlayerHeader } from '@/components/PlayerHeader';
+import { cardId } from '@/engine/types';
 import type { ICard } from '@/engine/types';
 
 const sampleCard: ICard = {
-  id: 'a11y-c1',
+  id: cardId('a11y-c1'),
   name: 'Test Goblin',
   power: 1,
   toughness: 1,
@@ -92,7 +93,7 @@ describe('a11y sweep', () => {
   });
 
   it('hidden opponent Hand has no axe violations', async () => {
-    const cards = [sampleCard, { ...sampleCard, id: 'a11y-c2' }];
+    const cards = [sampleCard, { ...sampleCard, id: cardId('a11y-c2') }];
     await expectNoViolations(
       <Hand hand={cards} label="Opponent hand" onActivate={() => {}} hidden compact />,
     );

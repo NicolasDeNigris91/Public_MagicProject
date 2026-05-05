@@ -2,10 +2,11 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi } from 'vitest';
 import { Card } from './Card';
+import { cardId } from '@/engine/types';
 import type { ICard } from '@/engine/types';
 
 const sample: ICard = {
-  id: 'c1',
+  id: cardId('c1'),
   name: 'Test Goblin',
   power: 1,
   toughness: 1,

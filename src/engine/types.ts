@@ -4,8 +4,21 @@ export type PlayerId = 'player' | 'opponent';
 export type Phase = 'draw' | 'main' | 'combat' | 'end';
 export type AnnouncePriority = 'polite' | 'assertive';
 
+// Branded ids. The brand is a unique-symbol property so two distinct
+// id flavours never get accidentally swapped at a callsite (e.g.
+// passing a LogEntryId into something that expects a CardId compiles
+// today but would not after this change). Mint via cardId()/logEntryId()
+// at trusted boundaries (Scryfall adapter, fallback deck, log appender)
+// and the rest of the code receives them already branded.
+declare const cardIdBrand: unique symbol;
+declare const logEntryIdBrand: unique symbol;
+export type CardId = string & { readonly [cardIdBrand]: never };
+export type LogEntryId = string & { readonly [logEntryIdBrand]: never };
+export const cardId = (s: string): CardId => s as CardId;
+export const logEntryId = (s: string): LogEntryId => s as LogEntryId;
+
 export interface ICard {
-  id: string;
+  id: CardId;
   name: string;
   power: number;
   toughness: number;
@@ -53,7 +66,7 @@ export interface IPlayer {
 export type LogKind = 'info' | 'turn' | 'draw' | 'play' | 'combat' | 'mana' | 'game-over';
 
 export interface LogEntry {
-  id: string;
+  id: LogEntryId;
   message: string;
   priority: AnnouncePriority;
   timestamp: number;

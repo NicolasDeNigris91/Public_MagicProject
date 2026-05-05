@@ -2,10 +2,11 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi } from 'vitest';
 import { CardInspector } from './CardInspector';
+import { cardId } from '@/engine/types';
 import type { ICard } from '@/engine/types';
 
 const sampleCard: ICard = {
-  id: 'card-1',
+  id: cardId('card-1'),
   name: 'Shivan Dragon',
   power: 5,
   toughness: 5,

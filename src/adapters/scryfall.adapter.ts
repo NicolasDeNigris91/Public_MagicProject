@@ -5,6 +5,7 @@
  * only this file.
  */
 import { z } from 'zod';
+import { cardId } from '@/engine/types';
 import { buildA11yDescription } from '@/utils/describeCard';
 import type { Color } from '@/engine/color';
 import type { ICard } from '@/engine/types';
@@ -97,7 +98,7 @@ export function adaptScryfallCard(raw: ScryfallCard): ICard {
   const imgs = pickImageUris(raw);
   const color = deriveColor(raw.colors);
   return {
-    id: raw.id,
+    id: cardId(raw.id),
     name: raw.name,
     power,
     toughness,

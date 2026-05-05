@@ -1,3 +1,4 @@
+import { cardId } from '@/engine/types';
 import { buildA11yDescription } from '@/utils/describeCard';
 import type { Color } from '@/engine/color';
 import type { ICard } from '@/engine/types';
@@ -537,7 +538,7 @@ const SEEDS_BY_COLOR: Record<Color, Seed[]> = {
 
 function seedToCard(color: Color, s: Seed): ICard {
   return {
-    id: s.id,
+    id: cardId(s.id),
     name: s.name,
     power: s.power,
     toughness: s.toughness,

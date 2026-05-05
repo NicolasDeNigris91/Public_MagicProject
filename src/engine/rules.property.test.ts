@@ -20,6 +20,7 @@
  */
 import { describe, it, expect } from 'vitest';
 import fc from 'fast-check';
+import { cardId } from './types';
 import type { ICard, IPlayer } from './types';
 import {
   applyDamage,
@@ -31,7 +32,7 @@ import {
 } from './rules';
 
 const cardArb: fc.Arbitrary<ICard> = fc.record({
-  id: fc.string({ minLength: 1, maxLength: 6 }),
+  id: fc.string({ minLength: 1, maxLength: 6 }).map(cardId),
   name: fc.string({ minLength: 1, maxLength: 12 }),
   power: fc.integer({ min: 0, max: 12 }),
   toughness: fc.integer({ min: 1, max: 12 }),
@@ -104,7 +105,8 @@ describe('engine invariants (property-based)', () => {
 
   it('playCardToField is a no-op when the card id is not in hand', () => {
     fc.assert(
-      fc.property(playerArb, fc.string({ minLength: 1, maxLength: 8 }), (p, fakeId) => {
+      fc.property(playerArb, fc.string({ minLength: 1, maxLength: 8 }), (p, fakeRaw) => {
+        const fakeId = cardId(fakeRaw);
         // Make sure fakeId truly isn't in the player's hand.
         if (p.hand.some((c) => c.id === fakeId)) return;
         expect(playCardToField(p, fakeId)).toBe(p);

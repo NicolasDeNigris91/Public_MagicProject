@@ -1,6 +1,6 @@
 // Greedy opponent: play the biggest affordable creature; attack into the
 // weakest legal blocker, or face if the board is empty.
-import type { ICard, IPlayer } from './types';
+import type { CardId, ICard, IPlayer } from './types';
 
 export function pickCardToPlay(hand: ICard[], manaAvailable: number): ICard | null {
   const affordable = hand.filter((c) => /creature/i.test(c.typeLine) && c.cmc <= manaAvailable);
@@ -9,8 +9,8 @@ export function pickCardToPlay(hand: ICard[], manaAvailable: number): ICard | nu
 }
 
 export interface AttackPlan {
-  attackerId: string;
-  blockerId: string | null;
+  attackerId: CardId;
+  blockerId: CardId | null;
 }
 
 export function planAttacks(me: IPlayer, opponent: IPlayer): AttackPlan[] {

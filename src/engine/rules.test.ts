@@ -9,10 +9,11 @@ import {
   playCardToField,
   resolveCombat,
 } from './rules';
+import { cardId } from './types';
 import type { ICard, IPlayer } from './types';
 
 const makeCard = (id: string, power = 2, toughness = 2): ICard => ({
-  id,
+  id: cardId(id),
   name: `Card ${id}`,
   power,
   toughness,
@@ -56,7 +57,7 @@ describe('playCardToField', () => {
   it('moves card from hand to battlefield with summoning sickness', () => {
     const c = makeCard('a');
     const p = makePlayer({ hand: [c] });
-    const result = playCardToField(p, 'a');
+    const result = playCardToField(p, cardId('a'));
     expect(result.hand).toHaveLength(0);
     expect(result.battlefield).toHaveLength(1);
     expect(result.battlefield[0]?.summoningSick).toBe(true);
@@ -64,33 +65,33 @@ describe('playCardToField', () => {
 
   it('is a no-op when card not in hand', () => {
     const p = makePlayer();
-    expect(playCardToField(p, 'ghost')).toEqual(p);
+    expect(playCardToField(p, cardId('ghost'))).toEqual(p);
   });
 
   it('decrements manaAvailable by card.cmc', () => {
     const c = { ...makeCard('a'), cmc: 3 };
     const p = makePlayer({ hand: [c], manaAvailable: 5, manaMax: 5 });
-    expect(playCardToField(p, 'a').manaAvailable).toBe(2);
+    expect(playCardToField(p, cardId('a')).manaAvailable).toBe(2);
   });
 
   it('treats free (cmc 0) cards as costing zero mana', () => {
     const c = { ...makeCard('a'), cmc: 0 };
     const p = makePlayer({ hand: [c], manaAvailable: 0 });
-    expect(playCardToField(p, 'a').manaAvailable).toBe(0);
+    expect(playCardToField(p, cardId('a')).manaAvailable).toBe(0);
   });
 
   it('clamps manaAvailable at 0 when cmc exceeds mana', () => {
     const c = { ...makeCard('a'), cmc: 5 };
     const p = makePlayer({ hand: [c], manaAvailable: 1 });
-    expect(playCardToField(p, 'a').manaAvailable).toBe(0);
+    expect(playCardToField(p, cardId('a')).manaAvailable).toBe(0);
   });
 
   it('allows multiple plays per turn', () => {
     const a = { ...makeCard('a'), cmc: 1 };
     const b = { ...makeCard('b'), cmc: 1 };
     let p = makePlayer({ hand: [a, b], manaAvailable: 2, manaMax: 2 });
-    p = playCardToField(p, 'a');
-    p = playCardToField(p, 'b');
+    p = playCardToField(p, cardId('a'));
+    p = playCardToField(p, cardId('b'));
     expect(p.battlefield).toHaveLength(2);
     expect(p.manaAvailable).toBe(0);
   });

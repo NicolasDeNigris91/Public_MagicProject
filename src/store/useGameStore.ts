@@ -10,9 +10,11 @@ import {
   removeFromField,
   resolveCombat,
 } from '@/engine/rules';
+import { logEntryId } from '@/engine/types';
 import { shortCardLabel } from '@/utils/describeCard';
 import type {
   AnnouncePriority,
+  CardId,
   GameResult,
   ICard,
   IGameState,
@@ -25,8 +27,8 @@ import type {
 interface GameActions {
   initGame: (playerDeck: ICard[], opponentDeck: ICard[]) => void;
   drawCard: (who: PlayerId) => void;
-  playCardToField: (who: PlayerId, cardId: string) => void;
-  attack: (attackerId: string, blockerId: string | null) => void;
+  playCardToField: (who: PlayerId, cardId: CardId) => void;
+  attack: (attackerId: CardId, blockerId: CardId | null) => void;
   endTurn: () => void;
   /**
    * Append a message to the log. `kind` tags the entry for the
@@ -78,7 +80,7 @@ function log(
   meta?: Record<string, string | number>,
 ): LogEntry {
   return {
-    id: `log-${++logSeq}`,
+    id: logEntryId(`log-${++logSeq}`),
     message: msg,
     priority,
     timestamp: Date.now(),

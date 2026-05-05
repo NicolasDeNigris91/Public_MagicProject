@@ -1,9 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { pickCardToPlay, planAttacks } from './ai';
+import { cardId } from './types';
 import type { ICard, IPlayer } from './types';
 
 const makeCard = (id: string, power = 2, toughness = 2, typeLine = 'Creature'): ICard => ({
-  id,
+  id: cardId(id),
   name: id,
   power,
   toughness,

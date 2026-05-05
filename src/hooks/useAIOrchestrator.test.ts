@@ -3,11 +3,12 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { useCombatStore } from '@/store/useCombatStore';
 import { useGameStore } from '@/store/useGameStore';
 import { useAIOrchestrator } from './useAIOrchestrator';
+import { cardId } from '@/engine/types';
 import type { ICard } from '@/engine/types';
 
 function card(id: string, p = 2, t = 2): ICard {
   return {
-    id,
+    id: cardId(id),
     name: `C-${id}`,
     power: p,
     toughness: t,
