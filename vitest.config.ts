@@ -31,7 +31,12 @@ export default defineConfig({
       // we ratchet up over time. Numbers below reflect current floor;
       // any regression below them fails CI.
       thresholds: {
-        'src/engine/**': { lines: 95, branches: 90, functions: 90, statements: 95 },
+        // Ratcheted upward after engine/actions.ts extraction + pure
+        // tests for it. Current per-file engine coverage is 100/93+
+        // for rules/ai/color and 100/95+ for actions, so 99/93/100/99
+        // is a guardrail just below current that prevents regression
+        // without flagging routine refactors.
+        'src/engine/**': { lines: 99, branches: 93, functions: 100, statements: 99 },
         'src/utils/**': { lines: 90, branches: 80, functions: 95, statements: 90 },
         'src/adapters/**': { lines: 85, branches: 80, functions: 90, statements: 85 },
         'src/services/fallback-deck.ts': { lines: 95, branches: 95, functions: 95, statements: 95 },

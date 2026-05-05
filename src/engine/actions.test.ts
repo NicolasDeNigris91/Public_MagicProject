@@ -141,6 +141,20 @@ describe('executeAttack — combat resolution', () => {
     expect(r.logs[1]?.message).toMatch(/Victory/);
   });
 
+  it('lethal face attack from OPPONENT side emits the "Defeat" copy', () => {
+    const big = bareCard('opp-lethal', { power: 99 });
+    const s = state({
+      turn: 'opponent',
+      opponent: emptyPlayer('opponent', { battlefield: [big] }),
+      player: emptyPlayer('player', { life: 1 }),
+    });
+    const r = executeAttack(s, big.id, null);
+    expect(r.next.winner).toBe('opponent');
+    expect(r.next.player.life).toBe(0);
+    expect(r.logs[1]?.message).toMatch(/Defeat/);
+    expect(r.logs[1]?.message).toMatch(/zero/);
+  });
+
   it('blocked attack where both die removes both creatures, no face damage', () => {
     const att = bareCard('p5', { power: 3, toughness: 3 });
     const blocker = bareCard('o5', { power: 3, toughness: 3 });
