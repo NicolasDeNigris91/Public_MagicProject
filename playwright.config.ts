@@ -14,6 +14,10 @@ import { defineConfig, devices } from '@playwright/test';
  */
 export default defineConfig({
   testDir: 'e2e',
+  // Visual regression has its own config (playwright.visual.config.ts)
+  // because the prod build it serves needs NEXT_PUBLIC_MTG_DETERMINISTIC=1
+  // baked in at compile time, which the smoke suite must not see.
+  testIgnore: /visual\.spec\.ts$/,
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,

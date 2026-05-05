@@ -6,6 +6,12 @@ import { useGameStore } from '@/store/useGameStore';
 
 export type DeckSource = 'scryfall' | 'fallback';
 
+// In deterministic mode (visual regression), `pickOpponentColor` is
+// passed an RNG that always returns 0 so the alphabetical-first non-
+// player color wins every roll. The matchup becomes stable across
+// runs without changing the production default of `Math.random`.
+const DETERMINISTIC = process.env.NEXT_PUBLIC_MTG_DETERMINISTIC === '1';
+
 export interface UseDeckResult {
   /** Whether both decks have loaded at least once. */
   ready: boolean;
@@ -32,7 +38,9 @@ export function useDeck(playerColor: Color | null): UseDeckResult {
 
   const loadBoth = useCallback(
     async (player: Color) => {
-      const opponent = pickOpponentColor(player);
+      const opponent = DETERMINISTIC
+        ? pickOpponentColor(player, () => 0)
+        : pickOpponentColor(player);
       setOpponentColor(opponent);
       const [p, o] = await Promise.all([fetchDeckForColor(player), fetchDeckForColor(opponent)]);
       if (cancelledRef.current) return;

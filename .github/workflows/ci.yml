@@ -94,3 +94,42 @@ jobs:
           name: playwright-report
           path: playwright-report/
           retention-days: 14
+
+  # Visual regression sweep. Pinned-input deterministic build
+  # (NEXT_PUBLIC_MTG_DETERMINISTIC=1) plus reduced-motion +
+  # animation-disabled snapshots make the diff a function of layout
+  # and theme only. Linux baselines are committed under
+  # e2e/__screenshots__/; first run after baseline drift uploads the
+  # diff so reviewers can inspect what changed without checking out
+  # the branch. Trigger workflow_dispatch with refresh_baselines=true
+  # to overwrite committed baselines, then download + commit the
+  # uploaded snapshot artifact.
+  visual:
+    runs-on: ubuntu-latest
+    needs: [typecheck, lint, test, build]
+    # Skip when no Linux baselines are committed yet — first-time
+    # bootstrapping populates them via the Visual Baseline Refresh
+    # workflow (workflow_dispatch). After that, this job becomes a
+    # required check on every push.
+    if: ${{ hashFiles('e2e/__screenshots__/**/*-linux.png') != '' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+      - name: Run visual regression
+        run: npm run test:visual
+      - name: Upload diff + report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-report
+          path: |
+            playwright-report-visual/
+            test-results/
+            e2e/__screenshots__/
+          retention-days: 14

@@ -1,0 +1,41 @@
+name: Visual Baseline Refresh
+
+# Manually-triggered Linux baseline regeneration for the visual
+# regression suite. Run this workflow when:
+#   - bootstrapping the suite for the first time (no baselines yet)
+#   - intentionally changing layout, color, or fonts
+#
+# Output: an artifact `visual-baselines-linux` containing the regenerated
+# `e2e/__screenshots__/` tree. Download it, replace the committed
+# baselines, and push. The regular `visual` job in CI will then
+# validate against the new truth files.
+#
+# Kept off `push` / `pull_request` so accidental layout drift never
+# silently overwrites baselines — refreshes are an explicit decision.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+      - name: Regenerate baselines
+        run: npm run test:visual:update
+      - name: Upload regenerated baselines
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-baselines-linux
+          path: e2e/__screenshots__/
+          retention-days: 14

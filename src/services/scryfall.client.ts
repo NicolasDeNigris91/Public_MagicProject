@@ -19,6 +19,13 @@ const http = axios.create({
   },
 });
 
+// Visual-regression / E2E hook: when `NEXT_PUBLIC_MTG_DETERMINISTIC=1`
+// is inlined at build time, the deck loader skips Scryfall entirely
+// and the color picker omits its art fetch. The result is a pixel-
+// identical first render across runs, which is what `toHaveScreenshot`
+// needs to be meaningful. Production builds default to false.
+const DETERMINISTIC = process.env.NEXT_PUBLIC_MTG_DETERMINISTIC === '1';
+
 export interface FetchResult {
   cards: ICard[];
   source: 'scryfall' | 'fallback';
@@ -36,6 +43,7 @@ export interface FetchResult {
  */
 export async function fetchDeckForColor(color: Color): Promise<FetchResult> {
   const seeds = fallbackDecks[color];
+  if (DETERMINISTIC) return { cards: seeds, source: 'fallback' };
   try {
     const { data } = await http.get<unknown>('/cards/search', {
       params: {
@@ -91,6 +99,7 @@ async function fetchArtCrop(exactName: string): Promise<string | null> {
 /** Fetch art_crop for every color's icon card in parallel. Missing
  *  entries silently fall back to the solid swatches in the UI. */
 export async function fetchColorArt(): Promise<Partial<Record<Color, string>>> {
+  if (DETERMINISTIC) return {};
   const entries = await Promise.all(
     COLORS.map(async (c) => [c, await fetchArtCrop(COLOR_ART_CARDS[c])] as const),
   );
