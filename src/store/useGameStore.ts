@@ -45,6 +45,15 @@ interface GameActions {
 }
 
 type GameStore = IGameState & GameActions;
+type StoreSet = (partial: Partial<GameStore> | ((state: GameStore) => Partial<GameStore>)) => void;
+
+// Typed dispatcher for the per-player slice — using `set({ [who]: p })`
+// elsewhere widens to a string-keyed record and erases the discriminator
+// between `player` and `opponent`. Funnel the writes through here so the
+// store stays structurally typed end-to-end.
+function setPlayer(set: StoreSet, who: PlayerId, player: IPlayer): void {
+  set(who === 'player' ? { player } : { opponent: player });
+}
 
 const STARTING_LIFE = 20;
 const STARTING_HAND = 5;
@@ -164,7 +173,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       );
       return;
     }
-    set({ [who]: updated });
+    setPlayer(set, who, updated);
     if (who === 'player') {
       get().announce(
         `You drew ${drawn.name}. Hand size ${updated.hand.length}.`,
@@ -198,7 +207,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       return;
     }
     const updated = playCardToField(s[who], cardId);
-    set({ [who]: updated });
+    setPlayer(set, who, updated);
     const label = shortCardLabel(card);
     get().announce(
       who === 'player'
@@ -260,11 +269,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
     const winner: GameResult = defenderPlayer.life <= 0 ? attackingSide : null;
 
-    set({
-      [attackingSide]: attackerPlayer,
-      [defendingSide]: defenderPlayer,
-      ...(winner ? { winner } : {}),
-    });
+    setPlayer(set, attackingSide, attackerPlayer);
+    setPlayer(set, defendingSide, defenderPlayer);
+    if (winner) set({ winner });
 
     const who = attackingSide === 'player' ? 'You' : 'Opponent';
     if (blocker) {
@@ -316,11 +323,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const next: PlayerId = s.turn === 'player' ? 'opponent' : 'player';
     const bumpTurn = next === 'player' ? 1 : 0;
     const updatedNext = beginTurn(s[next]);
-    set({
-      turn: next,
-      turnNumber: s.turnNumber + bumpTurn,
-      [next]: updatedNext,
-    });
+    set({ turn: next, turnNumber: s.turnNumber + bumpTurn });
+    setPlayer(set, next, updatedNext);
     get().announce(
       next === 'player' ? `Turn ${s.turnNumber + bumpTurn}. Your turn.` : "Opponent's turn.",
       'polite',
