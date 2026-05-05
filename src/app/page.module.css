@@ -1,0 +1,76 @@
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  height: 100dvh;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 10px 12px;
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+
+.title {
+  margin: 0;
+  font-size: clamp(14px, 3.5vw, 18px);
+}
+
+.turnCluster {
+  font-size: clamp(11px, 2.6vw, 13px);
+  color: #90a4ae;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* `display: contents` promotes the section's children (h2, hand,
+ * battlefield) to direct flex children of <main>. This lets BOTH
+ * battlefields - one from each zone - share remaining vertical
+ * space via `flex: 1 1 0` on their own rule, instead of each zone
+ * absorbing space as a unit. The semantic <section aria-label>
+ * still conveys grouping to assistive tech; display:contents is
+ * transparent to the accessibility tree in modern browsers. */
+.zone {
+  display: contents;
+}
+
+.gameOver {
+  padding: 12px;
+  border-radius: 12px;
+  border: 2px solid #66bb6a;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.gameOverDefeat {
+  border-color: #ef5350;
+}
+
+.gameOverTitle {
+  font-size: 16px;
+}
+
+.gameOverActions {
+  display: flex;
+  gap: 8px;
+}
+
+.control {
+  padding: 10px 18px;
+  background: #263238;
+  border: 1px solid #455a64;
+  border-radius: 8px;
+  color: #eceff1;
+  cursor: pointer;
+}

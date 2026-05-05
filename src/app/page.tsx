@@ -23,6 +23,7 @@ import { format } from '@/i18n/messages';
 import { useCombatStore } from '@/store/useCombatStore';
 import { useGameStore } from '@/store/useGameStore';
 import { buildInspectorActions } from '@/utils/buildInspectorActions';
+import styles from './page.module.css';
 
 // Code-split modal/overlay surfaces. None of these contribute to the
 // initial paint: CombatLog only mounts when the user presses L,
@@ -189,20 +190,10 @@ export default function GamePage() {
 
   return (
     <>
-      <main id="main" ref={mainRef} style={MAIN_STYLE}>
-        <header data-mtg-header style={HEADER_STYLE}>
-          <h1 style={{ margin: 0, fontSize: 'clamp(14px, 3.5vw, 18px)' }}>{t('app.title')}</h1>
-          <div
-            data-mtg-turn-cluster
-            style={{
-              fontSize: 'clamp(11px, 2.6vw, 13px)',
-              color: '#90a4ae',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 8,
-              flexWrap: 'wrap',
-            }}
-          >
+      <main id="main" ref={mainRef} className={styles.main}>
+        <header data-mtg-header className={styles.header}>
+          <h1 className={styles.title}>{t('app.title')}</h1>
+          <div data-mtg-turn-cluster className={styles.turnCluster}>
             <span>
               {t('turn.label')} <strong>{turnNumber}</strong>
               {' · '}
@@ -218,32 +209,23 @@ export default function GamePage() {
             ref={gameOverRef}
             tabIndex={-1}
             aria-labelledby="game-over-title"
-            style={{
-              padding: 12,
-              borderRadius: 12,
-              border: `2px solid ${winner === 'player' ? '#66bb6a' : '#ef5350'}`,
-              background: 'rgba(0,0,0,0.4)',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              gap: 12,
-            }}
+            className={`${styles.gameOver}${winner === 'opponent' ? ` ${styles.gameOverDefeat}` : ''}`}
           >
-            <strong id="game-over-title" style={{ fontSize: 16 }}>
+            <strong id="game-over-title" className={styles.gameOverTitle}>
               {winner === 'player' ? t('game.victory') : t('game.defeat')}
             </strong>
-            <div style={{ display: 'flex', gap: 8 }}>
-              <button onClick={onPlayAgain} style={controlStyle}>
+            <div className={styles.gameOverActions}>
+              <button onClick={onPlayAgain} className={styles.control}>
                 {t('game.playAgain', { color: t(`color.${playerColor}.name`) })}
               </button>
-              <button onClick={handleChangeColor} style={controlStyle}>
+              <button onClick={handleChangeColor} className={styles.control}>
                 {t('game.changeColor')}
               </button>
             </div>
           </div>
         )}
 
-        <section aria-label={t('player.opponent')} style={ZONE_STYLE}>
+        <section aria-label={t('player.opponent')} className={styles.zone}>
           <PlayerHeader
             label={t('player.opponent')}
             color={opponentColor}
@@ -280,7 +262,7 @@ export default function GamePage() {
           onEndTurn={endTurn}
         />
 
-        <section aria-label={t('player.you')} style={ZONE_STYLE}>
+        <section aria-label={t('player.you')} className={styles.zone}>
           <PlayerHeader
             label={t('player.you')}
             color={playerColor}
@@ -321,48 +303,3 @@ export default function GamePage() {
     </>
   );
 }
-
-const MAIN_STYLE: React.CSSProperties = {
-  display: 'flex',
-  flexDirection: 'column',
-  gap: 6,
-  height: '100dvh',
-  maxWidth: 1100,
-  margin: '0 auto',
-  padding: '10px 12px',
-  overflow: 'hidden',
-};
-
-const HEADER_STYLE: React.CSSProperties = {
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'baseline',
-  gap: 12,
-  flexWrap: 'wrap',
-  flexShrink: 0,
-};
-
-/**
- * `display: contents` promotes the section's children (h2, hand, battlefield)
- * to direct flex children of <main>. This lets BOTH battlefields - one from
- * each zone - share remaining vertical space via `flex: 1 1 0` on their own
- * rule, instead of each zone absorbing space as a unit. Otherwise the player
- * zone's fixed-height hand would starve the player battlefield of height
- * while the opponent battlefield stays empty and huge.
- *
- * The <section aria-label="..."> still conveys the semantic grouping to
- * assistive tech; display:contents is transparent to the accessibility tree
- * in modern browsers.
- */
-const ZONE_STYLE: React.CSSProperties = {
-  display: 'contents',
-};
-
-const controlStyle: React.CSSProperties = {
-  padding: '10px 18px',
-  background: '#263238',
-  border: '1px solid #455a64',
-  borderRadius: 8,
-  color: '#eceff1',
-  cursor: 'pointer',
-};
