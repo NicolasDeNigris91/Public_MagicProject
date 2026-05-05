@@ -140,6 +140,14 @@ export default function GamePage() {
     setPlayerColor(null);
   };
 
+  // The memo's value is small (an array of 2-4 InspectorAction
+  // objects), so the avoided work is mostly the array allocation and
+  // the buildInspectorActions string-concat. Where it pays off is in
+  // CardInspector's prop identity: a stable `actions` reference lets
+  // a future React.memo wrap on CardInspector skip its re-render
+  // when only the parent state changed but `inspected` did not. The
+  // dependencies cover every value the closure reads — see the
+  // surrounding hooks for why each is referentially stable.
   const inspectorActions = useMemo(() => {
     if (!inspected) return [];
     const playDisabledReason =

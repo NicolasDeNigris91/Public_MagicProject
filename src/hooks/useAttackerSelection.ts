@@ -30,6 +30,13 @@ export function useAttackerSelection() {
    * blocker between the preview and commit - guaranteed today by the
    * animator's serial queue and the isAnimating guards at every
    * attack entry point (player + AI).
+   *
+   * Memoization is incidental: runCombat is a private helper used by
+   * handleBattlefieldActivate and attackDirectly below. Stability
+   * cascades only as deep as those wrappers — neither of which has a
+   * memo-aware consumer downstream. Kept memoized so `attack` (a
+   * stable Zustand selector) is the single dep, which is easier to
+   * reason about than re-deriving the closure each render.
    */
   const runCombat = useCallback(
     async (attackerId: CardId, blockerId: CardId | null) => {
@@ -108,6 +115,10 @@ export function useAttackerSelection() {
     });
   }, [runCombat]);
 
+  // select / deselect: identity stability is load-bearing. Both are
+  // deps of page.tsx's `inspectorActions` useMemo; a fresh identity
+  // per render would invalidate the memo and rebuild the action
+  // array each time.
   const select = useCallback(
     (card: ICard) => {
       setSelected(card.id);
@@ -124,6 +135,8 @@ export function useAttackerSelection() {
     [announce],
   );
 
+  // clear: not a memo dep anywhere. Memoization is marginal. Kept
+  // for shape-uniformity with the rest of the returned object.
   const clear = useCallback(() => setSelected(null), []);
 
   return { selected, handleBattlefieldActivate, attackDirectly, select, deselect, clear };

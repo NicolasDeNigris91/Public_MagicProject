@@ -36,6 +36,10 @@ export function useDeck(playerColor: Color | null): UseDeckResult {
   const [ready, setReady] = useState(false);
   const cancelledRef = useRef(false);
 
+  // Stable identity is load-bearing here: this callback is in the
+  // useEffect dep array below. If `loadBoth` changed every render,
+  // the effect would re-run on every parent render and refetch both
+  // decks each time — observably broken.
   const loadBoth = useCallback(
     async (player: Color) => {
       const opponent = DETERMINISTIC
@@ -68,6 +72,10 @@ export function useDeck(playerColor: Color | null): UseDeckResult {
     };
   }, [playerColor, loadBoth]);
 
+  // restart's identity stability is incidental — its consumer
+  // (onPlayAgain in page.tsx) is a click handler whose own arrow
+  // closes over restart, so a fresh identity per render would not
+  // re-fire anything. Kept memoized for symmetry with loadBoth.
   const restart = useCallback(() => {
     if (!playerColor) return;
     void loadBoth(playerColor);

@@ -33,13 +33,21 @@ export function useInspector() {
     }
   }, [inspected, playerHand, playerField, opponentField, announce]);
 
+  // open: identity stability is incidental (consumed by Hand
+  // -> Card -> onActivate, neither of which is React.memo'd).
+  // Memoized for symmetry with close/clear and to keep the hook's
+  // returned shape uniform.
   const open = useCallback((card: ICard, source: InspectorSource) => {
     setInspected({ card, source });
   }, []);
 
-  // Functional setState lets close be referentially stable. The
-  // requestAnimationFrame waits for the inspector to unmount so the
-  // origin button is back in the tree before we focus it.
+  // close: identity stability is load-bearing. close is a dep of
+  // page.tsx's `inspectorActions` useMemo; a fresh identity per
+  // render would invalidate that memo on every render and rebuild
+  // the InspectorAction[] array unnecessarily. The functional
+  // setState avoids closing over the current value, so the deps
+  // array stays empty. requestAnimationFrame waits for the inspector
+  // to unmount so the origin button is back in the tree before focus.
   const close = useCallback(() => {
     setInspected((current) => {
       const originId = current?.card.id ?? null;
@@ -52,8 +60,9 @@ export function useInspector() {
     });
   }, []);
 
-  // Close without focus restore - used when the origin button no
-  // longer exists (game over, tab unmount).
+  // clear: close without focus restore. Used when the origin button
+  // no longer exists (game over, tab unmount). Memoization is
+  // marginal — kept for the same shape-uniformity reason as open.
   const clear = useCallback(() => setInspected(null), []);
 
   return { inspected, open, close, clear };
