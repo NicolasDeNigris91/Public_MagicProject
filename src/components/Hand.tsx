@@ -64,12 +64,16 @@ export function Hand({ hand, label, onActivate, hidden = false, compact = false 
         }}
       >
         {hand.map((card, i) => (
-          <li key={card.id} style={{ flexShrink: 0 }}>
-            {hidden ? (
-              <CardBack compact={compact} />
-            ) : (
-              <Card card={card} onActivate={onActivate} posInSet={i + 1} setSize={hand.length} />
-            )}
+          // aria-posinset/aria-setsize live on the listitem (the <li>'s
+          // implicit role) rather than the inner <button>, where axe
+          // reports them as aria-allowed-attr violations.
+          <li
+            key={card.id}
+            aria-posinset={i + 1}
+            aria-setsize={hand.length}
+            style={{ flexShrink: 0 }}
+          >
+            {hidden ? <CardBack compact={compact} /> : <Card card={card} onActivate={onActivate} />}
           </li>
         ))}
       </ul>

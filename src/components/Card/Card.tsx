@@ -19,10 +19,6 @@ export interface CardProps {
   onInspect?: (card: ICard) => void;
   /** If true, the card plays its "enter the battlefield" flip animation. */
   animateEntry?: boolean;
-  /** 1-indexed position within the surrounding set (e.g. hand). */
-  posInSet?: number;
-  /** Total size of the surrounding set. */
-  setSize?: number;
 }
 
 export function Card({
@@ -31,8 +27,6 @@ export function Card({
   onActivate,
   onInspect,
   animateEntry = false,
-  posInSet,
-  setSize,
 }: CardProps) {
   const [imgFailed, setImgFailed] = useState(!card.imageUrl);
   const reduceMotion = useReducedMotion();
@@ -90,8 +84,6 @@ export function Card({
         aria-label={ariaLabel}
         aria-pressed={selected}
         {...(onInspect ? { 'aria-keyshortcuts': 'I' } : {})}
-        {...(posInSet !== undefined ? { 'aria-posinset': posInSet } : {})}
-        {...(setSize !== undefined ? { 'aria-setsize': setSize } : {})}
         onClick={() => onActivate?.(card)}
         onKeyDown={handleKey}
         transition={{ duration: 0.45, ease: 'easeOut' }}
