@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useRef } from 'react';
+import { useInertWhile } from '@/hooks/useInertWhile';
 import { useI18n } from '@/i18n/I18nProvider';
 import { useGameStore } from '@/store/useGameStore';
 import type { LogKind } from '@/engine/types';
@@ -15,6 +16,13 @@ export function CombatLog({ open, onClose }: CombatLogProps) {
   const log = useGameStore((s) => s.gameLog);
   const { t } = useI18n();
   const listRef = useRef<HTMLOListElement>(null);
+  const panelRef = useRef<HTMLElement>(null);
+
+  // aria-hidden alone leaves the close button tabbable while the panel
+  // is translated off-screen. inert removes it from the focus order
+  // and from AT alike, so a sighted-but-keyboard user does not "lose"
+  // focus into an invisible region.
+  useInertWhile(panelRef, !open);
 
   useEffect(() => {
     // Keep the tail in view as new entries arrive. Scroll snapping to
@@ -26,9 +34,9 @@ export function CombatLog({ open, onClose }: CombatLogProps) {
 
   return (
     <aside
+      ref={panelRef}
       aria-label={t('log.title')}
       role="region"
-      aria-hidden={!open}
       style={{ ...PANEL_STYLE, transform: open ? 'translateX(0)' : 'translateX(100%)' }}
     >
       <header style={HEADER_STYLE}>
