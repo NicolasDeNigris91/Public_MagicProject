@@ -62,12 +62,12 @@ const colorArb: fc.Arbitrary<Color> = fc.constantFrom(...COLORS);
 const outcomeArb: fc.Arbitrary<Outcome> = fc.oneof(
   fc
     .tuple(colorArb, fc.integer({ min: 1, max: 12 }))
-    .map(([color, count]) => ({ kind: 'ok', color, count })),
-  fc.constant({ kind: 'empty' }),
-  fc.constant({ kind: 'malformed' }),
-  fc.constant({ kind: '4xx' }),
-  fc.constant({ kind: '5xx' }),
-  fc.constant({ kind: 'network' }),
+    .map(([color, count]): Outcome => ({ kind: 'ok', color, count })),
+  fc.constant<Outcome>({ kind: 'empty' }),
+  fc.constant<Outcome>({ kind: 'malformed' }),
+  fc.constant<Outcome>({ kind: '4xx' }),
+  fc.constant<Outcome>({ kind: '5xx' }),
+  fc.constant<Outcome>({ kind: 'network' }),
 );
 
 function buildScryfallCards(color: Color, count: number) {
