@@ -283,3 +283,134 @@ describe('executePlayCardToField', () => {
     expect(r.logs[0]?.kind).toBe('play');
   });
 });
+
+/**
+ * Multi-step compositions the single-call describes can't reach: state
+ * threads through 2-3 actions in a row. These pin sequences a real
+ * player drives in one turn, so a regression in one step that only
+ * surfaces on the next still gets caught.
+ */
+describe('cross-cutting sequences', () => {
+  it('two-attacker turn: blocker dies on first swing, second attacker hits face same turn', () => {
+    const a1 = bareCard('p-a1', { power: 5, toughness: 5 });
+    const a2 = bareCard('p-a2', { power: 3, toughness: 3 });
+    const blocker = bareCard('o-b', { power: 1, toughness: 1 });
+    const s = state({
+      player: emptyPlayer('player', { battlefield: [a1, a2] }),
+      opponent: emptyPlayer('opponent', { battlefield: [blocker] }),
+    });
+
+    const r1 = executeAttack(s, a1.id, blocker.id);
+    expect(r1.next.opponent.battlefield).toEqual([]);
+    expect(r1.next.player.battlefield.find((c) => c.id === a1.id)?.attackedThisTurn).toBe(true);
+    expect(r1.next.player.battlefield.find((c) => c.id === a2.id)?.attackedThisTurn).toBeFalsy();
+
+    // With the defender empty, a2 can now legally swing face.
+    const r2 = executeAttack(r1.next, a2.id, null);
+    expect(r2.next.opponent.life).toBe(17);
+    expect(r2.next.player.battlefield.find((c) => c.id === a2.id)?.attackedThisTurn).toBe(true);
+  });
+
+  it('multi-play same turn: three plays drain mana to zero, all enter with summoning sickness', () => {
+    const c1 = bareCard('p1', { cmc: 1 });
+    const c2 = bareCard('p2', { cmc: 1 });
+    const c3 = bareCard('p3', { cmc: 1 });
+    const s = state({
+      player: emptyPlayer('player', {
+        hand: [c1, c2, c3],
+        manaAvailable: 3,
+        manaMax: 3,
+      }),
+    });
+    const r1 = executePlayCardToField(s, 'player', c1.id);
+    const r2 = executePlayCardToField(r1.next, 'player', c2.id);
+    const r3 = executePlayCardToField(r2.next, 'player', c3.id);
+
+    expect(r3.next.player.hand).toEqual([]);
+    expect(r3.next.player.battlefield).toHaveLength(3);
+    expect(r3.next.player.manaAvailable).toBe(0);
+    expect(r3.next.player.battlefield.every((c) => c.summoningSick === true)).toBe(true);
+  });
+
+  it('round-trip summoning sickness: play, end-turn twice, the same creature can now attack', () => {
+    const card = bareCard('p1', { power: 3 });
+    const drawO = bareCard('o-draw');
+    const drawP = bareCard('p-draw');
+    const s = state({
+      player: emptyPlayer('player', {
+        hand: [card],
+        manaAvailable: 1,
+        manaMax: 1,
+        deck: [drawP],
+      }),
+      opponent: emptyPlayer('opponent', { manaMax: 1, deck: [drawO] }),
+    });
+    const r1 = executePlayCardToField(s, 'player', card.id);
+    expect(r1.next.player.battlefield[0]?.summoningSick).toBe(true);
+
+    const r2 = executeEndTurn(r1.next);
+    expect(r2.next.turn).toBe('opponent');
+
+    const r3 = executeEndTurn(r2.next);
+    expect(r3.next.turn).toBe('player');
+    expect(r3.next.turnNumber).toBe(2);
+    expect(r3.next.player.battlefield[0]?.summoningSick).toBe(false);
+
+    const r4 = executeAttack(r3.next, card.id, null);
+    expect(r4.next.opponent.life).toBe(17);
+    expect(r4.next.player.battlefield[0]?.attackedThisTurn).toBe(true);
+  });
+
+  it('post-decking cascade: once decking flips winner, a follow-up attack is a silent no-op', () => {
+    const s = state({ player: emptyPlayer('player', { deck: [] }) });
+    const r1 = executeDrawCard(s, 'player');
+    expect(r1.next.winner).toBe('opponent');
+
+    const att = bareCard('post-deck-att');
+    const withAttacker: IGameState = {
+      ...r1.next,
+      player: { ...r1.next.player, battlefield: [att] },
+    };
+    const r2 = executeAttack(withAttacker, att.id, null);
+    expect(r2.next).toBe(withAttacker);
+    expect(r2.logs).toEqual([]);
+  });
+
+  it('post-lethal cascade: end-turn after a lethal attack is a silent no-op', () => {
+    const big = bareCard('finisher', { power: 99 });
+    const s = state({
+      player: emptyPlayer('player', { battlefield: [big] }),
+      opponent: emptyPlayer('opponent', { life: 1 }),
+    });
+    const r1 = executeAttack(s, big.id, null);
+    expect(r1.next.winner).toBe('player');
+
+    const r2 = executeEndTurn(r1.next);
+    expect(r2.next).toBe(r1.next);
+    expect(r2.logs).toEqual([]);
+  });
+
+  it('play-then-attack same turn: fresh play keeps summoningSick, an existing creature swings unimpaired', () => {
+    const fresh = bareCard('fresh');
+    const veteran = bareCard('vet', { power: 4 });
+    const s = state({
+      player: emptyPlayer('player', {
+        hand: [fresh],
+        battlefield: [veteran],
+        manaAvailable: 2,
+        manaMax: 2,
+      }),
+    });
+    const r1 = executePlayCardToField(s, 'player', fresh.id);
+    expect(r1.next.player.battlefield).toHaveLength(2);
+
+    const r2 = executeAttack(r1.next, veteran.id, null);
+    expect(r2.next.opponent.life).toBe(16);
+    expect(r2.next.player.battlefield.find((c) => c.id === fresh.id)?.summoningSick).toBe(true);
+    expect(r2.next.player.battlefield.find((c) => c.id === veteran.id)?.attackedThisTurn).toBe(
+      true,
+    );
+    // The freshly played card never got attackedThisTurn flipped — only the veteran did.
+    expect(r2.next.player.battlefield.find((c) => c.id === fresh.id)?.attackedThisTurn).toBeFalsy();
+  });
+});
