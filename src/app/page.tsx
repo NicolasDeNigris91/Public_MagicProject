@@ -43,6 +43,10 @@ const CombatLayer = dynamic(
   () => import('@/components/CombatLayer/CombatLayer').then((m) => m.CombatLayer),
   { ssr: false },
 );
+const KeyboardHelp = dynamic(
+  () => import('@/components/KeyboardHelp/KeyboardHelp').then((m) => m.KeyboardHelp),
+  { ssr: false },
+);
 
 export default function GamePage() {
   const player = useGameStore((s) => s.player);
@@ -59,6 +63,7 @@ export default function GamePage() {
 
   const [playerColor, setPlayerColor] = useState<Color | null>(null);
   const [logOpen, setLogOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
   const { ready, source, restart, opponentColor } = useDeck(playerColor);
   const { t } = useI18n();
   const {
@@ -115,17 +120,26 @@ export default function GamePage() {
   }, []);
 
   useEffect(() => {
-    // Global shortcut: `L` toggles the match log. Bail if the user is
-    // typing into a field or a modifier is held, to avoid hijacking
+    // Global shortcuts:
+    //   L  → toggles the match log
+    //   ?  → opens the keyboard help (Shift+/ on US layouts)
+    // Bail if the user is typing into a field or a modifier is held
+    // (besides the Shift required to type "?"), to avoid hijacking
     // real keyboard actions.
     const handler = (e: KeyboardEvent) => {
       if (e.ctrlKey || e.metaKey || e.altKey) return;
-      if (e.key !== 'l' && e.key !== 'L') return;
       const tgt = e.target as HTMLElement | null;
       if (tgt && (tgt.tagName === 'INPUT' || tgt.tagName === 'TEXTAREA' || tgt.isContentEditable))
         return;
-      e.preventDefault();
-      setLogOpen((prev) => !prev);
+      if (e.key === 'l' || e.key === 'L') {
+        e.preventDefault();
+        setLogOpen((prev) => !prev);
+        return;
+      }
+      if (e.key === '?') {
+        e.preventDefault();
+        setHelpOpen(true);
+      }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
@@ -212,6 +226,16 @@ export default function GamePage() {
               <strong>{turn === 'player' ? t('turn.yourMove') : t('turn.opponent')}</strong>
             </span>
             <CombatLogToggle open={logOpen} onToggle={() => setLogOpen((o) => !o)} />
+            <button
+              type="button"
+              onClick={() => setHelpOpen(true)}
+              aria-label={t('help.openButton')}
+              aria-haspopup="dialog"
+              aria-keyshortcuts="?"
+              className={styles.helpButton}
+            >
+              ?
+            </button>
             <LangToggle />
           </div>
         </header>
@@ -302,6 +326,8 @@ export default function GamePage() {
       {inspected && (
         <CardInspector card={inspected.card} actions={inspectorActions} onClose={closeInspector} />
       )}
+
+      {helpOpen && <KeyboardHelp onClose={() => setHelpOpen(false)} />}
 
       <Footer source={source} />
     </>

@@ -1,0 +1,104 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.78);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 24px;
+}
+
+.dialog {
+  background: #181f24;
+  color: #eceff1;
+  border: 1px solid #455a64;
+  border-radius: 14px;
+  max-width: 520px;
+  width: 100%;
+  max-height: 92vh;
+  overflow-y: auto;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.title {
+  margin: 0;
+  font-size: 20px;
+}
+
+.list {
+  margin: 0;
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  column-gap: 16px;
+  row-gap: 8px;
+  font-size: 15px;
+}
+
+.list dt {
+  margin: 0;
+  font-weight: 600;
+  display: flex;
+  gap: 4px;
+}
+
+.list dd {
+  margin: 0;
+}
+
+.kbd {
+  display: inline-block;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 13px;
+  background: #263238;
+  color: #eceff1;
+  border: 1px solid #455a64;
+  border-radius: 4px;
+  padding: 2px 6px;
+  min-width: 28px;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 4px;
+}
+
+.close {
+  padding: 10px 18px;
+  background: #263238;
+  border: 1px solid #455a64;
+  border-radius: 8px;
+  color: #eceff1;
+  cursor: pointer;
+  font: inherit;
+}
+
+.close:focus-visible {
+  outline: none;
+  border-color: #4dd0e1;
+  box-shadow: 0 0 0 4px rgba(77, 208, 225, 0.35);
+}
+
+@media (forced-colors: active) {
+  .dialog,
+  .close {
+    background: ButtonFace;
+    color: ButtonText;
+    border: 1px solid ButtonText;
+  }
+  .kbd {
+    background: ButtonFace;
+    color: ButtonText;
+    border: 1px solid ButtonText;
+  }
+  .close:focus-visible {
+    border-color: Highlight;
+    outline: 3px solid Highlight;
+  }
+}

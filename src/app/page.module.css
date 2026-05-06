@@ -50,3 +50,36 @@
 .playArea {
   display: contents;
 }
+
+/* Small "?" affordance in the header next to log/lang toggles. Sized
+ * to match the other toggle buttons; the actual help dialog lives in
+ * KeyboardHelp.module.css. */
+.helpButton {
+  font: inherit;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: #263238;
+  color: #eceff1;
+  border: 1px solid #455a64;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.helpButton:focus-visible {
+  outline: none;
+  border-color: #4dd0e1;
+  box-shadow: 0 0 0 4px rgba(77, 208, 225, 0.35);
+}
+
+@media (forced-colors: active) {
+  .helpButton {
+    background: ButtonFace;
+    color: ButtonText;
+    border: 1px solid ButtonText;
+  }
+  .helpButton:focus-visible {
+    border-color: Highlight;
+    outline: 3px solid Highlight;
+  }
+}

@@ -93,7 +93,18 @@ export type MessageKey =
   | 'log.combat.face.byOpponent'
   | 'log.gameOver.victory'
   | 'log.gameOver.defeat'
-  | 'log.init.firstTurn';
+  | 'log.init.firstTurn'
+  | 'help.title'
+  | 'help.openButton'
+  | 'help.closeButton'
+  | 'help.shortcut.help'
+  | 'help.shortcut.inspect'
+  | 'help.shortcut.log'
+  | 'help.shortcut.handNav'
+  | 'help.shortcut.handEdge'
+  | 'help.shortcut.colorNav'
+  | 'help.shortcut.escape'
+  | 'help.shortcut.activate';
 
 export const messages: Record<Lang, Record<MessageKey, string>> = {
   pt: {
@@ -192,6 +203,17 @@ export const messages: Record<Lang, Record<MessageKey, string>> = {
     'log.gameOver.defeat': 'Derrota. O oponente reduziu sua vida a zero.',
     'log.init.firstTurn':
       'Nova partida. Turno 1. Você tem {life} de vida, {hand} cartas e 1 de mana. Sua vez.',
+    'help.title': 'Atalhos de teclado',
+    'help.openButton': 'Mostrar atalhos de teclado',
+    'help.closeButton': 'Fechar atalhos',
+    'help.shortcut.help': 'Mostrar este painel',
+    'help.shortcut.inspect': 'Inspecionar a carta em foco',
+    'help.shortcut.log': 'Abrir ou fechar o registro da partida',
+    'help.shortcut.handNav': 'Navegar pelas cartas da mão',
+    'help.shortcut.handEdge': 'Primeira ou última carta da mão',
+    'help.shortcut.colorNav': 'Navegar pelas cores na seleção',
+    'help.shortcut.escape': 'Fechar diálogo aberto',
+    'help.shortcut.activate': 'Jogar ou selecionar a carta em foco',
   },
   en: {
     'app.title': 'MTG Combat Demo',
@@ -289,6 +311,17 @@ export const messages: Record<Lang, Record<MessageKey, string>> = {
     'log.gameOver.defeat': 'Defeat. The opponent reduced your life to zero.',
     'log.init.firstTurn':
       'New match. Turn 1. You have {life} life, {hand} cards, and 1 mana. Your turn.',
+    'help.title': 'Keyboard shortcuts',
+    'help.openButton': 'Show keyboard shortcuts',
+    'help.closeButton': 'Close shortcuts',
+    'help.shortcut.help': 'Show this panel',
+    'help.shortcut.inspect': 'Inspect the focused card',
+    'help.shortcut.log': 'Toggle the match log',
+    'help.shortcut.handNav': 'Move between cards in your hand',
+    'help.shortcut.handEdge': 'First or last card in your hand',
+    'help.shortcut.colorNav': 'Move between colors during selection',
+    'help.shortcut.escape': 'Close any open dialog',
+    'help.shortcut.activate': 'Play or select the focused card',
   },
 };
 

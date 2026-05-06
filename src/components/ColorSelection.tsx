@@ -60,6 +60,7 @@ export function ColorSelection({ onSelect }: Props) {
                 onClick={() => onSelect(c)}
                 onKeyDown={(e) => onKeyDown(e, i)}
                 aria-label={`${name} - ${flavor}`}
+                aria-keyshortcuts="ArrowLeft ArrowRight"
                 className={styles.button}
               >
                 {artUrl ? (

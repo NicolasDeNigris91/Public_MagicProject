@@ -52,6 +52,7 @@ export function Hand({ hand, label, onActivate, hidden = false, compact = false 
       <ul
         ref={ref}
         onKeyDown={onKeyDown}
+        aria-keyshortcuts="ArrowLeft ArrowRight Home End"
         className={`${styles.list}${compact ? ` ${styles.compact}` : ''}`}
       >
         {hand.map((card, i) => (
