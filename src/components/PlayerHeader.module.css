@@ -124,3 +124,19 @@
   color: #eceff1;
   font-weight: 700;
 }
+
+/* Forced-colors: tinted backgrounds collapse under HCM, so re-state
+ * the life pill border, damage pulse color, and mana accent using
+ * system colors to keep semantic meaning. */
+@media (forced-colors: active) {
+  .life {
+    background: ButtonFace;
+    border-color: ButtonText;
+  }
+  .lifePulse {
+    color: Mark;
+  }
+  .manaBlock {
+    color: LinkText;
+  }
+}

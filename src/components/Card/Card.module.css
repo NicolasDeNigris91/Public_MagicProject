@@ -150,6 +150,35 @@
   }
 }
 
+/* Forced-colors: focus, pressed, sick badge, and inspect button rely on
+ * tinted box-shadow / hex backgrounds that vanish under Windows HCM.
+ * Re-state them with system colors so selection and inspect-affordance
+ * are still visible. forced-color-adjust: none is reserved for badges
+ * whose meaning is conveyed by color (sick = restricted action). */
+@media (forced-colors: active) {
+  .card:focus-visible {
+    border-color: Highlight;
+    outline: 3px solid Highlight;
+    outline-offset: 2px;
+  }
+  .card[aria-pressed='true'] {
+    border-color: Highlight;
+    outline: 2px solid Highlight;
+    outline-offset: -4px;
+  }
+  .sickBadge {
+    forced-color-adjust: none;
+    background: Mark;
+    color: MarkText;
+    border: 1px solid MarkText;
+  }
+  .inspectBtn {
+    background: ButtonFace;
+    color: ButtonText;
+    border: 1px solid ButtonText;
+  }
+}
+
 .cardWrapper {
   position: relative;
   display: inline-block;

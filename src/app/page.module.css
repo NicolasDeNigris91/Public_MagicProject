@@ -74,3 +74,21 @@
   color: #eceff1;
   cursor: pointer;
 }
+
+/* Forced-colors: green/red borders distinguish victory from defeat
+ * but those hex values vanish under HCM. Re-express via system colors
+ * (Highlight for win, Mark for loss) so the outcome is still
+ * visually distinct from the background panel. */
+@media (forced-colors: active) {
+  .gameOver {
+    border-color: Highlight;
+  }
+  .gameOverDefeat {
+    border-color: Mark;
+  }
+  .control {
+    background: ButtonFace;
+    color: ButtonText;
+    border: 1px solid ButtonText;
+  }
+}

@@ -184,6 +184,31 @@ a {
   }
 }
 
+/* Windows High Contrast Mode / forced-colors. Hex colors above are
+ * stripped by the OS, so map our semantic accents to system colors so
+ * focus rings, links, and attack/end buttons stay visible. */
+@media (forced-colors: active) {
+  :focus-visible {
+    outline-color: Highlight;
+  }
+  a {
+    color: LinkText;
+  }
+  .skip-link {
+    background: ButtonFace;
+    color: ButtonText;
+    border: 1px solid ButtonText;
+  }
+  .btn-attack:hover:not(:disabled) {
+    border-color: ButtonText;
+    color: ButtonText;
+  }
+  .btn-end:hover:not(:disabled) {
+    border-color: ButtonText;
+    color: ButtonText;
+  }
+}
+
 /* Below 480px the header's title + turn cluster + toolbar can't all
  * sit on one line without each piece getting clipped or the title
  * shrinking past readability. Stack them vertically so each row gets

@@ -42,3 +42,23 @@
   pointer-events: none;
   animation: combat-travel var(--combat-travel-ms, 350ms) cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
+
+/* Forced-colors: the red damage hex and rgba clone background both
+ * vanish under HCM. Re-state damage as Mark text framed in a small
+ * box so it remains the visually loudest event on the screen, and
+ * the flight clone uses system colors for the travelling chip. */
+@media (forced-colors: active) {
+  .damageNumber {
+    forced-color-adjust: none;
+    color: Mark;
+    background: ButtonFace;
+    text-shadow: none;
+    padding: 2px 6px;
+    border: 1px solid Mark;
+    border-radius: 4px;
+  }
+  .flightClone {
+    background: ButtonFace;
+    border-color: ButtonText;
+  }
+}
