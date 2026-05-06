@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { logEntryId, cardId } from '@/engine/types';
-import { createGameStore } from './useGameStore';
+import { createGameStore, getLangGlobal, setLangGlobal } from './useGameStore';
 import type { ICard, LogEntry } from '@/engine/types';
 
 // MAX_LOG is internal to useGameStore.ts (intentionally — it's a tuning knob,
@@ -171,5 +171,119 @@ describe('createGameStore — gameLog truncation', () => {
     expect(log[0]?.message).not.toBe('pre-0');
     // Tail must be one of the freshly-appended entries (id starts with `a-`).
     expect(log[log.length - 1]?.id?.startsWith('a-')).toBe(true);
+  });
+});
+
+describe('createGameStore — language resolution', () => {
+  it('honors injected getLang: en for log resolution', () => {
+    const store = createGameStore({
+      clock: () => 0,
+      idGen: () => logEntryId('en-1'),
+      getLang: () => 'en',
+    });
+    store.getState().initGame(deck('p'), deck('o'));
+    const init = store.getState().gameLog[0];
+    expect(init?.message).toMatch(/^New match\./);
+  });
+
+  it('honors injected getLang: pt for log resolution', () => {
+    const store = createGameStore({
+      clock: () => 0,
+      idGen: () => logEntryId('pt-1'),
+      getLang: () => 'pt',
+    });
+    store.getState().initGame(deck('p'), deck('o'));
+    const init = store.getState().gameLog[0];
+    expect(init?.message).toMatch(/^Nova partida\./);
+  });
+
+  it('singleton picks up setLangGlobal between actions', () => {
+    // No injected getLang -> uses the module-level globalLang. Flip it
+    // before each action and verify the next log reflects the switch.
+    const before = getLangGlobal();
+    try {
+      const store = createGameStore({
+        clock: () => 0,
+        idGen: ((): (() => ReturnType<typeof logEntryId>) => {
+          let n = 0;
+          return () => logEntryId(`g-${++n}`);
+        })(),
+      });
+
+      setLangGlobal('en');
+      store.getState().initGame(deck('p'), deck('o'));
+      expect(store.getState().gameLog[0]?.message).toMatch(/^New match\./);
+
+      // Re-init under PT to isolate the second resolution from the
+      // first; initGame replaces the entire log slice.
+      setLangGlobal('pt');
+      store.getState().initGame(deck('p'), deck('o'));
+      expect(store.getState().gameLog[0]?.message).toMatch(/^Nova partida\./);
+    } finally {
+      setLangGlobal(before);
+    }
+  });
+
+  it('combat.blocked logs interpolate {who} from meta.attackingSide', () => {
+    // Drive an actual blocked combat through the store and verify the
+    // resolved message string carries the correct localized "who"
+    // anchor for both attacker sides. This is the integration check
+    // for resolveSeed's special-case {who} substitution.
+    const playerSide: ICard = {
+      ...bareCard('atk', 1),
+      power: 2,
+      toughness: 2,
+    };
+    const opponentBlocker: ICard = {
+      ...bareCard('blk', 1),
+      power: 2,
+      toughness: 2,
+    };
+
+    const enStore = createGameStore({
+      clock: () => 0,
+      idGen: ((): (() => ReturnType<typeof logEntryId>) => {
+        let n = 0;
+        return () => logEntryId(`en-${++n}`);
+      })(),
+      getLang: () => 'en',
+    });
+    enStore.setState({
+      player: { ...enStore.getState().player, battlefield: [playerSide], manaMax: 1 },
+      opponent: {
+        ...enStore.getState().opponent,
+        battlefield: [opponentBlocker],
+        manaMax: 1,
+      },
+      initialized: true,
+    });
+    enStore.getState().attack(playerSide.id, opponentBlocker.id);
+    const enCombat = enStore.getState().gameLog.at(-1);
+    expect(enCombat?.message).toMatch(/^You attacked with/);
+
+    const ptStore = createGameStore({
+      clock: () => 0,
+      idGen: ((): (() => ReturnType<typeof logEntryId>) => {
+        let n = 0;
+        return () => logEntryId(`pt-${++n}`);
+      })(),
+      getLang: () => 'pt',
+    });
+    // turn defaults to 'player' on a fresh store; flip to opponent so
+    // the combat log resolves through the byOpponent / "Oponente"
+    // {who} branch.
+    ptStore.setState({
+      turn: 'opponent',
+      player: { ...ptStore.getState().player, battlefield: [opponentBlocker], manaMax: 1 },
+      opponent: {
+        ...ptStore.getState().opponent,
+        battlefield: [playerSide],
+        manaMax: 1,
+      },
+      initialized: true,
+    });
+    ptStore.getState().attack(playerSide.id, opponentBlocker.id);
+    const ptCombat = ptStore.getState().gameLog.at(-1);
+    expect(ptCombat?.message).toMatch(/^Oponente atacou com/);
   });
 });

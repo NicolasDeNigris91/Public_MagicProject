@@ -173,29 +173,22 @@ function defaultIdGen(): IdGen {
   return () => logEntryId(`log-${++seq}`);
 }
 
-// Module-level lang getter that the singleton store uses by default.
-// I18nProvider hooks itself in via registerLangGetter() on mount.
+// Module-level live language. I18nProvider pushes the user's choice
+// here on every `lang` state change via setLangGlobal(); the default
+// singleton store reads it through the closure below at log-mint
+// time, which means a language switch is reflected in the next
+// engine-driven log entry without needing prop drilling or context.
+// Tests that need a stable language inject `getLang: () => '...'`
+// into createGameStore() instead of touching this module-level var.
 let globalLang: Lang = 'pt';
 const globalLangGetter: LangGetter = () => globalLang;
-/**
- * Register a getter so the singleton store reads the live language
- * from I18nProvider. Returns a teardown that restores the default
- * 'pt' getter — useful in tests.
- */
-export function registerLangGetter(getter: LangGetter): () => void {
-  const previous = globalLang;
-  globalLang = getter();
-  // Subsequent reads pick up the new value via the closure below.
-  // We poll on each call rather than installing the getter directly
-  // so the provider only has to push values via setLangGlobal — no
-  // shared mutable closure of its setLang setter.
-  return () => {
-    globalLang = previous;
-  };
-}
 /** Pushed by I18nProvider whenever its `lang` state changes. */
 export function setLangGlobal(lang: Lang): void {
   globalLang = lang;
+}
+/** Read the current global language. Exported for test use. */
+export function getLangGlobal(): Lang {
+  return globalLang;
 }
 
 /**
