@@ -45,10 +45,10 @@ const BUDGETS = {
   // colors fallbacks across 5 modules, the prefers-reduced-data
   // helper, plus a header help button + 11 new i18n keys feeding the
   // KeyboardHelp dialog. KeyboardHelp itself is next/dynamic so its
-  // ~1 kB only loads on first open. Ratcheted floor sits ~1 kB above
-  // current to absorb routine refactors but trip on a real
-  // regression.
-  '/page': { gzip: 197_000, brotli: 172_000 },
+  // ~1 kB only loads on first open. Then bumped again the same day
+  // when es-ES and fr-FR translation blocks landed (~85 keys × 2
+  // catalogs feeds /page through the format() helper).
+  '/page': { gzip: 199_000, brotli: 174_000 },
   // /layout grew ~1.5 kB after the observability shim landed:
   // the static import of src/lib/observability.ts pulls webpack's
   // dynamic-import runtime into the layout chunk even though
@@ -56,7 +56,10 @@ const BUDGETS = {
   // until NEXT_PUBLIC_SENTRY_DSN is set. Worth the cost — a single
   // entry point for ErrorBoundary, global error handlers, and
   // Web Vitals reporting beats wiring each call site by hand.
-  '/layout': { gzip: 105_000, brotli: 92_000 },
+  // Bumped again 2026-05-06 with the es-ES/fr-FR catalogs: I18nProvider
+  // pulls in the full messages.ts at the layout level so all 4
+  // language tables ship in the layout chunk.
+  '/layout': { gzip: 107_000, brotli: 95_000 },
   '/_not-found/page': { gzip: 91_000, brotli: 79_000 },
 };
 

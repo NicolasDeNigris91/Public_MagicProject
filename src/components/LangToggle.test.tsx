@@ -25,12 +25,14 @@ function renderWithProvider() {
 }
 
 describe('LangToggle', () => {
-  it('renders both language buttons inside a labelled group', () => {
+  it('renders one button per language inside a labelled group', () => {
     renderWithProvider();
     const group = screen.getByRole('group');
     expect(group.getAttribute('aria-label')).toBeTruthy();
-    // Two buttons, one per language.
-    expect(screen.getAllByRole('button')).toHaveLength(2);
+    // 4 buttons after the es/fr translations landed: pt, en, es, fr.
+    // Update the count alongside LANGS in src/i18n/messages.ts when
+    // adding a new language.
+    expect(screen.getAllByRole('button')).toHaveLength(4);
   });
 
   it('the active language button is aria-pressed=true on mount (pt is default)', () => {
@@ -61,7 +63,7 @@ describe('LangToggle', () => {
       .find((b) => b.getAttribute('aria-pressed') === 'false')!;
     await userEvent.click(inactive);
     const stored = window.localStorage.getItem('mtg-a11y-lang');
-    expect(stored).toMatch(/^(pt|en)$/);
+    expect(stored).toMatch(/^(pt|en|es|fr)$/);
     expect(document.documentElement.lang).toBe(stored);
   });
 });

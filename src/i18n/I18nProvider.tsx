@@ -1,7 +1,7 @@
 'use client';
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
 import { setLangGlobal } from '@/store/useGameStore';
-import { format, messages, type Lang, type MessageKey } from './messages';
+import { format, LANGS, messages, type Lang, type MessageKey } from './messages';
 
 interface I18nCtx {
   lang: Lang;
@@ -22,7 +22,9 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     try {
       const saved = window.localStorage.getItem(STORAGE_KEY);
-      if (saved === 'pt' || saved === 'en') setLangState(saved);
+      if (saved && (LANGS as readonly string[]).includes(saved)) {
+        setLangState(saved as Lang);
+      }
     } catch {
       // localStorage unavailable (private mode, sandbox) - ignore.
     }

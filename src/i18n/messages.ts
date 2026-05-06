@@ -3,9 +3,9 @@
  * oracle text, type lines) stays in English - it's source data, not
  * UI copy. Only strings authored by this app are translated here.
  */
-export type Lang = 'pt' | 'en';
+export type Lang = 'pt' | 'en' | 'es' | 'fr';
 
-export const LANGS: readonly Lang[] = ['pt', 'en'] as const;
+export const LANGS: readonly Lang[] = ['pt', 'en', 'es', 'fr'] as const;
 
 export type MessageKey =
   | 'app.title'
@@ -49,6 +49,8 @@ export type MessageKey =
   | 'lang.toggle'
   | 'lang.pt'
   | 'lang.en'
+  | 'lang.es'
+  | 'lang.fr'
   | 'log.title'
   | 'log.empty'
   | 'log.open'
@@ -150,6 +152,8 @@ export const messages: Record<Lang, Record<MessageKey, string>> = {
     'lang.toggle': 'Mudar idioma',
     'lang.pt': 'PT',
     'lang.en': 'EN',
+    'lang.es': 'ES',
+    'lang.fr': 'FR',
     'log.title': 'Registro da partida',
     'log.empty': 'Nenhum evento ainda.',
     'log.open': 'Abrir registro',
@@ -258,6 +262,8 @@ export const messages: Record<Lang, Record<MessageKey, string>> = {
     'lang.toggle': 'Change language',
     'lang.pt': 'PT',
     'lang.en': 'EN',
+    'lang.es': 'ES',
+    'lang.fr': 'FR',
     'log.title': 'Match log',
     'log.empty': 'No events yet.',
     'log.open': 'Open log',
@@ -322,6 +328,228 @@ export const messages: Record<Lang, Record<MessageKey, string>> = {
     'help.shortcut.colorNav': 'Move between colors during selection',
     'help.shortcut.escape': 'Close any open dialog',
     'help.shortcut.activate': 'Play or select the focused card',
+  },
+  es: {
+    'app.title': 'MTG Combat Demo',
+    'turn.label': 'Turno',
+    'turn.yourMove': 'Tu turno',
+    'turn.opponent': 'Oponente',
+    'game.loading': 'Repartiendo cartas…',
+    'game.victory': '¡Victoria! Has derrotado al oponente.',
+    'game.defeat': 'Derrota. Tu vida llegó a cero.',
+    'game.playAgain': 'Jugar otra vez con {color}',
+    'game.changeColor': 'Cambiar color',
+    'color.selectTitle': 'Elige tu color',
+    'color.toolbarLabel': 'Colores disponibles',
+    'color.W.name': 'Blanco',
+    'color.W.flavor': 'Orden, protección y tropas en formación',
+    'color.U.name': 'Azul',
+    'color.U.flavor': 'Vuelo, evasión y control del ritmo',
+    'color.B.name': 'Negro',
+    'color.B.flavor': 'Amenazas mortíferas que regresan del cementerio',
+    'color.R.name': 'Rojo',
+    'color.R.flavor': 'Pura velocidad y daño directo',
+    'color.G.name': 'Verde',
+    'color.G.flavor': 'Fuerza bruta y criaturas masivas',
+    'color.announceChoice': 'Has elegido {me}. El oponente jugará con {them}. Repartiendo cartas.',
+    'player.you': 'Tú',
+    'player.opponent': 'Oponente',
+    'player.lifePrefix': 'Vida ',
+    'player.handLabel': 'mano',
+    'player.handSingular': 'carta',
+    'player.handPlural': 'cartas',
+    'player.manaLabel': 'Maná',
+    'action.attackDirect': 'Atacar directamente al oponente',
+    'action.endTurn': 'Terminar turno',
+    'action.opponentThinking': 'Oponente pensando…',
+    'action.attackBlocked':
+      'No puedes atacar directamente mientras el oponente tenga criaturas en el campo.',
+    'battlefield.yourLabel': 'Tu campo de batalla',
+    'battlefield.opponentLabel': 'Campo del oponente',
+    'battlefield.empty': '{label} - sin criaturas en juego',
+    'hand.your': 'Tu mano',
+    'hand.opponent': 'Mano del oponente',
+    'lang.toggle': 'Cambiar idioma',
+    'lang.pt': 'PT',
+    'lang.en': 'EN',
+    'lang.es': 'ES',
+    'lang.fr': 'FR',
+    'log.title': 'Registro de la partida',
+    'log.empty': 'Aún no hay eventos.',
+    'log.open': 'Abrir registro',
+    'log.close': 'Cerrar registro',
+    'log.shortcut': 'Atajo: L',
+    'log.cannotPlay.noMana': 'No puedes jugar {name} - cuesta {cmc}, tienes {available} de maná.',
+    'hand.cannotPlay.mana': 'No puedes jugar {name} - cuesta {cmc}, tienes {available} de maná.',
+    'card.sickBadge': 'Mareo de invocación',
+    'card.exhaustedBadge': 'Ya atacó',
+    'card.sickAriaSuffix': 'Mareo de invocación: no puede atacar este turno.',
+    'card.exhaustedAriaSuffix': 'Ya atacó este turno.',
+    'card.inspect': 'Inspeccionar {name}',
+    'inspector.type': 'Tipo',
+    'inspector.mana': 'Maná',
+    'inspector.pt': 'F / R',
+    'inspector.statusLabel': 'Estado de {label}',
+    'footer.deckSource': 'Fuente del mazo',
+    'footer.disclaimer':
+      'Este es un proyecto de portafolio no oficial, sin fines de lucro. Magic: The Gathering, los nombres de las cartas, el arte y las marcas son propiedad de Wizards of the Coast LLC, una filial de Hasbro, Inc. Este proyecto no es producido, respaldado ni afiliado a Wizards of the Coast.',
+    'footer.scryfallThanks':
+      'Los datos e imágenes de las cartas son proporcionados por la API pública de Scryfall, a quien agradecemos.',
+    'footer.fanPolicy':
+      'Este contenido de fan está permitido bajo la Política de Contenido de Fans de Wizards of the Coast.',
+    'log.play.player':
+      'Jugaste {label} al campo de batalla. Tiene mareo de invocación y no puede atacar este turno.',
+    'log.play.opponent': 'El oponente jugó {label}. Tiene mareo de invocación.',
+    'log.cannotPlay.mana': 'No puedes jugar {name} - cuesta {cmc}, tienes {available} de maná.',
+    'log.draw.player': 'Robaste {name}. Tu mano tiene {handSize}.',
+    'log.draw.opponent': 'El oponente robó una carta. Su mano tiene {handSize}.',
+    'log.decking.player': 'Intentaste robar de un mazo vacío. Has perdido la partida.',
+    'log.decking.opponent': 'El oponente intentó robar de un mazo vacío. Has ganado la partida.',
+    'log.turn.player': 'Turno {turnNumber}. Tu turno.',
+    'log.turn.opponent': 'Turno del oponente.',
+    'log.mana.available': '{manaMax} de maná disponible.',
+    'log.attack.summoningSick': '{name} tiene mareo de invocación y no puede atacar.',
+    'log.attack.exhausted': '{name} ya atacó este turno y no puede atacar.',
+    'log.attack.cannotAttackDirect':
+      'No puedes atacar directamente mientras el oponente tenga criaturas en el campo.',
+    'log.combat.blocked.both':
+      '{who} atacó con {attackerLabel}, bloqueado por {blockerLabel}. {attackerName} muere. {blockerName} muere.',
+    'log.combat.blocked.attackerOnly':
+      '{who} atacó con {attackerLabel}, bloqueado por {blockerLabel}. {attackerName} muere.',
+    'log.combat.blocked.blockerOnly':
+      '{who} atacó con {attackerLabel}, bloqueado por {blockerLabel}. {blockerName} muere.',
+    'log.combat.blocked.none': '{who} atacó con {attackerLabel}, bloqueado por {blockerLabel}.',
+    'log.combat.face.byPlayer':
+      'Atacaste con {attackerLabel}, infligiendo {damage} de daño. La vida del oponente ahora es {defenderLife}.',
+    'log.combat.face.byOpponent':
+      'El oponente atacó con {attackerLabel}, infligiendo {damage} de daño. Tu vida ahora es {defenderLife}.',
+    'log.gameOver.victory': '¡Victoria! Has derrotado al oponente.',
+    'log.gameOver.defeat': 'Derrota. El oponente redujo tu vida a cero.',
+    'log.init.firstTurn':
+      'Nueva partida. Turno 1. Tienes {life} de vida, {hand} cartas y 1 de maná. Tu turno.',
+    'help.title': 'Atajos de teclado',
+    'help.openButton': 'Mostrar atajos de teclado',
+    'help.closeButton': 'Cerrar atajos',
+    'help.shortcut.help': 'Mostrar este panel',
+    'help.shortcut.inspect': 'Inspeccionar la carta enfocada',
+    'help.shortcut.log': 'Abrir o cerrar el registro de la partida',
+    'help.shortcut.handNav': 'Navegar por las cartas de tu mano',
+    'help.shortcut.handEdge': 'Primera o última carta de tu mano',
+    'help.shortcut.colorNav': 'Navegar por los colores durante la selección',
+    'help.shortcut.escape': 'Cerrar cualquier diálogo abierto',
+    'help.shortcut.activate': 'Jugar o seleccionar la carta enfocada',
+  },
+  fr: {
+    'app.title': 'MTG Combat Demo',
+    'turn.label': 'Tour',
+    'turn.yourMove': 'À toi de jouer',
+    'turn.opponent': 'Adversaire',
+    'game.loading': 'Distribution des cartes…',
+    'game.victory': 'Victoire ! Tu as vaincu l’adversaire.',
+    'game.defeat': 'Défaite. Ta vie est tombée à zéro.',
+    'game.playAgain': 'Rejouer avec {color}',
+    'game.changeColor': 'Changer de couleur',
+    'color.selectTitle': 'Choisis ta couleur',
+    'color.toolbarLabel': 'Couleurs disponibles',
+    'color.W.name': 'Blanc',
+    'color.W.flavor': 'Ordre, protection et troupes en formation',
+    'color.U.name': 'Bleu',
+    'color.U.flavor': 'Vol, esquive et contrôle du tempo',
+    'color.B.name': 'Noir',
+    'color.B.flavor': 'Menaces létales qui reviennent du cimetière',
+    'color.R.name': 'Rouge',
+    'color.R.flavor': 'Vitesse pure et dégâts directs',
+    'color.G.name': 'Vert',
+    'color.G.flavor': 'Force brute et créatures massives',
+    'color.announceChoice':
+      'Tu as choisi {me}. L’adversaire jouera avec {them}. Distribution des cartes.',
+    'player.you': 'Toi',
+    'player.opponent': 'Adversaire',
+    'player.lifePrefix': 'Vie ',
+    'player.handLabel': 'main',
+    'player.handSingular': 'carte',
+    'player.handPlural': 'cartes',
+    'player.manaLabel': 'Mana',
+    'action.attackDirect': 'Attaquer l’adversaire directement',
+    'action.endTurn': 'Finir le tour',
+    'action.opponentThinking': 'L’adversaire réfléchit…',
+    'action.attackBlocked':
+      'Impossible d’attaquer directement tant que l’adversaire a des créatures sur le champ de bataille.',
+    'battlefield.yourLabel': 'Ton champ de bataille',
+    'battlefield.opponentLabel': 'Champ de l’adversaire',
+    'battlefield.empty': '{label} - aucune créature en jeu',
+    'hand.your': 'Ta main',
+    'hand.opponent': 'Main de l’adversaire',
+    'lang.toggle': 'Changer de langue',
+    'lang.pt': 'PT',
+    'lang.en': 'EN',
+    'lang.es': 'ES',
+    'lang.fr': 'FR',
+    'log.title': 'Journal de la partie',
+    'log.empty': 'Aucun événement pour le moment.',
+    'log.open': 'Ouvrir le journal',
+    'log.close': 'Fermer le journal',
+    'log.shortcut': 'Raccourci : L',
+    'log.cannotPlay.noMana': 'Impossible de jouer {name} - coûte {cmc}, tu as {available} de mana.',
+    'hand.cannotPlay.mana': 'Impossible de jouer {name} - coûte {cmc}, tu as {available} de mana.',
+    'card.sickBadge': 'Mal d’invocation',
+    'card.exhaustedBadge': 'A déjà attaqué',
+    'card.sickAriaSuffix': 'Mal d’invocation : ne peut pas attaquer ce tour.',
+    'card.exhaustedAriaSuffix': 'A déjà attaqué ce tour.',
+    'card.inspect': 'Inspecter {name}',
+    'inspector.type': 'Type',
+    'inspector.mana': 'Mana',
+    'inspector.pt': 'F / E',
+    'inspector.statusLabel': 'Statut de {label}',
+    'footer.deckSource': 'Source du deck',
+    'footer.disclaimer':
+      'Ceci est un projet de portfolio non officiel, sans but lucratif. Magic: The Gathering, les noms des cartes, les illustrations et les marques sont la propriété de Wizards of the Coast LLC, une filiale de Hasbro, Inc. Ce projet n’est ni produit, ni soutenu, ni affilié à Wizards of the Coast.',
+    'footer.scryfallThanks':
+      'Les données et images des cartes sont fournies par l’API publique Scryfall, que nous remercions.',
+    'footer.fanPolicy':
+      'Ce contenu de fan est autorisé sous la Politique de Contenu de Fans de Wizards of the Coast.',
+    'log.play.player':
+      'Tu as joué {label} sur le champ de bataille. Elle a le mal d’invocation et ne peut pas attaquer ce tour.',
+    'log.play.opponent': 'L’adversaire a joué {label}. Elle a le mal d’invocation.',
+    'log.cannotPlay.mana': 'Impossible de jouer {name} - coûte {cmc}, tu as {available} de mana.',
+    'log.draw.player': 'Tu as pioché {name}. Ta main contient {handSize}.',
+    'log.draw.opponent': 'L’adversaire a pioché une carte. Sa main contient {handSize}.',
+    'log.decking.player': 'Tu as essayé de piocher d’une bibliothèque vide. Tu as perdu la partie.',
+    'log.decking.opponent':
+      'L’adversaire a essayé de piocher d’une bibliothèque vide. Tu as gagné la partie.',
+    'log.turn.player': 'Tour {turnNumber}. À toi de jouer.',
+    'log.turn.opponent': 'Tour de l’adversaire.',
+    'log.mana.available': '{manaMax} de mana disponible.',
+    'log.attack.summoningSick': '{name} a le mal d’invocation et ne peut pas attaquer.',
+    'log.attack.exhausted': '{name} a déjà attaqué ce tour et ne peut pas attaquer.',
+    'log.attack.cannotAttackDirect':
+      'Impossible d’attaquer directement tant que l’adversaire a des créatures sur le champ de bataille.',
+    'log.combat.blocked.both':
+      '{who} a attaqué avec {attackerLabel}, bloqué par {blockerLabel}. {attackerName} meurt. {blockerName} meurt.',
+    'log.combat.blocked.attackerOnly':
+      '{who} a attaqué avec {attackerLabel}, bloqué par {blockerLabel}. {attackerName} meurt.',
+    'log.combat.blocked.blockerOnly':
+      '{who} a attaqué avec {attackerLabel}, bloqué par {blockerLabel}. {blockerName} meurt.',
+    'log.combat.blocked.none': '{who} a attaqué avec {attackerLabel}, bloqué par {blockerLabel}.',
+    'log.combat.face.byPlayer':
+      'Tu as attaqué avec {attackerLabel}, infligeant {damage} blessures. La vie de l’adversaire est maintenant à {defenderLife}.',
+    'log.combat.face.byOpponent':
+      'L’adversaire a attaqué avec {attackerLabel}, infligeant {damage} blessures. Ta vie est maintenant à {defenderLife}.',
+    'log.gameOver.victory': 'Victoire ! Tu as vaincu l’adversaire.',
+    'log.gameOver.defeat': 'Défaite. L’adversaire a réduit ta vie à zéro.',
+    'log.init.firstTurn':
+      'Nouvelle partie. Tour 1. Tu as {life} points de vie, {hand} cartes et 1 de mana. À toi de jouer.',
+    'help.title': 'Raccourcis clavier',
+    'help.openButton': 'Afficher les raccourcis clavier',
+    'help.closeButton': 'Fermer les raccourcis',
+    'help.shortcut.help': 'Afficher ce panneau',
+    'help.shortcut.inspect': 'Inspecter la carte ciblée',
+    'help.shortcut.log': 'Ouvrir ou fermer le journal de la partie',
+    'help.shortcut.handNav': 'Naviguer entre les cartes de la main',
+    'help.shortcut.handEdge': 'Première ou dernière carte de la main',
+    'help.shortcut.colorNav': 'Naviguer entre les couleurs lors de la sélection',
+    'help.shortcut.escape': 'Fermer toute boîte de dialogue ouverte',
+    'help.shortcut.activate': 'Jouer ou sélectionner la carte ciblée',
   },
 };
 
