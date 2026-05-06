@@ -1,0 +1,9 @@
+# Portfolio site — public, indexable.
+# /api routes are server-only and don't exist in this app, but listed
+# here defensively in case a future feature adds them.
+User-agent: *
+Allow: /
+Disallow: /api/
+
+# Pointer to the security disclosure policy.
+# RFC 9116: https://datatracker.ietf.org/doc/html/rfc9116

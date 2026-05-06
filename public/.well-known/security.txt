@@ -1,0 +1,13 @@
+# Security disclosure policy for this project.
+# Plain-text format defined in RFC 9116:
+#   https://datatracker.ietf.org/doc/html/rfc9116
+#
+# This file is unsigned. The repository is small, public, and the
+# policy lives at SECURITY.md in the same source tree — readers can
+# verify provenance by fetching the file from the GitHub mirror.
+
+Contact: mailto:nicolas.denigris91@icloud.com
+Expires: 2027-05-06T00:00:00.000Z
+Preferred-Languages: en, pt
+Canonical: https://github.com/NicolasDeNigris91/Public_MagicProject/blob/main/SECURITY.md
+Policy: https://github.com/NicolasDeNigris91/Public_MagicProject/blob/main/SECURITY.md
