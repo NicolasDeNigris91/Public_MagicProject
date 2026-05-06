@@ -95,4 +95,28 @@ describe('Hand keyboard navigation', () => {
     expect(screen.queryByRole('button')).toBeNull();
     expect(screen.getAllByRole('listitem')).toHaveLength(5);
   });
+
+  it('singular hand label uses "1 card" (no plural -s)', () => {
+    render(<Hand hand={[card('only', 'Only Card')]} label="Your hand" onActivate={vi.fn()} />);
+    expect(screen.getByLabelText(/Your hand\.\s+1 card\./)).toBeInTheDocument();
+  });
+
+  it('arrow key with focus outside any card button is a no-op (idx < 0 guard)', async () => {
+    render(<Hand hand={HAND} label="Your hand" onActivate={vi.fn()} />);
+    // Park focus on body; idx === -1 inside the handler.
+    document.body.focus();
+    const before = document.activeElement;
+    await userEvent.keyboard('{ArrowRight}');
+    expect(document.activeElement).toBe(before);
+  });
+
+  it('arrow key on an empty hand is a no-op (no buttons to step through)', async () => {
+    render(<Hand hand={[]} label="Your hand" onActivate={vi.fn()} />);
+    // The <ul> is empty; pressing Home would otherwise try to focus
+    // buttons[0] which is undefined. The early-return on length === 0
+    // is what we exercise here.
+    await userEvent.keyboard('{Home}');
+    // No throw, no focus change — body stays focused.
+    expect(document.activeElement?.tagName).toBe('BODY');
+  });
 });
