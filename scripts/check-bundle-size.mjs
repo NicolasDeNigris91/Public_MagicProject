@@ -41,7 +41,14 @@ if (!existsSync(manifestPath)) {
  */
 const BUDGETS = {
   '/page': { gzip: 195_000, brotli: 170_000 },
-  '/layout': { gzip: 103_000, brotli: 89_000 },
+  // /layout grew ~1.5 kB after the observability shim landed:
+  // the static import of src/lib/observability.ts pulls webpack's
+  // dynamic-import runtime into the layout chunk even though
+  // @sentry/browser and web-vitals themselves stay in lazy chunks
+  // until NEXT_PUBLIC_SENTRY_DSN is set. Worth the cost — a single
+  // entry point for ErrorBoundary, global error handlers, and
+  // Web Vitals reporting beats wiring each call site by hand.
+  '/layout': { gzip: 105_000, brotli: 92_000 },
   '/_not-found/page': { gzip: 91_000, brotli: 79_000 },
 };
 

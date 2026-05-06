@@ -2,6 +2,7 @@ import { headers } from 'next/headers';
 import Script from 'next/script';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { LiveRegion } from '@/components/LiveRegion';
+import { Observability } from '@/components/Observability';
 import { I18nProvider } from '@/i18n/I18nProvider';
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
@@ -49,6 +50,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           Skip to main content
         </a>
         <I18nProvider>
+          <Observability />
           <ErrorBoundary>{children}</ErrorBoundary>
           <LiveRegion />
         </I18nProvider>

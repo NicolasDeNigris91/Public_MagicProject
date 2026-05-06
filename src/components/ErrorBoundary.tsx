@@ -1,5 +1,6 @@
 'use client';
 import { Component, type ErrorInfo, type ReactNode } from 'react';
+import { reportError } from '@/lib/observability';
 import styles from './ErrorBoundary.module.css';
 
 interface State {
@@ -16,6 +17,9 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, State> {
   override componentDidCatch(error: Error, info: ErrorInfo) {
     // eslint-disable-next-line no-console
     console.error('[ErrorBoundary]', error, info);
+    // Best-effort: forward to Sentry when NEXT_PUBLIC_SENTRY_DSN is set.
+    // Silent no-op otherwise — observability must never break recovery UX.
+    reportError(error, { componentStack: info.componentStack });
   }
 
   // Clears the captured error and re-renders children. Useful when the
