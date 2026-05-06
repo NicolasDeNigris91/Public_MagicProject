@@ -182,6 +182,85 @@ describe('executeAttack — combat resolution', () => {
     expect(r.next.player.battlefield[0]?.attackedThisTurn).toBe(true);
     expect(r.next.opponent.battlefield).toEqual([]);
   });
+
+  it('blocker selection picks the *named* defender, not the first creature on the field', () => {
+    // Three blockers; we target the middle one. If the find lookup
+    // collapsed to "first match" the wrong card would die and the
+    // others would survive — a subtle bug Stryker catches via the
+    // `(c) => true` mutation on the find predicate.
+    const att = bareCard('atk', { power: 3, toughness: 3 });
+    const b1 = bareCard('b1', { power: 1, toughness: 1 });
+    const b2 = bareCard('b2', { power: 1, toughness: 1 });
+    const b3 = bareCard('b3', { power: 1, toughness: 1 });
+    const s = state({
+      player: emptyPlayer('player', { battlefield: [att] }),
+      opponent: emptyPlayer('opponent', { battlefield: [b1, b2, b3] }),
+    });
+    const r = executeAttack(s, att.id, b2.id);
+    const remaining = r.next.opponent.battlefield.map((c) => c.id);
+    expect(remaining).toEqual([b1.id, b3.id]);
+  });
+
+  it('player face attack announcer says "You attacked" + "Opponent\'s life is now N"', () => {
+    const att = bareCard('p-att', { power: 4 });
+    const s = state({ player: emptyPlayer('player', { battlefield: [att] }) });
+    const r = executeAttack(s, att.id, null);
+    expect(r.logs[0]?.message).toMatch(/^You attacked with /);
+    expect(r.logs[0]?.message).toMatch(/Opponent's life is now 16/);
+    expect(r.logs[0]?.meta?.attackingSide).toBe('player');
+    expect(r.logs[0]?.meta?.damage).toBe(4);
+  });
+
+  it('opponent face attack announcer says "Opponent attacked" + "Your life is now N"', () => {
+    const att = bareCard('o-att', { power: 5 });
+    const s = state({
+      turn: 'opponent',
+      opponent: emptyPlayer('opponent', { battlefield: [att] }),
+    });
+    const r = executeAttack(s, att.id, null);
+    expect(r.logs[0]?.message).toMatch(/^Opponent attacked with /);
+    expect(r.logs[0]?.message).toMatch(/Your life is now 15/);
+    expect(r.logs[0]?.meta?.attackingSide).toBe('opponent');
+  });
+
+  it('blocked-combat announcer surfaces both creature names + both "{name} dies" suffixes', () => {
+    // Names chosen so neither is a substring of the other; otherwise the
+    // negative match in the only-blocker-dies test below would be ambiguous.
+    const att = bareCard('a', { name: 'Atticus', power: 2, toughness: 2 });
+    const blk = bareCard('b', { name: 'Bramblefolk', power: 2, toughness: 2 });
+    const s = state({
+      player: emptyPlayer('player', { battlefield: [att] }),
+      opponent: emptyPlayer('opponent', { battlefield: [blk] }),
+    });
+    const r = executeAttack(s, att.id, blk.id);
+    expect(r.logs[0]?.message).toContain('Atticus dies');
+    expect(r.logs[0]?.message).toContain('Bramblefolk dies');
+    expect(r.logs[0]?.meta?.attackerDies).toBe(1);
+    expect(r.logs[0]?.meta?.blockerDies).toBe(1);
+  });
+
+  it('blocked-combat with only blocker dying omits the "{attacker} dies" sentence', () => {
+    const att = bareCard('a', { name: 'Atticus', power: 5, toughness: 5 });
+    const blk = bareCard('b', { name: 'Bramblefolk', power: 1, toughness: 1 });
+    const s = state({
+      player: emptyPlayer('player', { battlefield: [att] }),
+      opponent: emptyPlayer('opponent', { battlefield: [blk] }),
+    });
+    const r = executeAttack(s, att.id, blk.id);
+    expect(r.logs[0]?.message).toContain('Bramblefolk dies');
+    expect(r.logs[0]?.message).not.toContain('Atticus dies');
+    expect(r.logs[0]?.meta?.attackerDies).toBe(0);
+    expect(r.logs[0]?.meta?.blockerDies).toBe(1);
+  });
+
+  it('non-lethal face attack leaves winner null and emits exactly one combat log', () => {
+    const att = bareCard('p7', { power: 2 });
+    const s = state({ player: emptyPlayer('player', { battlefield: [att] }) });
+    const r = executeAttack(s, att.id, null);
+    expect(r.next.winner).toBeNull();
+    expect(r.logs).toHaveLength(1);
+    expect(r.logs[0]?.kind).toBe('combat');
+  });
 });
 
 describe('executeEndTurn', () => {
@@ -234,10 +313,68 @@ describe('executeDrawCard', () => {
     expect(r.next.winner).toBe('opponent');
     expect(r.logs[0]?.kind).toBe('game-over');
     expect(r.logs[0]?.meta?.reason).toBe('decking');
+    expect(r.logs[0]?.meta?.winner).toBe('opponent');
+    expect(r.logs[0]?.message).toMatch(/You tried to draw from an empty deck/);
+    expect(r.logs[0]?.message).toMatch(/lose the match/);
+    expect(r.logs[0]?.priority).toBe('assertive');
+  });
+
+  it('decking-out opponent flips winner=player and emits the win-side game-over copy', () => {
+    const s = state({ opponent: emptyPlayer('opponent', { deck: [] }) });
+    const r = executeDrawCard(s, 'opponent');
+    expect(r.next.winner).toBe('player');
+    expect(r.logs[0]?.kind).toBe('game-over');
+    expect(r.logs[0]?.meta?.reason).toBe('decking');
+    expect(r.logs[0]?.meta?.winner).toBe('player');
+    expect(r.logs[0]?.message).toMatch(/Opponent tried to draw from an empty deck/);
+    expect(r.logs[0]?.message).toMatch(/win the match/);
+    expect(r.logs[0]?.priority).toBe('assertive');
+  });
+
+  it('successful draw from PLAYER side emits a "You drew" log + transfers card to hand', () => {
+    const card = bareCard('drawme');
+    const s = state({ player: emptyPlayer('player', { deck: [card] }) });
+    const r = executeDrawCard(s, 'player');
+    expect(r.next.player.hand).toContainEqual(card);
+    expect(r.next.player.deck).toEqual([]);
+    expect(r.logs[0]?.kind).toBe('draw');
+    expect(r.logs[0]?.message).toMatch(/^You drew /);
+  });
+
+  it('successful draw from OPPONENT side emits an "Opponent drew" log without leaking the card name', () => {
+    const card = bareCard('hidden');
+    const s = state({ opponent: emptyPlayer('opponent', { deck: [card] }) });
+    const r = executeDrawCard(s, 'opponent');
+    expect(r.next.opponent.hand).toContainEqual(card);
+    expect(r.logs[0]?.kind).toBe('draw');
+    expect(r.logs[0]?.message).toMatch(/^Opponent drew/);
+    // The opponent's draw must not surface the card's name (hidden info).
+    expect(r.logs[0]?.message).not.toContain(card.name);
   });
 });
 
 describe('executePlayCardToField', () => {
+  it('no-op when winner is already set', () => {
+    const card = bareCard('p0');
+    const s = state({
+      winner: 'opponent',
+      player: emptyPlayer('player', { hand: [card], manaAvailable: 2 }),
+    });
+    const r = executePlayCardToField(s, 'player', card.id);
+    expect(r.next).toBe(s);
+    expect(r.logs).toEqual([]);
+  });
+
+  it('no-op when the requested cardId is not in the player hand', () => {
+    const real = bareCard('real');
+    const s = state({
+      player: emptyPlayer('player', { hand: [real], manaAvailable: 2 }),
+    });
+    const r = executePlayCardToField(s, 'player', cardId('ghost'));
+    expect(r.next).toBe(s);
+    expect(r.logs).toEqual([]);
+  });
+
   it("no-op when not the requested side's turn", () => {
     const card = bareCard('p1');
     const s = state({
@@ -270,7 +407,7 @@ describe('executePlayCardToField', () => {
     expect(r.logs).toEqual([]);
   });
 
-  it('successful play moves the card to battlefield with summoningSick=true', () => {
+  it('successful play from PLAYER side emits "You played" log + summoningSick=true on the entered card', () => {
     const card = bareCard('p3');
     const s = state({
       player: emptyPlayer('player', { hand: [card], manaAvailable: 2 }),
@@ -281,6 +418,23 @@ describe('executePlayCardToField', () => {
     expect(r.next.player.battlefield[0]?.summoningSick).toBe(true);
     expect(r.next.player.manaAvailable).toBe(1);
     expect(r.logs[0]?.kind).toBe('play');
+    expect(r.logs[0]?.message).toMatch(/^You played /);
+    expect(r.logs[0]?.message).toMatch(/summoning sickness/);
+    expect(r.logs[0]?.meta?.player).toBe('player');
+  });
+
+  it('successful play from OPPONENT side emits "Opponent played" log with player meta=opponent', () => {
+    const card = bareCard('o-p', { cmc: 1 });
+    const s = state({
+      turn: 'opponent',
+      opponent: emptyPlayer('opponent', { hand: [card], manaAvailable: 2 }),
+    });
+    const r = executePlayCardToField(s, 'opponent', card.id);
+    expect(r.next.opponent.battlefield).toHaveLength(1);
+    expect(r.logs[0]?.kind).toBe('play');
+    expect(r.logs[0]?.message).toMatch(/^Opponent played /);
+    expect(r.logs[0]?.message).toMatch(/summoning sickness/);
+    expect(r.logs[0]?.meta?.player).toBe('opponent');
   });
 });
 
