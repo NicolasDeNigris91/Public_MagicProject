@@ -111,4 +111,45 @@ describe('useInspector', () => {
 
     expect(result.current.inspected).toBeNull();
   });
+
+  it('close() restores focus to the origin via requestAnimationFrame', async () => {
+    const card = makeCard('a');
+    resetStore('hand', [card]);
+
+    // Mount a real button bearing the same data-card-id the inspector
+    // queries on close. requestAnimationFrame in jsdom is implemented
+    // as setTimeout(fn, 0), so a microtask flush is enough to fire it.
+    const origin = document.createElement('button');
+    origin.setAttribute('data-card-id', card.id);
+    origin.tabIndex = 0;
+    document.body.appendChild(origin);
+
+    const { result } = renderHook(() => useInspector());
+    act(() => {
+      result.current.open(card, 'hand');
+    });
+    act(() => {
+      result.current.close();
+    });
+    expect(result.current.inspected).toBeNull();
+
+    // Yield to the queued rAF callback.
+    await new Promise<void>((resolve) =>
+      requestAnimationFrame(() => {
+        resolve();
+      }),
+    );
+    expect(document.activeElement).toBe(origin);
+  });
+
+  it('close() with no inspector open is a safe no-op (no rAF query)', () => {
+    const { result } = renderHook(() => useInspector());
+    expect(result.current.inspected).toBeNull();
+    // Should not throw, should not schedule a focus query against a
+    // non-existent origin id.
+    act(() => {
+      result.current.close();
+    });
+    expect(result.current.inspected).toBeNull();
+  });
 });
