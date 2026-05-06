@@ -1,0 +1,75 @@
+name: Mutation testing
+
+# Stryker is too slow (multi-minute) to gate every PR on, but a silent
+# floor is no floor at all. Run twice a week against main so a real
+# regression surfaces within ~3 days of landing instead of waiting for
+# someone to remember to run the script locally.
+on:
+  schedule:
+    # Mondays + Thursdays at 02:00 UTC. Two cadences in a week catch
+    # mid-week regressions; 02:00 UTC sits outside US/EU dev hours so
+    # the runner is unlikely to fight other workloads.
+    - cron: '0 2 * * 1,4'
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: mutation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  stryker:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      # Stryker exits non-zero when the score drops below the
+      # configured break threshold (90). The exit code becomes the
+      # job result; the issue-open step downstream reads it.
+      - name: Run Stryker
+        id: stryker
+        run: npm run test:mutation
+
+      - name: Upload mutation HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mutation-report
+          path: reports/mutation/
+          retention-days: 30
+
+      # When a scheduled run regresses below break=90, open an issue
+      # so the regression is visible without anyone watching the
+      # Actions tab. Manual workflow_dispatch runs skip the issue —
+      # those are intentional probes, not surprises.
+      - name: Open issue on regression
+        if: failure() && github.event_name == 'schedule'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const runUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            const title = `Mutation score regressed below the 90% break threshold (${new Date().toISOString().slice(0,10)})`;
+            const body = [
+              `The scheduled Stryker run on \`main\` failed. The mutation score dropped below the configured break threshold (90).`,
+              ``,
+              `- Workflow run: ${runUrl}`,
+              `- Trigger: ${context.eventName}`,
+              `- Commit: ${context.sha}`,
+              ``,
+              `Download the \`mutation-report\` artifact from the run for the per-mutant breakdown. Likely fix: either the test that previously caught the affected mutant got dropped/weakened, or new code landed in src/engine or src/store without matching tests.`,
+            ].join('\n');
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title,
+              body,
+              labels: ['ci', 'mutation-regression'],
+            });
