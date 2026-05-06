@@ -33,13 +33,9 @@ export function useInspector() {
     }
   }, [inspected, playerHand, playerField, opponentField, announce]);
 
-  // open: identity stability is incidental (consumed by Hand
-  // -> Card -> onActivate, neither of which is React.memo'd).
-  // Memoized for symmetry with close/clear and to keep the hook's
-  // returned shape uniform.
-  const open = useCallback((card: ICard, source: InspectorSource) => {
+  const open = (card: ICard, source: InspectorSource) => {
     setInspected({ card, source });
-  }, []);
+  };
 
   // close: identity stability is load-bearing. close is a dep of
   // page.tsx's `inspectorActions` useMemo; a fresh identity per
@@ -60,9 +56,10 @@ export function useInspector() {
     });
   }, []);
 
-  // clear: close without focus restore. Used when the origin button
-  // no longer exists (game over, tab unmount). Memoization is
-  // marginal — kept for the same shape-uniformity reason as open.
+  // clear: close without focus restore. Identity stability is
+  // load-bearing — page.tsx's game-over useEffect lists it in deps,
+  // and a fresh identity per render would re-fire that effect on
+  // every store change while the game-over screen is up.
   const clear = useCallback(() => setInspected(null), []);
 
   return { inspected, open, close, clear };

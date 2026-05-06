@@ -72,14 +72,10 @@ export function useDeck(playerColor: Color | null): UseDeckResult {
     };
   }, [playerColor, loadBoth]);
 
-  // restart's identity stability is incidental — its consumer
-  // (onPlayAgain in page.tsx) is a click handler whose own arrow
-  // closes over restart, so a fresh identity per render would not
-  // re-fire anything. Kept memoized for symmetry with loadBoth.
-  const restart = useCallback(() => {
+  const restart = () => {
     if (!playerColor) return;
     void loadBoth(playerColor);
-  }, [playerColor, loadBoth]);
+  };
 
   return { ready, source, restart, opponentColor };
 }
