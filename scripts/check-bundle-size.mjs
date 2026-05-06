@@ -40,15 +40,14 @@ if (!existsSync(manifestPath)) {
  *   3. Drive-by raises ("CI was green before") are not legitimate.
  */
 const BUDGETS = {
-  // /page grew ~1 kB gzip after the a11y deepening pass landed in
-  // 2026-05-06: GameOverDialog (focus trap + extracted CSS), forced-
-  // colors fallbacks across 5 modules, the prefers-reduced-data
-  // helper, plus a header help button + 11 new i18n keys feeding the
-  // KeyboardHelp dialog. KeyboardHelp itself is next/dynamic so its
-  // ~1 kB only loads on first open. Then bumped again the same day
-  // when es-ES and fr-FR translation blocks landed (~85 keys × 2
-  // catalogs feeds /page through the format() helper).
-  '/page': { gzip: 199_000, brotli: 174_000 },
+  // /page bumped twice on 2026-05-06: a11y deepening + i18n catalogs
+  // pushed it to 193 kB gzip; the same-day axios → fetch refactor
+  // reclaimed ~21 kB by dropping axios + follow-redirects + form-data
+  // + proxy-from-env, taking the route to ~172 kB. Floor sits ~5 kB
+  // above current to absorb routine refactors but trip on a real
+  // regression. Down-ratchet (175k vs the previous 197k) keeps the
+  // budget honest after the win.
+  '/page': { gzip: 178_000, brotli: 154_000 },
   // /layout grew ~1.5 kB after the observability shim landed:
   // the static import of src/lib/observability.ts pulls webpack's
   // dynamic-import runtime into the layout chunk even though

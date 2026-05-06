@@ -1,30 +1,41 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-
-vi.mock('axios', () => {
-  const get = vi.fn();
-  return {
-    default: { create: () => ({ get }) },
-    AxiosError: class AxiosError extends Error {},
-    __esModule: true,
-  };
-});
-
-import axios, { AxiosError } from 'axios';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { SKELETON } from '@/engine/color';
 import { fallbackDecks } from './fallback-deck';
 import { fetchColorArt, fetchDeckForColor } from './scryfall.client';
 
-const mockedGet = (axios.create() as unknown as { get: ReturnType<typeof vi.fn> }).get;
+const mockedFetch = vi.fn();
 
-interface MinimalAxiosResponse {
-  status: number;
+beforeEach(() => {
+  vi.stubGlobal('fetch', mockedFetch);
+  mockedFetch.mockReset();
+});
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
+
+/**
+ * Lightweight fetch-Response stand-in. The client only reads
+ * `ok`, `status`, `statusText`, and `json()` so we don't need a full
+ * Response polyfill — a plain object with those four members suffices
+ * across jsdom and node test environments alike.
+ */
+function jsonResponse(body: unknown, status = 200) {
+  return {
+    ok: status >= 200 && status < 300,
+    status,
+    statusText: status === 200 ? 'OK' : 'HTTP error',
+    json: async () => body,
+  };
 }
-function makeAxiosError(message: string, response?: MinimalAxiosResponse): AxiosError {
-  const err = new AxiosError(message);
-  if (response) {
-    (err as unknown as { response: MinimalAxiosResponse }).response = response;
-  }
-  return err;
+
+function statusResponse(status: number) {
+  return {
+    ok: status >= 200 && status < 300,
+    status,
+    statusText: 'HTTP error',
+    json: async () => ({}),
+  };
 }
 
 function scryfallCard(opts: {
@@ -53,11 +64,9 @@ function scryfallCard(opts: {
 }
 
 describe('fetchDeckForColor', () => {
-  beforeEach(() => mockedGet.mockReset());
-
   it('builds a 10-card deck from Scryfall candidates', async () => {
-    mockedGet.mockResolvedValueOnce({
-      data: {
+    mockedFetch.mockResolvedValueOnce(
+      jsonResponse({
         data: [
           scryfallCard({ id: 'c1', colors: ['R'], cmc: 1, power: 2, toughness: 1 }),
           scryfallCard({ id: 'c2', colors: ['R'], cmc: 1, power: 1, toughness: 2 }),
@@ -70,8 +79,8 @@ describe('fetchDeckForColor', () => {
           scryfallCard({ id: 'c9', colors: ['R'], cmc: 6, power: 5, toughness: 5 }),
           scryfallCard({ id: 'c10', colors: ['R'], cmc: 2, power: 1, toughness: 4 }),
         ],
-      },
-    });
+      }),
+    );
     const result = await fetchDeckForColor('R');
     expect(result.source).toBe('scryfall');
     expect(result.cards).toHaveLength(SKELETON.length);
@@ -79,9 +88,11 @@ describe('fetchDeckForColor', () => {
   });
 
   it('falls back per slot when candidates are missing for that slot', async () => {
-    mockedGet.mockResolvedValueOnce({
-      data: { data: [scryfallCard({ id: 'c1', colors: ['R'], cmc: 1, power: 2, toughness: 1 })] },
-    });
+    mockedFetch.mockResolvedValueOnce(
+      jsonResponse({
+        data: [scryfallCard({ id: 'c1', colors: ['R'], cmc: 1, power: 2, toughness: 1 })],
+      }),
+    );
     const result = await fetchDeckForColor('R');
     expect(result.source).toBe('scryfall');
     // slot 0 uses the Scryfall candidate; the rest come from R seeds.
@@ -91,26 +102,26 @@ describe('fetchDeckForColor', () => {
   });
 
   it('falls back to the full color seed deck on network error', async () => {
-    mockedGet.mockRejectedValueOnce(new Error('boom'));
+    mockedFetch.mockRejectedValueOnce(new Error('boom'));
     const result = await fetchDeckForColor('G');
     expect(result.source).toBe('fallback');
     expect(result.cards.map((c) => c.id)).toEqual(fallbackDecks.G.map((c) => c.id));
   });
 
   it('drops multicolor survivors returned by the search', async () => {
-    mockedGet.mockResolvedValueOnce({
-      data: {
+    mockedFetch.mockResolvedValueOnce(
+      jsonResponse({
         data: [scryfallCard({ id: 'rg', colors: ['R', 'G'], cmc: 1, power: 2, toughness: 1 })],
-      },
-    });
+      }),
+    );
     const result = await fetchDeckForColor('R');
     // rg is multicolor, so deriveColor yields undefined, so it's ignored.
     expect(result.cards[0]!.id).toBe(fallbackDecks.R[0]!.id);
   });
 
   it('drops candidates without an image so the deck never shows the blank fallback', async () => {
-    mockedGet.mockResolvedValueOnce({
-      data: {
+    mockedFetch.mockResolvedValueOnce(
+      jsonResponse({
         data: [
           scryfallCard({
             id: 'noimg',
@@ -121,47 +132,46 @@ describe('fetchDeckForColor', () => {
             withImage: false,
           }),
         ],
-      },
-    });
+      }),
+    );
     const result = await fetchDeckForColor('R');
     // The image-less candidate is rejected; slot 0 falls back to the seed.
     expect(result.cards[0]!.id).toBe(fallbackDecks.R[0]!.id);
   });
 
   it('retries on transient network failure and succeeds on the second attempt', async () => {
-    mockedGet.mockRejectedValueOnce(makeAxiosError('ECONNRESET')).mockResolvedValueOnce({
-      data: {
+    mockedFetch.mockRejectedValueOnce(new Error('ECONNRESET')).mockResolvedValueOnce(
+      jsonResponse({
         data: [scryfallCard({ id: 'rg1', colors: ['R'], cmc: 1, power: 2, toughness: 1 })],
-      },
-    });
+      }),
+    );
     const result = await fetchDeckForColor('R');
     expect(result.source).toBe('scryfall');
-    expect(mockedGet).toHaveBeenCalledTimes(2);
+    expect(mockedFetch).toHaveBeenCalledTimes(2);
   });
 
   it('retries on 5xx response and gives up after the third attempt, falling back', async () => {
-    const fivexx = () => makeAxiosError('Service Unavailable', { status: 503 });
-    mockedGet
-      .mockRejectedValueOnce(fivexx())
-      .mockRejectedValueOnce(fivexx())
-      .mockRejectedValueOnce(fivexx());
+    mockedFetch
+      .mockResolvedValueOnce(statusResponse(503))
+      .mockResolvedValueOnce(statusResponse(503))
+      .mockResolvedValueOnce(statusResponse(503));
     const result = await fetchDeckForColor('B');
     expect(result.source).toBe('fallback');
-    expect(mockedGet).toHaveBeenCalledTimes(3);
+    expect(mockedFetch).toHaveBeenCalledTimes(3);
   });
 
   it('does NOT retry on 4xx response — caller is wrong, retry will not help', async () => {
-    mockedGet.mockRejectedValueOnce(makeAxiosError('Bad Request', { status: 400 }));
+    mockedFetch.mockResolvedValueOnce(statusResponse(400));
     const result = await fetchDeckForColor('U');
     expect(result.source).toBe('fallback');
-    expect(mockedGet).toHaveBeenCalledTimes(1);
+    expect(mockedFetch).toHaveBeenCalledTimes(1);
   });
 
   it('malformed envelope (response is a primitive, not an object) falls back with error=Malformed envelope', async () => {
     // ScryfallSearchResponseSchema is z.object().passthrough() — defaults
     // a missing `data` field to []. To trip the safeParse failure branch
-    // we have to pass a non-object: a string slips through axios.data.
-    mockedGet.mockResolvedValueOnce({ data: 'not an object' });
+    // we have to pass a non-object: a string slips through fetch.json().
+    mockedFetch.mockResolvedValueOnce(jsonResponse('not an object'));
     const result = await fetchDeckForColor('W');
     expect(result.source).toBe('fallback');
     expect(result.error).toBe('Malformed envelope');
@@ -182,7 +192,7 @@ describe('fetchDeckForColor', () => {
       const result = await fetchDeckForColor('R');
       expect(result.source).toBe('fallback');
       expect(result.error).toBeUndefined();
-      expect(mockedGet).not.toHaveBeenCalled();
+      expect(mockedFetch).not.toHaveBeenCalled();
       expect(result.cards).toEqual(fallbackDecks.R);
       // Seed cards have empty imageUrls so battlefield/hand will
       // render the local fallback artwork without HTTP image loads.
@@ -195,11 +205,11 @@ describe('fetchDeckForColor', () => {
   it('empty candidates after filter falls back with error=Empty response', async () => {
     // Returns a card whose color filter knocks it out — leaves the
     // candidates array empty and trips the second guard.
-    mockedGet.mockResolvedValueOnce({
-      data: {
+    mockedFetch.mockResolvedValueOnce(
+      jsonResponse({
         data: [scryfallCard({ id: 'wrong', colors: ['G'], cmc: 1, power: 2, toughness: 1 })],
-      },
-    });
+      }),
+    );
     const result = await fetchDeckForColor('R');
     expect(result.source).toBe('fallback');
     expect(result.error).toBe('Empty response');
@@ -207,14 +217,12 @@ describe('fetchDeckForColor', () => {
 });
 
 describe('fetchColorArt', () => {
-  beforeEach(() => mockedGet.mockReset());
-
   it('returns art_crop URLs keyed by color when every fetch succeeds', async () => {
     // 5 colors, each gets a /cards/named call. Mock once per color
     // with a distinct art_crop URL we can identify in the result.
     for (let i = 0; i < 5; i++) {
-      mockedGet.mockResolvedValueOnce({
-        data: {
+      mockedFetch.mockResolvedValueOnce(
+        jsonResponse({
           id: `art-${i}`,
           name: `Art ${i}`,
           type_line: 'Creature',
@@ -223,8 +231,8 @@ describe('fetchColorArt', () => {
           power: '1',
           toughness: '1',
           image_uris: { normal: 'irrelevant', art_crop: `https://art.test/${i}.jpg` },
-        },
-      });
+        }),
+      );
     }
     const result = await fetchColorArt();
     expect(Object.keys(result).length).toBe(5);
@@ -232,10 +240,10 @@ describe('fetchColorArt', () => {
   });
 
   it('skips colors whose response fails schema validation', async () => {
-    mockedGet
-      .mockResolvedValueOnce({ data: { not: 'a card' } }) // W: schema fails
-      .mockResolvedValueOnce({
-        data: {
+    mockedFetch
+      .mockResolvedValueOnce(jsonResponse({ not: 'a card' })) // W: schema fails
+      .mockResolvedValueOnce(
+        jsonResponse({
           id: 'u1',
           name: 'U Card',
           type_line: 'Creature',
@@ -244,11 +252,11 @@ describe('fetchColorArt', () => {
           power: '1',
           toughness: '1',
           image_uris: { normal: '', art_crop: 'https://art.test/u.jpg' },
-        },
-      })
+        }),
+      )
       .mockRejectedValueOnce(new Error('B network')) // B: rejects
-      .mockResolvedValueOnce({
-        data: {
+      .mockResolvedValueOnce(
+        jsonResponse({
           id: 'r1',
           name: 'R Card',
           type_line: 'Creature',
@@ -257,9 +265,9 @@ describe('fetchColorArt', () => {
           power: '1',
           toughness: '1',
           image_uris: { normal: '', art_crop: 'https://art.test/r.jpg' },
-        },
-      })
-      .mockResolvedValueOnce({ data: null }); // G: schema fails (null is not an object)
+        }),
+      )
+      .mockResolvedValueOnce(jsonResponse(null)); // G: schema fails (null is not an object)
     const result = await fetchColorArt();
     // Only U and R have valid art_crop URLs; the rest are absent.
     expect(result.U).toBe('https://art.test/u.jpg');
@@ -282,7 +290,7 @@ describe('fetchColorArt', () => {
     try {
       const result = await fetchColorArt();
       expect(result).toEqual({});
-      expect(mockedGet).not.toHaveBeenCalled();
+      expect(mockedFetch).not.toHaveBeenCalled();
     } finally {
       spy.mockRestore();
     }
@@ -292,8 +300,8 @@ describe('fetchColorArt', () => {
     // Double-faced cards put image_uris on each face, not the root.
     // The fetcher's fallback chain should pick the front face.
     for (let i = 0; i < 5; i++) {
-      mockedGet.mockResolvedValueOnce({
-        data: {
+      mockedFetch.mockResolvedValueOnce(
+        jsonResponse({
           id: `dfc-${i}`,
           name: `DFC ${i}`,
           type_line: 'Creature',
@@ -305,8 +313,8 @@ describe('fetchColorArt', () => {
             { image_uris: { normal: '', art_crop: `https://art.test/dfc-${i}.jpg` } },
             { image_uris: { normal: '', art_crop: 'back-face' } },
           ],
-        },
-      });
+        }),
+      );
     }
     const result = await fetchColorArt();
     expect(Object.keys(result).length).toBe(5);

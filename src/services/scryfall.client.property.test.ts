@@ -12,38 +12,32 @@
  *     short hand, regardless of what came back.
  *   - The fallback path is deterministic per color: same input,
  *     identical output across calls (frozen seed deck).
- *
- * Each property runs 100+ generated scenarios; counterexamples shrink
- * to the smallest sequence that broke the invariant.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import fc from 'fast-check';
 
-vi.mock('axios', () => {
-  const get = vi.fn();
-  return {
-    default: { create: () => ({ get }) },
-    AxiosError: class AxiosError extends Error {},
-    __esModule: true,
-  };
-});
-
-import axios, { AxiosError } from 'axios';
 import { COLORS, SKELETON, type Color } from '@/engine/color';
 import { fallbackDecks } from './fallback-deck';
 import { fetchDeckForColor } from './scryfall.client';
 
-const mockedGet = (axios.create() as unknown as { get: ReturnType<typeof vi.fn> }).get;
+const mockedFetch = vi.fn();
 
-interface MinimalAxiosResponse {
-  status: number;
+function jsonResponse(body: unknown, status = 200) {
+  return {
+    ok: status >= 200 && status < 300,
+    status,
+    statusText: status === 200 ? 'OK' : 'HTTP error',
+    json: async () => body,
+  };
 }
-function makeAxiosError(message: string, response?: MinimalAxiosResponse): AxiosError {
-  const err = new AxiosError(message);
-  if (response) {
-    (err as unknown as { response: MinimalAxiosResponse }).response = response;
-  }
-  return err;
+
+function statusResponse(status: number) {
+  return {
+    ok: status >= 200 && status < 300,
+    status,
+    statusText: 'HTTP error',
+    json: async () => ({}),
+  };
 }
 
 // Failure-mode arbitrary. Each generated value tells the next mock
@@ -86,29 +80,32 @@ function buildScryfallCards(color: Color, count: number) {
 function applyOutcome(o: Outcome) {
   switch (o.kind) {
     case 'ok':
-      mockedGet.mockResolvedValueOnce({ data: { data: buildScryfallCards(o.color, o.count) } });
+      mockedFetch.mockResolvedValueOnce(
+        jsonResponse({ data: buildScryfallCards(o.color, o.count) }),
+      );
       return;
     case 'empty':
-      mockedGet.mockResolvedValueOnce({ data: { data: [] } });
+      mockedFetch.mockResolvedValueOnce(jsonResponse({ data: [] }));
       return;
     case 'malformed':
-      mockedGet.mockResolvedValueOnce({ data: 'not-an-object' });
+      mockedFetch.mockResolvedValueOnce(jsonResponse('not-an-object'));
       return;
     case '4xx':
-      mockedGet.mockRejectedValueOnce(makeAxiosError('client error', { status: 404 }));
+      mockedFetch.mockResolvedValueOnce(statusResponse(404));
       return;
     case '5xx':
-      mockedGet.mockRejectedValueOnce(makeAxiosError('server error', { status: 503 }));
+      mockedFetch.mockResolvedValueOnce(statusResponse(503));
       return;
     case 'network':
-      mockedGet.mockRejectedValueOnce(makeAxiosError('ECONNRESET'));
+      mockedFetch.mockRejectedValueOnce(new Error('ECONNRESET'));
       return;
   }
 }
 
 describe('fetchDeckForColor (property-based resilience)', () => {
   beforeEach(() => {
-    mockedGet.mockReset();
+    vi.stubGlobal('fetch', mockedFetch);
+    mockedFetch.mockReset();
     // The retry wrapper sleeps 250ms / 500ms / 1000ms between attempts.
     // Real waits push 60+ property runs well past the 5s test timeout
     // — and they're the wall-clock cost, not signal. Replace setTimeout
@@ -120,7 +117,10 @@ describe('fetchDeckForColor (property-based resilience)', () => {
       return 0;
     }) as unknown as typeof setTimeout);
   });
-  afterEach(() => vi.restoreAllMocks());
+  afterEach(() => {
+    vi.restoreAllMocks();
+    vi.unstubAllGlobals();
+  });
 
   it('never throws and always returns a 10-card deck under random failure sequences', async () => {
     await fc.assert(
@@ -128,12 +128,12 @@ describe('fetchDeckForColor (property-based resilience)', () => {
         colorArb,
         fc.array(outcomeArb, { minLength: 1, maxLength: 4 }),
         async (color, outcomes) => {
-          mockedGet.mockReset();
+          mockedFetch.mockReset();
           // Apply one outcome per attempt. The retry wrapper does up to
           // 3 attempts; if the array is shorter, mockResolvedValueOnce
-          // exhaustion just makes the next call reject undefined, which
-          // the catch handler converts to fallback. Either way the
-          // function returns gracefully.
+          // exhaustion just resolves with undefined, which the catch
+          // handler converts to fallback. Either way the function
+          // returns gracefully.
           outcomes.forEach(applyOutcome);
 
           const result = await fetchDeckForColor(color);
@@ -168,7 +168,7 @@ describe('fetchDeckForColor (property-based resilience)', () => {
         colorArb,
         fc.array(failureOutcomeArb, { minLength: 1, maxLength: 5 }),
         async (color, outcomes) => {
-          mockedGet.mockReset();
+          mockedFetch.mockReset();
           outcomes.forEach(applyOutcome);
 
           const result = await fetchDeckForColor(color);

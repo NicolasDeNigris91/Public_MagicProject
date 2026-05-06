@@ -24,24 +24,24 @@ A keyboard-first, screen-reader-first TCG demo built on the [Scryfall API](https
 | Visual regression   | Pinned-input deterministic build, platform-suffixed baselines                                    |
 | Lighthouse          | a11y = 1.0 (error gate), perf / best-practices / SEO ≥ 0.95 (warn gate)                          |
 | CSP                 | `script-src 'self' 'strict-dynamic' nonce-...`, `style-src 'self'` (no `'unsafe-inline'`)        |
-| Bundle ceiling      | `/page` 194.3 kB gzip, `/layout` 104.5 kB gzip — enforced per-build                              |
+| Bundle ceiling      | `/page` 173.8 kB gzip, `/layout` 104.5 kB gzip — enforced per-build                              |
 | Security advisories | 11 residual `next@14` issues, all N/A under our deploy config — see [SECURITY.md](./SECURITY.md) |
 | Languages           | pt-BR · en-US · es-ES · fr-FR (parity enforced by the type system)                               |
 
 ## Stack
 
-| Concern    | Choice                                                                                                          |
-| ---------- | --------------------------------------------------------------------------------------------------------------- |
-| Framework  | Next.js 14 (App Router) + TypeScript (strict, `exactOptionalPropertyTypes`)                                     |
-| State      | Zustand factory `createGameStore({ clock, idGen, getLang })` for determinism                                    |
-| Animation  | Framer Motion + CSS keyframes (with `prefers-reduced-motion` honored)                                           |
-| Data       | Scryfall REST via Axios + Zod schemas at the boundary, retry-with-backoff, offline fallback deck                |
-| i18n       | Type-enforced flat catalog at `src/i18n/messages.ts` — see [ADR 0009](./docs/adr/0009-i18n-parity-via-types.md) |
-| Unit tests | Vitest + Testing Library, fast-check property tests, `vitest-axe` JSDOM sweep                                   |
-| E2E tests  | Playwright + `@axe-core/playwright` against the production build, forced-colors smoke                           |
-| Mutation   | Stryker, scheduled twice weekly with auto-issue on regression                                                   |
-| Quality    | ESLint flat config (typescript-eslint type-checked), Prettier, Husky + commitlint, pre-push typecheck+test      |
-| Telemetry  | `@sentry/browser` + `web-vitals`, gated behind `NEXT_PUBLIC_SENTRY_DSN`                                         |
+| Concern    | Choice                                                                                                                                |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| Framework  | Next.js 14 (App Router) + TypeScript (strict, `exactOptionalPropertyTypes`)                                                           |
+| State      | Zustand factory `createGameStore({ clock, idGen, getLang })` for determinism                                                          |
+| Animation  | Framer Motion + CSS keyframes (with `prefers-reduced-motion` honored)                                                                 |
+| Data       | Scryfall REST via native `fetch` + `AbortController` timeout + Zod schemas at the boundary, retry-with-backoff, offline fallback deck |
+| i18n       | Type-enforced flat catalog at `src/i18n/messages.ts` — see [ADR 0009](./docs/adr/0009-i18n-parity-via-types.md)                       |
+| Unit tests | Vitest + Testing Library, fast-check property tests, `vitest-axe` JSDOM sweep                                                         |
+| E2E tests  | Playwright + `@axe-core/playwright` against the production build, forced-colors smoke                                                 |
+| Mutation   | Stryker, scheduled twice weekly with auto-issue on regression                                                                         |
+| Quality    | ESLint flat config (typescript-eslint type-checked), Prettier, Husky + commitlint, pre-push typecheck+test                            |
+| Telemetry  | `@sentry/browser` + `web-vitals`, gated behind `NEXT_PUBLIC_SENTRY_DSN`                                                               |
 
 ## Gameplay rules
 

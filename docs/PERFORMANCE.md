@@ -17,13 +17,13 @@ exceeds budget.
 
 | Route              | gzip ceiling | brotli ceiling | What's in it                                                             |
 | ------------------ | ------------ | -------------- | ------------------------------------------------------------------------ |
-| `/page`            | 194.3 kB     | 169.9 kB       | App entry + game UI. Includes Zustand store, engine, Framer Motion, i18n |
+| `/page`            | 173.8 kB     | 150.4 kB       | App entry + game UI. Includes Zustand store, engine, Framer Motion, i18n |
 | `/layout`          | 104.5 kB     | 92.8 kB        | Root layout. Includes I18nProvider (4 catalogs) + observability shim     |
 | `/_not-found/page` | 88.9 kB      | 77.1 kB        | 404. Mostly the framework runtime                                        |
 
 ### Why these numbers and not lower
 
-Three things are shipped that aren't strictly necessary for "first
+Two things are shipped that aren't strictly necessary for "first
 paint of game state":
 
 1. **Framer Motion 11** (~30 kB gzip in the entry chunk). Powers the
@@ -31,15 +31,16 @@ paint of game state":
    CSS keyframes — that swap is on the next-16 migration plan
    ([ADR 0011](./adr/0011-next-14-to-16-migration.md)) but not on
    the critical path today.
-2. **Axios 1.16** (~13 kB gzip). Could be `fetch` directly. Saves
-   ~3 kB but rewrites scryfall.client.ts and its test mocks.
-   Trade-off lands on the perf round if the budget gets tight; it
-   isn't today.
-3. **The 4-language i18n catalog**. ~6 kB gzip per language inside
+2. **The 4-language i18n catalog**. ~6 kB gzip per language inside
    the layout chunk. Could be code-split per locale via dynamic
    imports — but the messages are tiny strings the browser caches
    forever and the URL-routing complexity doesn't pay back at this
    catalog size.
+
+(`axios` was on this list until 2026-05-06; the `fetch` +
+`AbortController` rewrite landed and reclaimed ~21 kB gzip on
+`/page`, dropping `axios` + `follow-redirects` + `form-data` +
+`proxy-from-env` in one swap.)
 
 ### When to bump a budget
 
