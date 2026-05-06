@@ -201,4 +201,35 @@ describe('buildDeckFromCandidates', () => {
     );
     expect(deck[0]!.id).toBe('seed-0');
   });
+
+  it('cmcMatches rejects a fixed-cmc candidate whose cmc does not equal the slot value', () => {
+    // Slot 0 wants cmc===1. A candidate at cmc=99 with otherwise
+    // perfect power/toughness must still be rejected — kills the
+    // mutation that turns `cardCmc === slotCmc` into `true`.
+    const seeds = makeSeeds();
+    const deck = buildDeckFromCandidates(
+      [card({ id: 'wrong-cmc', cmc: 99, power: 1, toughness: 1 })],
+      seeds,
+    );
+    expect(deck[0]!.id).toBe('seed-0');
+  });
+
+  it('cmcMatches rejects a flex-slot candidate below the lower cmc bound', () => {
+    // Flex slot 9 accepts cmc 1-3. A cmc=0 candidate must be
+    // rejected — kills the mutation that turns `cardCmc >= slotCmc[0]`
+    // into `true`. Power/toughness chosen to fit the slot otherwise
+    // so cmc is the sole rejection reason.
+    const seeds = makeSeeds();
+    const deck = buildDeckFromCandidates(
+      [
+        // Fill slots 0+1 so the under-cmc candidate has nowhere to
+        // go but flex (which then rejects it on the cmc lower bound).
+        card({ id: 'fill0', cmc: 1, power: 1, toughness: 1 }),
+        card({ id: 'fill1', cmc: 1, power: 1, toughness: 1 }),
+        card({ id: 'under-bound', cmc: 0, power: 1, toughness: 2 }),
+      ],
+      seeds,
+    );
+    expect(deck[9]!.id).toBe('seed-9');
+  });
 });
