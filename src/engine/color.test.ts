@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   COLORS,
   COLOR_LABELS,
+  MANA_SYMBOL_URL,
   pickOpponentColor,
   buildDeckFromCandidates,
   SKELETON,
@@ -21,6 +22,19 @@ describe('COLOR_LABELS', () => {
       expect(COLOR_LABELS[c].name).toBeTruthy();
       expect(COLOR_LABELS[c].flavor).toBeTruthy();
     }
+  });
+});
+
+describe('MANA_SYMBOL_URL', () => {
+  // The five basic mana SVGs are pinned to Scryfall's static CDN. Any
+  // accidental rename of W/U/B/R/G in the constant breaks rendering;
+  // assert each exact URL so a literal mutation is caught.
+  it('maps each color to its canonical Scryfall card-symbol SVG', () => {
+    expect(MANA_SYMBOL_URL.W).toBe('https://svgs.scryfall.io/card-symbols/W.svg');
+    expect(MANA_SYMBOL_URL.U).toBe('https://svgs.scryfall.io/card-symbols/U.svg');
+    expect(MANA_SYMBOL_URL.B).toBe('https://svgs.scryfall.io/card-symbols/B.svg');
+    expect(MANA_SYMBOL_URL.R).toBe('https://svgs.scryfall.io/card-symbols/R.svg');
+    expect(MANA_SYMBOL_URL.G).toBe('https://svgs.scryfall.io/card-symbols/G.svg');
   });
 });
 
@@ -127,5 +141,64 @@ describe('buildDeckFromCandidates', () => {
       makeSeeds(),
     );
     expect(deck[9]!.id).toBe('flex');
+  });
+
+  it('flex slot accepts the lower cmc bound (cmc=1)', () => {
+    // Slot 9 accepts cmc 1-3. A candidate at cmc=1 must fit; the
+    // boundary kills the `>= → >` mutation on the lower edge.
+    const seeds = makeSeeds();
+    const deck = buildDeckFromCandidates(
+      [
+        // Fill slots 0+1 so the cmc-1 candidate has nowhere to go but flex.
+        card({ id: 'fill0', cmc: 1, power: 1, toughness: 1 }),
+        card({ id: 'fill1', cmc: 1, power: 1, toughness: 1 }),
+        card({ id: 'lo-bound', cmc: 1, power: 2, toughness: 4 }),
+      ],
+      seeds,
+    );
+    expect(deck[9]!.id).toBe('lo-bound');
+  });
+
+  it('flex slot accepts the upper cmc bound (cmc=3) and rejects cmc=4', () => {
+    const seeds = makeSeeds();
+
+    // cmc=3 inside the [1,3] window — must take the flex slot.
+    const acceptedDeck = buildDeckFromCandidates(
+      [card({ id: 'hi-bound', cmc: 3, power: 2, toughness: 4 })],
+      seeds,
+    );
+    // cmc=3 power=2 toughness=4 also fits slots 4 and 5 (cmc 3, pow 2-3,
+    // tou 2-3) — wait, toughness=4 is out of range for slots 4/5 (tou 2-3),
+    // so it ends up in the flex slot 9.
+    expect(acceptedDeck[9]!.id).toBe('hi-bound');
+
+    // cmc=4 outside the [1,3] window — flex slot must fall back to seed-9.
+    const rejectedDeck = buildDeckFromCandidates(
+      [card({ id: 'over-bound', cmc: 4, power: 2, toughness: 4 })],
+      seeds,
+    );
+    expect(rejectedDeck[9]!.id).toBe('seed-9');
+  });
+
+  it('inRange rejects power below the slot lower bound', () => {
+    // Slot 0 wants power 1-2. A cmc-1 candidate at power=0 must be
+    // rejected, and the slot falls back to its seed.
+    const seeds = makeSeeds();
+    const deck = buildDeckFromCandidates(
+      [card({ id: 'underpowered', cmc: 1, power: 0, toughness: 1 })],
+      seeds,
+    );
+    expect(deck[0]!.id).toBe('seed-0');
+  });
+
+  it('inRange rejects toughness above the slot upper bound', () => {
+    // Slot 0 wants toughness 1-2. A candidate at toughness=3 falls back
+    // to seed (kills the inRange `<=` upper-edge mutation to `<`).
+    const seeds = makeSeeds();
+    const deck = buildDeckFromCandidates(
+      [card({ id: 'too-tough', cmc: 1, power: 1, toughness: 3 })],
+      seeds,
+    );
+    expect(deck[0]!.id).toBe('seed-0');
   });
 });

@@ -7,6 +7,7 @@ import {
   canAttackFace,
   drawCard,
   playCardToField,
+  removeFromField,
   resolveCombat,
 } from './rules';
 import { cardId } from './types';
@@ -198,5 +199,50 @@ describe('resolveCombat', () => {
 describe('applyDamage', () => {
   it('clamps life at zero', () => {
     expect(applyDamage(makePlayer({ life: 3 }), 10).life).toBe(0);
+  });
+});
+
+describe('removeFromField', () => {
+  it('removes only the named card and preserves the others in order', () => {
+    // Stryker mutates the find predicate to (c) => false (no removal)
+    // and (c) => true (remove all). Three-card fixture differentiates
+    // both: the named card must be gone AND the other two must remain.
+    const a = makeCard('a');
+    const b = makeCard('b');
+    const c = makeCard('c');
+    const p = makePlayer({ battlefield: [a, b, c] });
+    // removeFromField is imported from rules at the top of this file.
+    // (test re-uses existing helpers/imports.)
+    const after = removeFromField(p, cardId('b'));
+    expect(after.battlefield.map((x) => x.id)).toEqual(['a', 'c']);
+  });
+
+  it('is a no-op when the cardId is not on the battlefield', () => {
+    const a = makeCard('a');
+    const p = makePlayer({ battlefield: [a] });
+    const after = removeFromField(p, cardId('ghost'));
+    expect(after.battlefield).toEqual([a]);
+  });
+});
+
+describe('beginTurn — card identity', () => {
+  it('preserves the original reference for cards that need no flag clearing', () => {
+    // The clearing branch is `c.summoningSick || c.attackedThisTurn`. If
+    // mutated to a constant `true`, every card gets a fresh spread copy
+    // — observable as a new reference even when no flags actually change.
+    const clean = makeCard('clean');
+    const p = makePlayer({ battlefield: [clean] });
+    const after = beginTurn(p);
+    expect(after.battlefield[0]).toBe(clean);
+  });
+
+  it('replaces the reference for cards whose flags are cleared', () => {
+    // Sanity-check the inverse: a flagged card must get a fresh object,
+    // since the spread mints a new card record with the flags cleared.
+    const sick: ICard = { ...makeCard('sick'), summoningSick: true };
+    const p = makePlayer({ battlefield: [sick] });
+    const after = beginTurn(p);
+    expect(after.battlefield[0]).not.toBe(sick);
+    expect(after.battlefield[0]?.summoningSick).toBe(false);
   });
 });
