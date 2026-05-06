@@ -29,7 +29,16 @@ test.describe('smoke', () => {
     await expect(cards).toHaveCount(5, { timeout: 30_000 });
   });
 
-  test('combat log toggle responds to L', async ({ page }) => {
+  test('combat log toggle responds to L', async ({ page }, testInfo) => {
+    // Keyboard shortcut is a desktop-only UX affordance — there is no
+    // physical L key on the iPhone 13 / Pixel 5 emulations and the
+    // virtual keyboard isn't surfaced for non-input contexts. The
+    // touch path opens the log via the toggle button instead and is
+    // covered by the click-driven flow.
+    test.skip(
+      testInfo.project.name !== 'chromium',
+      'Keyboard shortcut not part of the mobile contract',
+    );
     await page.goto('/');
     await pickColor(page, /Vermelho|Red/);
     await expect(page.locator('[data-card-id]').first()).toBeVisible({ timeout: 30_000 });
