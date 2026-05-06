@@ -19,7 +19,7 @@ A keyboard-first, screen-reader-first TCG demo built on the [Scryfall API](https
 | ------------------- | ------------------------------------------------------------------------------------------------ |
 | Unit + property     | 362 tests across 43 files (Vitest + fast-check + JSDOM axe)                                      |
 | Branch coverage     | Per-folder thresholds: engine 99/95, store 99/97, services 99/91, hooks 95/86, components 100/91 |
-| Mutation score      | 92.7% (engine 95.9, store 86.6) — Stryker `break: 90` enforced via scheduled CI                  |
+| Mutation score      | 94.5% (engine 96.4, store 91.1) — Stryker `break: 92` enforced via scheduled CI                  |
 | End-to-end          | 5 Playwright projects: chromium / firefox / webkit / iPhone 13 / Pixel 5                         |
 | Visual regression   | Pinned-input deterministic build, platform-suffixed baselines                                    |
 | Lighthouse          | a11y = 1.0 (error gate), perf / best-practices / SEO ≥ 0.95 (warn gate)                          |

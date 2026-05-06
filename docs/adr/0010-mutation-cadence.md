@@ -54,20 +54,27 @@ isn't committed), so back-to-back runs do redundant work. Two
 runs spaced 3 days apart catches mid-week regressions without the
 redundancy.
 
-## Why `break: 90` and not `break: 95`
+## Why `break: 92` and not higher
 
-The score has held 90+ for the engine/store contract surface, but
-useGameStore sits at 79% with the rest of the surface lifting the
-average. A higher break threshold would either:
+The score has held 92+ for the engine/store contract surface since
+a 2026-05-06 follow-up pass added targeted tests for the three
+remaining `combat.blocked.*` template branches, the `drawCard`
+state-mutation path, and the `getLangGlobal` value assertion —
+useGameStore moved 79 → 88 and the aggregate moved 92.72 → 94.54.
 
-- pin useGameStore at a level its current tests can't sustainably
-  hold (the remaining survivors are mostly equivalent mutants —
-  process.env checks, default-clock arrows, color label literals)
-- or force an arms race of "test the test" that produces busy work
-  without catching real regressions.
+The threshold sits two points below the current aggregate so
+routine refactors don't immediately trip it but a real regression
+(a mutant set the previous tests caught now escapes detection)
+surfaces on the next scheduled run.
 
-`break: 90` absorbs the noise floor and trips on a real regression
-(a mutant set the previous tests caught now escapes detection).
+A higher threshold would force an arms race of "test the test"
+against the residual equivalent mutants — devtools enabled-flag
+(`process.env.NODE_ENV` is never `'development'` in test runners),
+the MAX_LOG `>` vs `>=` boundary (mathematically equivalent on
+`slice(-N)` of length-N arrays), and color-label string literals
+that don't affect any code path. The
+[stryker.conf.json](../../stryker.conf.json) `_comment` enumerates
+these so the next reviewer doesn't re-derive them.
 
 ## Verification
 
@@ -83,10 +90,10 @@ average. A higher break threshold would either:
 ## Consequences
 
 - The mutation score is now visibly tracked. A dropped test that
-  weakened the score below 90 surfaces as an issue within 3 days.
+  weakened the score below 92 surfaces as an issue within 3 days.
 - New code in `src/engine/**` and `src/store/**` (the Stryker
   `mutate` glob) inherits the floor implicitly — tests for the new
-  code must catch enough mutants to keep the aggregate above 90.
+  code must catch enough mutants to keep the aggregate above 92.
 - The mutation report URL goes in the auto-opened issue; reviewers
   should expect to download the artifact and read the per-mutant
   breakdown rather than relying on the issue body alone.

@@ -62,7 +62,7 @@ files. The pre-push hook runs `typecheck` + `test`. Don't bypass them with
 
 | Change touches               | Required                                                                                                                                                                   |
 | ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `src/engine/`                | New unit tests + check `npm run test:mutation` keeps the floor at ≥ 90%                                                                                                    |
+| `src/engine/`                | New unit tests + check `npm run test:mutation` keeps the floor at ≥ 92%                                                                                                    |
 | `src/store/`                 | `npm test` passes; equivalence snapshots regenerated in the same commit                                                                                                    |
 | Components / hooks (a11y)    | Keyboard-only walkthrough + axe sweep clean; consider e2e if focus-related                                                                                                 |
 | CSS modules (semantic color) | Add a `@media (forced-colors: active)` block if the change carries semantic meaning ([ADR 0007](./docs/adr/0007-forced-colors-fallbacks.md))                               |
