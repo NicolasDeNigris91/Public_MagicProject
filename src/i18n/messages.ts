@@ -68,7 +68,32 @@ export type MessageKey =
   | 'footer.deckSource'
   | 'footer.disclaimer'
   | 'footer.fanPolicy'
-  | 'footer.scryfallThanks';
+  | 'footer.scryfallThanks'
+  // Engine-emitted templates. Engine returns { template, vars } and the
+  // store glue resolves via this dictionary at log-mint time. Adding a
+  // template here is part of the engine contract — see ADR 0006.
+  | 'log.play.player'
+  | 'log.play.opponent'
+  | 'log.cannotPlay.mana'
+  | 'log.draw.player'
+  | 'log.draw.opponent'
+  | 'log.decking.player'
+  | 'log.decking.opponent'
+  | 'log.turn.player'
+  | 'log.turn.opponent'
+  | 'log.mana.available'
+  | 'log.attack.summoningSick'
+  | 'log.attack.exhausted'
+  | 'log.attack.cannotAttackDirect'
+  | 'log.combat.blocked.both'
+  | 'log.combat.blocked.attackerOnly'
+  | 'log.combat.blocked.blockerOnly'
+  | 'log.combat.blocked.none'
+  | 'log.combat.face.byPlayer'
+  | 'log.combat.face.byOpponent'
+  | 'log.gameOver.victory'
+  | 'log.gameOver.defeat'
+  | 'log.init.firstTurn';
 
 export const messages: Record<Lang, Record<MessageKey, string>> = {
   pt: {
@@ -137,6 +162,36 @@ export const messages: Record<Lang, Record<MessageKey, string>> = {
       'Dados e imagens das cartas são fornecidos pela API pública Scryfall, a quem agradecemos.',
     'footer.fanPolicy':
       'Este conteúdo de fã é permitido sob a Política de Conteúdo de Fãs da Wizards of the Coast.',
+    'log.play.player':
+      'Você jogou {label} no campo de batalha. Está com enjoo de invocação e não pode atacar neste turno.',
+    'log.play.opponent': 'Oponente jogou {label}. Está com enjoo de invocação.',
+    'log.cannotPlay.mana': 'Não pode jogar {name} - custa {cmc}, você tem {available} de mana.',
+    'log.draw.player': 'Você comprou {name}. Mão com {handSize}.',
+    'log.draw.opponent': 'Oponente comprou uma carta. A mão dele tem {handSize}.',
+    'log.decking.player': 'Você tentou comprar de um grimório vazio. Você perdeu a partida.',
+    'log.decking.opponent': 'Oponente tentou comprar de um grimório vazio. Você venceu a partida.',
+    'log.turn.player': 'Turno {turnNumber}. Sua vez.',
+    'log.turn.opponent': 'Vez do oponente.',
+    'log.mana.available': '{manaMax} de mana disponível.',
+    'log.attack.summoningSick': '{name} está com enjoo de invocação e não pode atacar.',
+    'log.attack.exhausted': '{name} já atacou neste turno e não pode atacar.',
+    'log.attack.cannotAttackDirect':
+      'Não pode atacar diretamente enquanto o oponente tiver criaturas no campo.',
+    'log.combat.blocked.both':
+      '{who} atacou com {attackerLabel}, bloqueado por {blockerLabel}. {attackerName} morre. {blockerName} morre.',
+    'log.combat.blocked.attackerOnly':
+      '{who} atacou com {attackerLabel}, bloqueado por {blockerLabel}. {attackerName} morre.',
+    'log.combat.blocked.blockerOnly':
+      '{who} atacou com {attackerLabel}, bloqueado por {blockerLabel}. {blockerName} morre.',
+    'log.combat.blocked.none': '{who} atacou com {attackerLabel}, bloqueado por {blockerLabel}.',
+    'log.combat.face.byPlayer':
+      'Você atacou com {attackerLabel}, causando {damage} de dano. A vida do oponente agora é {defenderLife}.',
+    'log.combat.face.byOpponent':
+      'Oponente atacou com {attackerLabel}, causando {damage} de dano. Sua vida agora é {defenderLife}.',
+    'log.gameOver.victory': 'Vitória! Você derrotou o oponente.',
+    'log.gameOver.defeat': 'Derrota. O oponente reduziu sua vida a zero.',
+    'log.init.firstTurn':
+      'Nova partida. Turno 1. Você tem {life} de vida, {hand} cartas e 1 de mana. Sua vez.',
   },
   en: {
     'app.title': 'MTG Combat Demo',
@@ -204,6 +259,36 @@ export const messages: Record<Lang, Record<MessageKey, string>> = {
       'Card data and images are provided by the public Scryfall API, with thanks.',
     'footer.fanPolicy':
       'This fan content is permitted under the Wizards of the Coast Fan Content Policy.',
+    'log.play.player':
+      'You played {label} to the battlefield. It has summoning sickness and cannot attack this turn.',
+    'log.play.opponent': 'Opponent played {label}. It has summoning sickness.',
+    'log.cannotPlay.mana': 'Cannot play {name} - costs {cmc}, you have {available} mana.',
+    'log.draw.player': 'You drew {name}. Hand size {handSize}.',
+    'log.draw.opponent': 'Opponent drew a card. Their hand size is {handSize}.',
+    'log.decking.player': 'You tried to draw from an empty deck. You lose the match.',
+    'log.decking.opponent': 'Opponent tried to draw from an empty deck. You win the match.',
+    'log.turn.player': 'Turn {turnNumber}. Your turn.',
+    'log.turn.opponent': "Opponent's turn.",
+    'log.mana.available': '{manaMax} mana available.',
+    'log.attack.summoningSick': '{name} has summoning sickness and cannot attack.',
+    'log.attack.exhausted': '{name} has already attacked this turn and cannot attack.',
+    'log.attack.cannotAttackDirect':
+      'Cannot attack directly while the opponent has creatures on the battlefield.',
+    'log.combat.blocked.both':
+      '{who} attacked with {attackerLabel}, blocked by {blockerLabel}. {attackerName} dies. {blockerName} dies.',
+    'log.combat.blocked.attackerOnly':
+      '{who} attacked with {attackerLabel}, blocked by {blockerLabel}. {attackerName} dies.',
+    'log.combat.blocked.blockerOnly':
+      '{who} attacked with {attackerLabel}, blocked by {blockerLabel}. {blockerName} dies.',
+    'log.combat.blocked.none': '{who} attacked with {attackerLabel}, blocked by {blockerLabel}.',
+    'log.combat.face.byPlayer':
+      "You attacked with {attackerLabel}, dealing {damage} damage. Opponent's life is now {defenderLife}.",
+    'log.combat.face.byOpponent':
+      'Opponent attacked with {attackerLabel}, dealing {damage} damage. Your life is now {defenderLife}.',
+    'log.gameOver.victory': 'Victory! You defeated the opponent.',
+    'log.gameOver.defeat': 'Defeat. The opponent reduced your life to zero.',
+    'log.init.firstTurn':
+      'New match. Turn 1. You have {life} life, {hand} cards, and 1 mana. Your turn.',
   },
 };
 

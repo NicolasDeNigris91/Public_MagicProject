@@ -1,6 +1,6 @@
 import { act, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { useGameStore } from '@/store/useGameStore';
+import { setLangGlobal, useGameStore } from '@/store/useGameStore';
 import { useAnnouncer } from './useAnnouncer';
 
 const HOLD_MS = 1100;
@@ -12,10 +12,15 @@ function resetStore() {
 describe('useAnnouncer', () => {
   beforeEach(() => {
     vi.useFakeTimers();
+    // Pin the singleton to English so log seed templates resolve to
+    // the legacy English copy this test asserts on. Production runs
+    // with PT default; the contract under test is the queue cadence.
+    setLangGlobal('en');
     resetStore();
   });
   afterEach(() => {
     vi.useRealTimers();
+    setLangGlobal('pt');
   });
 
   it('starts with empty polite and assertive slots', () => {

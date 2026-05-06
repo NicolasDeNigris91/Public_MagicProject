@@ -80,7 +80,7 @@ describe('executeAttack — early-out branches', () => {
     const r = executeAttack(s, sick.id, null);
     expect(r.next).toBe(s);
     expect(r.logs).toHaveLength(1);
-    expect(r.logs[0]?.message).toMatch(/summoning sickness/);
+    expect(r.logs[0]?.template).toBe('log.attack.summoningSick');
     expect(r.logs[0]?.priority).toBe('polite');
     expect(r.logs[0]?.kind).toBe('info');
   });
@@ -100,7 +100,7 @@ describe('executeAttack — early-out branches', () => {
     const exhausted = bareCard('p2', { attackedThisTurn: true });
     const s = state({ player: emptyPlayer('player', { battlefield: [exhausted] }) });
     const r = executeAttack(s, exhausted.id, null);
-    expect(r.logs[0]?.message).toMatch(/has already attacked this turn/);
+    expect(r.logs[0]?.template).toBe('log.attack.exhausted');
   });
 
   it('face attack with creatures present: PLAYER gets the "cannot attack directly" log', () => {
@@ -112,7 +112,7 @@ describe('executeAttack — early-out branches', () => {
     });
     const r = executeAttack(s, att.id, null);
     expect(r.next).toBe(s);
-    expect(r.logs[0]?.message).toMatch(/Cannot attack directly/);
+    expect(r.logs[0]?.template).toBe('log.attack.cannotAttackDirect');
   });
 });
 
@@ -138,7 +138,7 @@ describe('executeAttack — combat resolution', () => {
     expect(r.next.opponent.life).toBe(0);
     expect(r.logs).toHaveLength(2);
     expect(r.logs[1]?.kind).toBe('game-over');
-    expect(r.logs[1]?.message).toMatch(/Victory/);
+    expect(r.logs[1]?.template).toBe('log.gameOver.victory');
   });
 
   it('lethal face attack from OPPONENT side emits the "Defeat" copy', () => {
@@ -151,8 +151,7 @@ describe('executeAttack — combat resolution', () => {
     const r = executeAttack(s, big.id, null);
     expect(r.next.winner).toBe('opponent');
     expect(r.next.player.life).toBe(0);
-    expect(r.logs[1]?.message).toMatch(/Defeat/);
-    expect(r.logs[1]?.message).toMatch(/zero/);
+    expect(r.logs[1]?.template).toBe('log.gameOver.defeat');
   });
 
   it('blocked attack where both die removes both creatures, no face damage', () => {
@@ -166,8 +165,7 @@ describe('executeAttack — combat resolution', () => {
     expect(r.next.player.battlefield).toEqual([]);
     expect(r.next.opponent.battlefield).toEqual([]);
     expect(r.next.opponent.life).toBe(20);
-    expect(r.logs[0]?.message).toMatch(/blocked by/);
-    expect(r.logs[0]?.message).toMatch(/dies/);
+    expect(r.logs[0]?.template).toBe('log.combat.blocked.both');
   });
 
   it('blocked attack where only the blocker dies: attacker survives + attackedThisTurn=true', () => {
@@ -201,31 +199,30 @@ describe('executeAttack — combat resolution', () => {
     expect(remaining).toEqual([b1.id, b3.id]);
   });
 
-  it('player face attack announcer says "You attacked" + "Opponent\'s life is now N"', () => {
+  it('player face attack uses byPlayer template + carries damage/defenderLife in vars', () => {
     const att = bareCard('p-att', { power: 4 });
     const s = state({ player: emptyPlayer('player', { battlefield: [att] }) });
     const r = executeAttack(s, att.id, null);
-    expect(r.logs[0]?.message).toMatch(/^You attacked with /);
-    expect(r.logs[0]?.message).toMatch(/Opponent's life is now 16/);
+    expect(r.logs[0]?.template).toBe('log.combat.face.byPlayer');
+    expect(r.logs[0]?.vars?.damage).toBe(4);
+    expect(r.logs[0]?.vars?.defenderLife).toBe(16);
     expect(r.logs[0]?.meta?.attackingSide).toBe('player');
     expect(r.logs[0]?.meta?.damage).toBe(4);
   });
 
-  it('opponent face attack announcer says "Opponent attacked" + "Your life is now N"', () => {
+  it('opponent face attack uses byOpponent template + carries defenderLife in vars', () => {
     const att = bareCard('o-att', { power: 5 });
     const s = state({
       turn: 'opponent',
       opponent: emptyPlayer('opponent', { battlefield: [att] }),
     });
     const r = executeAttack(s, att.id, null);
-    expect(r.logs[0]?.message).toMatch(/^Opponent attacked with /);
-    expect(r.logs[0]?.message).toMatch(/Your life is now 15/);
+    expect(r.logs[0]?.template).toBe('log.combat.face.byOpponent');
+    expect(r.logs[0]?.vars?.defenderLife).toBe(15);
     expect(r.logs[0]?.meta?.attackingSide).toBe('opponent');
   });
 
-  it('blocked-combat announcer surfaces both creature names + both "{name} dies" suffixes', () => {
-    // Names chosen so neither is a substring of the other; otherwise the
-    // negative match in the only-blocker-dies test below would be ambiguous.
+  it('blocked-combat where both die emits the .both template + carries both names in vars', () => {
     const att = bareCard('a', { name: 'Atticus', power: 2, toughness: 2 });
     const blk = bareCard('b', { name: 'Bramblefolk', power: 2, toughness: 2 });
     const s = state({
@@ -233,13 +230,14 @@ describe('executeAttack — combat resolution', () => {
       opponent: emptyPlayer('opponent', { battlefield: [blk] }),
     });
     const r = executeAttack(s, att.id, blk.id);
-    expect(r.logs[0]?.message).toContain('Atticus dies');
-    expect(r.logs[0]?.message).toContain('Bramblefolk dies');
+    expect(r.logs[0]?.template).toBe('log.combat.blocked.both');
+    expect(r.logs[0]?.vars?.attackerName).toBe('Atticus');
+    expect(r.logs[0]?.vars?.blockerName).toBe('Bramblefolk');
     expect(r.logs[0]?.meta?.attackerDies).toBe(1);
     expect(r.logs[0]?.meta?.blockerDies).toBe(1);
   });
 
-  it('blocked-combat with only blocker dying omits the "{attacker} dies" sentence', () => {
+  it('blocked-combat with only blocker dying picks the .blockerOnly template', () => {
     const att = bareCard('a', { name: 'Atticus', power: 5, toughness: 5 });
     const blk = bareCard('b', { name: 'Bramblefolk', power: 1, toughness: 1 });
     const s = state({
@@ -247,8 +245,8 @@ describe('executeAttack — combat resolution', () => {
       opponent: emptyPlayer('opponent', { battlefield: [blk] }),
     });
     const r = executeAttack(s, att.id, blk.id);
-    expect(r.logs[0]?.message).toContain('Bramblefolk dies');
-    expect(r.logs[0]?.message).not.toContain('Atticus dies');
+    expect(r.logs[0]?.template).toBe('log.combat.blocked.blockerOnly');
+    expect(r.logs[0]?.vars?.blockerName).toBe('Bramblefolk');
     expect(r.logs[0]?.meta?.attackerDies).toBe(0);
     expect(r.logs[0]?.meta?.blockerDies).toBe(1);
   });
@@ -307,49 +305,50 @@ describe('executeDrawCard', () => {
     expect(r.logs).toEqual([]);
   });
 
-  it('decking-out player flips winner=opponent and emits game-over with reason=decking', () => {
+  it('decking-out player flips winner=opponent and emits log.decking.player', () => {
     const s = state({ player: emptyPlayer('player', { deck: [] }) });
     const r = executeDrawCard(s, 'player');
     expect(r.next.winner).toBe('opponent');
     expect(r.logs[0]?.kind).toBe('game-over');
+    expect(r.logs[0]?.template).toBe('log.decking.player');
     expect(r.logs[0]?.meta?.reason).toBe('decking');
     expect(r.logs[0]?.meta?.winner).toBe('opponent');
-    expect(r.logs[0]?.message).toMatch(/You tried to draw from an empty deck/);
-    expect(r.logs[0]?.message).toMatch(/lose the match/);
     expect(r.logs[0]?.priority).toBe('assertive');
   });
 
-  it('decking-out opponent flips winner=player and emits the win-side game-over copy', () => {
+  it('decking-out opponent flips winner=player and emits log.decking.opponent', () => {
     const s = state({ opponent: emptyPlayer('opponent', { deck: [] }) });
     const r = executeDrawCard(s, 'opponent');
     expect(r.next.winner).toBe('player');
     expect(r.logs[0]?.kind).toBe('game-over');
+    expect(r.logs[0]?.template).toBe('log.decking.opponent');
     expect(r.logs[0]?.meta?.reason).toBe('decking');
     expect(r.logs[0]?.meta?.winner).toBe('player');
-    expect(r.logs[0]?.message).toMatch(/Opponent tried to draw from an empty deck/);
-    expect(r.logs[0]?.message).toMatch(/win the match/);
     expect(r.logs[0]?.priority).toBe('assertive');
   });
 
-  it('successful draw from PLAYER side emits a "You drew" log + transfers card to hand', () => {
+  it('successful draw from PLAYER side emits log.draw.player + transfers card to hand', () => {
     const card = bareCard('drawme');
     const s = state({ player: emptyPlayer('player', { deck: [card] }) });
     const r = executeDrawCard(s, 'player');
     expect(r.next.player.hand).toContainEqual(card);
     expect(r.next.player.deck).toEqual([]);
     expect(r.logs[0]?.kind).toBe('draw');
-    expect(r.logs[0]?.message).toMatch(/^You drew /);
+    expect(r.logs[0]?.template).toBe('log.draw.player');
+    expect(r.logs[0]?.vars?.name).toBe(card.name);
   });
 
-  it('successful draw from OPPONENT side emits an "Opponent drew" log without leaking the card name', () => {
+  it('successful draw from OPPONENT side emits log.draw.opponent without leaking the card name', () => {
     const card = bareCard('hidden');
     const s = state({ opponent: emptyPlayer('opponent', { deck: [card] }) });
     const r = executeDrawCard(s, 'opponent');
     expect(r.next.opponent.hand).toContainEqual(card);
     expect(r.logs[0]?.kind).toBe('draw');
-    expect(r.logs[0]?.message).toMatch(/^Opponent drew/);
+    expect(r.logs[0]?.template).toBe('log.draw.opponent');
     // The opponent's draw must not surface the card's name (hidden info).
-    expect(r.logs[0]?.message).not.toContain(card.name);
+    // Vars should only carry the hand size, never the name.
+    expect(r.logs[0]?.vars?.name).toBeUndefined();
+    expect(JSON.stringify(r.logs[0]?.vars ?? {})).not.toContain(card.name);
   });
 });
 
@@ -386,14 +385,17 @@ describe('executePlayCardToField', () => {
     expect(r.logs).toEqual([]);
   });
 
-  it('over-cost from PLAYER side emits an info log (no state change)', () => {
+  it('over-cost from PLAYER side emits log.cannotPlay.mana (no state change)', () => {
     const card = bareCard('p2', { cmc: 5 });
     const s = state({
       player: emptyPlayer('player', { hand: [card], manaAvailable: 1 }),
     });
     const r = executePlayCardToField(s, 'player', card.id);
     expect(r.next).toBe(s);
-    expect(r.logs[0]?.message).toMatch(/Cannot play/);
+    expect(r.logs[0]?.template).toBe('log.cannotPlay.mana');
+    expect(r.logs[0]?.vars?.name).toBe(card.name);
+    expect(r.logs[0]?.vars?.cmc).toBe(5);
+    expect(r.logs[0]?.vars?.available).toBe(1);
   });
 
   it('over-cost from OPPONENT side is silent (no log)', () => {
@@ -407,7 +409,7 @@ describe('executePlayCardToField', () => {
     expect(r.logs).toEqual([]);
   });
 
-  it('successful play from PLAYER side emits "You played" log + summoningSick=true on the entered card', () => {
+  it('successful play from PLAYER side emits log.play.player + summoningSick=true on the entered card', () => {
     const card = bareCard('p3');
     const s = state({
       player: emptyPlayer('player', { hand: [card], manaAvailable: 2 }),
@@ -418,12 +420,12 @@ describe('executePlayCardToField', () => {
     expect(r.next.player.battlefield[0]?.summoningSick).toBe(true);
     expect(r.next.player.manaAvailable).toBe(1);
     expect(r.logs[0]?.kind).toBe('play');
-    expect(r.logs[0]?.message).toMatch(/^You played /);
-    expect(r.logs[0]?.message).toMatch(/summoning sickness/);
+    expect(r.logs[0]?.template).toBe('log.play.player');
+    expect(typeof r.logs[0]?.vars?.label).toBe('string');
     expect(r.logs[0]?.meta?.player).toBe('player');
   });
 
-  it('successful play from OPPONENT side emits "Opponent played" log with player meta=opponent', () => {
+  it('successful play from OPPONENT side emits log.play.opponent with player meta=opponent', () => {
     const card = bareCard('o-p', { cmc: 1 });
     const s = state({
       turn: 'opponent',
@@ -432,8 +434,8 @@ describe('executePlayCardToField', () => {
     const r = executePlayCardToField(s, 'opponent', card.id);
     expect(r.next.opponent.battlefield).toHaveLength(1);
     expect(r.logs[0]?.kind).toBe('play');
-    expect(r.logs[0]?.message).toMatch(/^Opponent played /);
-    expect(r.logs[0]?.message).toMatch(/summoning sickness/);
+    expect(r.logs[0]?.template).toBe('log.play.opponent');
+    expect(typeof r.logs[0]?.vars?.label).toBe('string');
     expect(r.logs[0]?.meta?.player).toBe('opponent');
   });
 });

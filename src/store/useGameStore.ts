@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import {
+  type ActionLogSeed,
   type ActionResult,
   executeAttack,
   executeDrawCard,
@@ -8,6 +9,7 @@ import {
   executePlayCardToField,
 } from '@/engine/actions';
 import { logEntryId } from '@/engine/types';
+import { format, messages, type Lang, type MessageKey } from '@/i18n/messages';
 import type {
   AnnouncePriority,
   CardId,
@@ -52,15 +54,51 @@ type LogMinter = (
 ) => LogEntry;
 
 /**
- * Apply a pure ActionResult to the store: mint each log seed into a
- * full LogEntry via the per-store Clock + IdGen, then write the new
- * state slices and the appended log in a single set() call so React
- * sees one render. Idempotent for empty-log results — those still
- * write the (unchanged) state slices, which is fine.
+ * Resolve a (template, vars, meta) seed produced by the pure engine
+ * into the user-facing message string. Stripped down to the cases the
+ * engine actually emits:
+ *   - all combat.blocked.* templates carry a {who} placeholder; the
+ *     store substitutes it from meta.attackingSide so the engine
+ *     stays language-agnostic.
+ *   - everything else is a straight messages[lang][template] lookup
+ *     formatted with the seed's vars.
  */
-function applyResult(set: StoreSet, get: StoreGet, log: LogMinter, result: ActionResult): void {
+function resolveSeed(seed: ActionLogSeed, lang: Lang): string {
+  const template = messages[lang][seed.template];
+  const vars: Record<string, string | number> = { ...(seed.vars ?? {}) };
+  if (
+    seed.template === 'log.combat.blocked.both' ||
+    seed.template === 'log.combat.blocked.attackerOnly' ||
+    seed.template === 'log.combat.blocked.blockerOnly' ||
+    seed.template === 'log.combat.blocked.none'
+  ) {
+    const attackingSide = seed.meta?.attackingSide;
+    const whoKey: MessageKey = attackingSide === 'opponent' ? 'player.opponent' : 'player.you';
+    vars.who = messages[lang][whoKey];
+  }
+  return format(template, vars);
+}
+
+/**
+ * Apply a pure ActionResult to the store: resolve each ActionLogSeed
+ * into a fully-rendered message via the active language, then mint a
+ * LogEntry through the per-store Clock + IdGen. State slices and
+ * appended log are written in a single set() call so React sees one
+ * render. Idempotent for empty-log results — those still write the
+ * (unchanged) state slices, which is fine.
+ */
+function applyResult(
+  set: StoreSet,
+  get: StoreGet,
+  log: LogMinter,
+  result: ActionResult,
+  getLang: () => Lang,
+): void {
   set((s) => {
-    const minted = result.logs.map((l) => log(l.message, l.priority, l.kind, l.meta));
+    const lang = getLang();
+    const minted = result.logs.map((seed) =>
+      log(resolveSeed(seed, lang), seed.priority, seed.kind, seed.meta),
+    );
     const merged = [...s.gameLog, ...minted];
     return {
       player: result.next.player,
@@ -110,9 +148,20 @@ export type Clock = () => number;
  *  inject a deterministic generator via createGameStore({ idGen }). */
 export type IdGen = () => LogEntryId;
 
+/**
+ * Active-language getter. Called every time the store mints a log
+ * entry, so a language switch in I18nProvider is reflected on the
+ * very next action without forcing the engine to re-emit. Defaults to
+ * the same DEFAULT_LANG that I18nProvider uses ('pt') so the
+ * production singleton lines up with the UI's default. Tests inject
+ * `() => 'en'` to keep equivalence snapshots in English.
+ */
+export type LangGetter = () => Lang;
+
 export interface GameStoreDependencies {
   clock?: Clock;
   idGen?: IdGen;
+  getLang?: LangGetter;
 }
 
 function defaultIdGen(): IdGen {
@@ -122,6 +171,31 @@ function defaultIdGen(): IdGen {
   // re-spoken.
   let seq = 0;
   return () => logEntryId(`log-${++seq}`);
+}
+
+// Module-level lang getter that the singleton store uses by default.
+// I18nProvider hooks itself in via registerLangGetter() on mount.
+let globalLang: Lang = 'pt';
+const globalLangGetter: LangGetter = () => globalLang;
+/**
+ * Register a getter so the singleton store reads the live language
+ * from I18nProvider. Returns a teardown that restores the default
+ * 'pt' getter — useful in tests.
+ */
+export function registerLangGetter(getter: LangGetter): () => void {
+  const previous = globalLang;
+  globalLang = getter();
+  // Subsequent reads pick up the new value via the closure below.
+  // We poll on each call rather than installing the getter directly
+  // so the provider only has to push values via setLangGlobal — no
+  // shared mutable closure of its setLang setter.
+  return () => {
+    globalLang = previous;
+  };
+}
+/** Pushed by I18nProvider whenever its `lang` state changes. */
+export function setLangGlobal(lang: Lang): void {
+  globalLang = lang;
 }
 
 /**
@@ -140,6 +214,11 @@ function defaultIdGen(): IdGen {
 export function createGameStore(deps: GameStoreDependencies = {}) {
   const clock: Clock = deps.clock ?? (() => Date.now());
   const idGen: IdGen = deps.idGen ?? defaultIdGen();
+  // Default to 'pt' to match I18nProvider's DEFAULT_LANG. The provider
+  // calls registerLangGetter() on mount, swapping this for a getter
+  // backed by its useState — the singleton store therefore tracks the
+  // user's actual language without prop-drilling or context.
+  const getLang: LangGetter = deps.getLang ?? globalLangGetter;
 
   function log(
     msg: string,
@@ -196,7 +275,15 @@ export function createGameStore(deps: GameStoreDependencies = {}) {
             generation: s.generation + 1,
             gameLog: [
               log(
-                `New match. Turn 1. You have ${STARTING_LIFE} life, ${STARTING_HAND} cards, and 1 mana. Your turn.`,
+                resolveSeed(
+                  {
+                    template: 'log.init.firstTurn',
+                    vars: { life: STARTING_LIFE, hand: STARTING_HAND },
+                    priority: 'polite',
+                    kind: 'turn',
+                  },
+                  getLang(),
+                ),
                 'polite',
                 'turn',
                 { turnNumber: 1, player: 'player' },
@@ -213,19 +300,19 @@ export function createGameStore(deps: GameStoreDependencies = {}) {
         },
 
         drawCard: (who) => {
-          applyResult(set, get, log, executeDrawCard(get(), who));
+          applyResult(set, get, log, executeDrawCard(get(), who), getLang);
         },
 
         playCardToField: (who, cardId) => {
-          applyResult(set, get, log, executePlayCardToField(get(), who, cardId));
+          applyResult(set, get, log, executePlayCardToField(get(), who, cardId), getLang);
         },
 
         attack: (attackerId, blockerId) => {
-          applyResult(set, get, log, executeAttack(get(), attackerId, blockerId));
+          applyResult(set, get, log, executeAttack(get(), attackerId, blockerId), getLang);
         },
 
         endTurn: () => {
-          applyResult(set, get, log, executeEndTurn(get()));
+          applyResult(set, get, log, executeEndTurn(get()), getLang);
         },
       }),
       { name: 'game', enabled: process.env.NODE_ENV === 'development' },

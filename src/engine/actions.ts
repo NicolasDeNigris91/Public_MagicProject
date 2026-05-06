@@ -9,15 +9,17 @@
  * Each function returns:
  *   - `next`: the post-action IGameState (gameLog field is unchanged
  *     and ignored by the store glue).
- *   - `logs`: announcer entry seeds — message, priority, kind, meta.
- *     The store maps these through its log() helper to mint full
- *     LogEntry records with stable ids and timestamps.
+ *   - `logs`: announcer entry seeds — { template, vars }, priority,
+ *     kind, meta. The store maps these through its log() helper to
+ *     mint full LogEntry records: it resolves the template against the
+ *     current language via the i18n messages dictionary, formats the
+ *     vars, and stamps id + timestamp.
  *
- * Announcer copy (the human-readable `message`) is part of the
- * contract: the equivalence snapshots in
- * src/store/useGameStore.equivalence.test.ts pin every string. Any
- * intentional copy change shows up as a snapshot diff that has to be
- * accepted in the same commit.
+ * The contract surface is the (template, vars) pair. The equivalence
+ * snapshot in src/store/useGameStore.equivalence.test.ts pins those
+ * along with the resolved message string for stability — any copy
+ * change in messages.ts shows up as a snapshot diff that has to be
+ * accepted in the same commit (ADR 0006).
  */
 import { shortCardLabel } from '@/utils/describeCard';
 import {
@@ -40,9 +42,11 @@ import type {
   LogKind,
   PlayerId,
 } from './types';
+import type { MessageKey } from '@/i18n/messages';
 
 export interface ActionLogSeed {
-  message: string;
+  template: MessageKey;
+  vars?: Record<string, string | number>;
   priority: AnnouncePriority;
   kind: LogKind;
   meta?: Record<string, string | number>;
@@ -87,7 +91,8 @@ export function executePlayCardToField(
       next: state,
       logs: [
         {
-          message: `Cannot play ${card.name} - costs ${card.cmc}, you have ${state[who].manaAvailable} mana.`,
+          template: 'log.cannotPlay.mana',
+          vars: { name: card.name, cmc: card.cmc, available: state[who].manaAvailable },
           priority: 'polite',
           kind: 'info',
         },
@@ -101,10 +106,8 @@ export function executePlayCardToField(
     next,
     logs: [
       {
-        message:
-          who === 'player'
-            ? `You played ${label} to the battlefield. It has summoning sickness and cannot attack this turn.`
-            : `Opponent played ${label}. It has summoning sickness.`,
+        template: who === 'player' ? 'log.play.player' : 'log.play.opponent',
+        vars: { label },
         priority: 'polite',
         kind: 'play',
         meta: { player: who, card: card.name },
@@ -127,10 +130,7 @@ export function executeDrawCard(state: IGameState, who: PlayerId): ActionResult 
       next: { ...state, winner },
       logs: [
         {
-          message:
-            who === 'player'
-              ? 'You tried to draw from an empty deck. You lose the match.'
-              : 'Opponent tried to draw from an empty deck. You win the match.',
+          template: who === 'player' ? 'log.decking.player' : 'log.decking.opponent',
           priority: 'assertive',
           kind: 'game-over',
           meta: { winner: who === 'player' ? 'opponent' : 'player', reason: 'decking' },
@@ -142,13 +142,15 @@ export function executeDrawCard(state: IGameState, who: PlayerId): ActionResult 
   const log: ActionLogSeed =
     who === 'player'
       ? {
-          message: `You drew ${drawn.name}. Hand size ${updated.hand.length}.`,
+          template: 'log.draw.player',
+          vars: { name: drawn.name, handSize: updated.hand.length },
           priority: 'polite',
           kind: 'draw',
           meta: { player: 'player', card: drawn.name, handSize: updated.hand.length },
         }
       : {
-          message: `Opponent drew a card. Their hand size is ${updated.hand.length}.`,
+          template: 'log.draw.opponent',
+          vars: { handSize: updated.hand.length },
           priority: 'polite',
           kind: 'draw',
           meta: { player: 'opponent', handSize: updated.hand.length },
@@ -172,16 +174,25 @@ export function executeEndTurn(state: IGameState): ActionResult {
   s = { ...s, turn: nextSide, turnNumber: newTurnNumber };
 
   const logs: ActionLogSeed[] = [
-    {
-      message: nextSide === 'player' ? `Turn ${newTurnNumber}. Your turn.` : "Opponent's turn.",
-      priority: 'polite',
-      kind: 'turn',
-      meta: { turnNumber: newTurnNumber, player: nextSide },
-    },
+    nextSide === 'player'
+      ? {
+          template: 'log.turn.player',
+          vars: { turnNumber: newTurnNumber },
+          priority: 'polite',
+          kind: 'turn',
+          meta: { turnNumber: newTurnNumber, player: nextSide },
+        }
+      : {
+          template: 'log.turn.opponent',
+          priority: 'polite',
+          kind: 'turn',
+          meta: { turnNumber: newTurnNumber, player: nextSide },
+        },
   ];
   if (nextSide === 'player') {
     logs.push({
-      message: `${updatedNext.manaMax} mana available.`,
+      template: 'log.mana.available',
+      vars: { manaMax: updatedNext.manaMax },
       priority: 'polite',
       kind: 'mana',
       meta: {
@@ -217,14 +228,12 @@ export function executeAttack(
 
   if (!canAttack(attacker)) {
     if (attackingSide !== 'player') return noop(state);
-    const reason = attacker.summoningSick
-      ? 'has summoning sickness'
-      : 'has already attacked this turn';
     return {
       next: state,
       logs: [
         {
-          message: `${attacker.name} ${reason} and cannot attack.`,
+          template: attacker.summoningSick ? 'log.attack.summoningSick' : 'log.attack.exhausted',
+          vars: { name: attacker.name },
           priority: 'polite',
           kind: 'info',
         },
@@ -242,7 +251,7 @@ export function executeAttack(
       next: state,
       logs: [
         {
-          message: 'Cannot attack directly while the opponent has creatures on the battlefield.',
+          template: 'log.attack.cannotAttackDirect',
           priority: 'polite',
           kind: 'info',
         },
@@ -274,15 +283,26 @@ export function executeAttack(
   next = setPlayerSlice(next, defendingSide, defenderPlayer);
   if (winner) next = { ...next, winner };
 
-  const who = attackingSide === 'player' ? 'You' : 'Opponent';
+  // For blocked combat templates the {who} placeholder is "You"/"Opponent"
+  // depending on attackingSide. The store glue injects that — engine
+  // doesn't know the active language, so it just emits meta.attackingSide.
   const logs: ActionLogSeed[] = [];
   if (blocker) {
+    const blockedTemplate: MessageKey = result.attackerDies
+      ? result.blockerDies
+        ? 'log.combat.blocked.both'
+        : 'log.combat.blocked.attackerOnly'
+      : result.blockerDies
+        ? 'log.combat.blocked.blockerOnly'
+        : 'log.combat.blocked.none';
     logs.push({
-      message: `${who} attacked with ${shortCardLabel(attacker)}, blocked by ${shortCardLabel(
-        blocker,
-      )}. ${result.attackerDies ? `${attacker.name} dies. ` : ''}${
-        result.blockerDies ? `${blocker.name} dies.` : ''
-      }`.trim(),
+      template: blockedTemplate,
+      vars: {
+        attackerLabel: shortCardLabel(attacker),
+        blockerLabel: shortCardLabel(blocker),
+        attackerName: attacker.name,
+        blockerName: blocker.name,
+      },
       priority: 'assertive',
       kind: 'combat',
       meta: {
@@ -295,11 +315,13 @@ export function executeAttack(
     });
   } else {
     logs.push({
-      message: `${who} attacked with ${shortCardLabel(attacker)}, dealing ${
-        result.playerDamage
-      } damage. ${defendingSide === 'player' ? 'Your' : "Opponent's"} life is now ${
-        defenderPlayer.life
-      }.`,
+      template:
+        attackingSide === 'player' ? 'log.combat.face.byPlayer' : 'log.combat.face.byOpponent',
+      vars: {
+        attackerLabel: shortCardLabel(attacker),
+        damage: result.playerDamage,
+        defenderLife: defenderPlayer.life,
+      },
       priority: 'assertive',
       kind: 'combat',
       meta: {
@@ -313,10 +335,7 @@ export function executeAttack(
 
   if (winner) {
     logs.push({
-      message:
-        winner === 'player'
-          ? 'Victory! You defeated the opponent.'
-          : 'Defeat. The opponent reduced your life to zero.',
+      template: winner === 'player' ? 'log.gameOver.victory' : 'log.gameOver.defeat',
       priority: 'assertive',
       kind: 'game-over',
       meta: { winner },

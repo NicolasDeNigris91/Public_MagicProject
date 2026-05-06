@@ -69,7 +69,11 @@ const opponentDeck: ICard[] = [
 ];
 
 function fresh() {
-  return createGameStore({ clock: CLOCK, idGen: idGen() });
+  // Pin equivalence snapshots to English. The production singleton
+  // defaults to PT (matching I18nProvider); tests pin EN so snapshots
+  // are stable against PT translation tweaks and align with the
+  // legacy hardcoded copy this module historically pinned.
+  return createGameStore({ clock: CLOCK, idGen: idGen(), getLang: () => 'en' });
 }
 
 /** Strip Zustand's actions, keeping only IGameState fields. The

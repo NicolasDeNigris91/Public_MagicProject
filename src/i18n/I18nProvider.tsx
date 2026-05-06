@@ -1,5 +1,6 @@
 'use client';
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
+import { setLangGlobal } from '@/store/useGameStore';
 import { format, messages, type Lang, type MessageKey } from './messages';
 
 interface I18nCtx {
@@ -39,6 +40,11 @@ export function I18nProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     document.documentElement.lang = lang;
+    // Push the live language into the singleton game store so its
+    // engine-emitted log seeds resolve in the user's actual language
+    // without prop-drilling. Future log entries pick up the new value;
+    // already-minted entries keep their original-language string.
+    setLangGlobal(lang);
   }, [lang]);
 
   const t = useCallback(
