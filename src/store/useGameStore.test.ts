@@ -286,4 +286,138 @@ describe('createGameStore — language resolution', () => {
     const ptCombat = ptStore.getState().gameLog.at(-1);
     expect(ptCombat?.message).toMatch(/^Oponente atacou com/);
   });
+
+  // The four combat.blocked.* templates are special-cased in
+  // resolveSeed: each one triggers the {who} substitution. The
+  // existing test exercises the .both branch; these three drive
+  // each remaining branch so a regression that breaks the {who}
+  // injection on attackerOnly / blockerOnly / none surfaces here.
+  it('combat.blocked.attackerOnly resolves {who} when only the attacker dies', () => {
+    const attacker: ICard = { ...bareCard('atk', 1), power: 1, toughness: 1 };
+    const blocker: ICard = { ...bareCard('blk', 1), power: 2, toughness: 2 };
+    const store = createGameStore({
+      clock: () => 0,
+      idGen: ((): (() => ReturnType<typeof logEntryId>) => {
+        let n = 0;
+        return () => logEntryId(`a-${++n}`);
+      })(),
+      getLang: () => 'en',
+    });
+    store.setState({
+      player: { ...store.getState().player, battlefield: [attacker], manaMax: 1 },
+      opponent: { ...store.getState().opponent, battlefield: [blocker], manaMax: 1 },
+      initialized: true,
+    });
+    store.getState().attack(attacker.id, blocker.id);
+    const combat = store.getState().gameLog.at(-1);
+    // "You attacked with atk, blocked by blk. atk dies."
+    expect(combat?.message).toMatch(/^You attacked with/);
+    expect(combat?.message).toContain('atk dies');
+    expect(combat?.message).not.toContain('blk dies');
+  });
+
+  it('combat.blocked.blockerOnly resolves {who} when only the blocker dies', () => {
+    const attacker: ICard = { ...bareCard('atk', 1), power: 2, toughness: 2 };
+    const blocker: ICard = { ...bareCard('blk', 1), power: 1, toughness: 1 };
+    const store = createGameStore({
+      clock: () => 0,
+      idGen: ((): (() => ReturnType<typeof logEntryId>) => {
+        let n = 0;
+        return () => logEntryId(`a-${++n}`);
+      })(),
+      getLang: () => 'en',
+    });
+    store.setState({
+      player: { ...store.getState().player, battlefield: [attacker], manaMax: 1 },
+      opponent: { ...store.getState().opponent, battlefield: [blocker], manaMax: 1 },
+      initialized: true,
+    });
+    store.getState().attack(attacker.id, blocker.id);
+    const combat = store.getState().gameLog.at(-1);
+    expect(combat?.message).toMatch(/^You attacked with/);
+    expect(combat?.message).toContain('blk dies');
+    expect(combat?.message).not.toContain('atk dies');
+  });
+
+  it('combat.blocked.none resolves {who} when neither creature dies', () => {
+    // 1/3 vs 1/3: each takes 1 dmg, each survives with 2 toughness.
+    const attacker: ICard = { ...bareCard('atk', 1), power: 1, toughness: 3 };
+    const blocker: ICard = { ...bareCard('blk', 1), power: 1, toughness: 3 };
+    const store = createGameStore({
+      clock: () => 0,
+      idGen: ((): (() => ReturnType<typeof logEntryId>) => {
+        let n = 0;
+        return () => logEntryId(`a-${++n}`);
+      })(),
+      getLang: () => 'en',
+    });
+    store.setState({
+      player: { ...store.getState().player, battlefield: [attacker], manaMax: 1 },
+      opponent: { ...store.getState().opponent, battlefield: [blocker], manaMax: 1 },
+      initialized: true,
+    });
+    store.getState().attack(attacker.id, blocker.id);
+    const combat = store.getState().gameLog.at(-1);
+    expect(combat?.message).toMatch(/^You attacked with/);
+    // Nothing dies: assert the standard "blocked by" form is present
+    // without any "X dies" tail.
+    expect(combat?.message).toContain('blocked by');
+    expect(combat?.message).not.toContain('dies');
+  });
+
+  it('getLangGlobal returns whatever setLangGlobal last wrote', () => {
+    const before = getLangGlobal();
+    try {
+      setLangGlobal('es');
+      expect(getLangGlobal()).toBe('es');
+      setLangGlobal('fr');
+      expect(getLangGlobal()).toBe('fr');
+      setLangGlobal('en');
+      expect(getLangGlobal()).toBe('en');
+    } finally {
+      setLangGlobal(before);
+    }
+  });
+});
+
+describe('createGameStore — drawCard action', () => {
+  it('drawCard("player") moves one card from deck head to hand tail', () => {
+    const store = createGameStore({
+      clock: () => 0,
+      idGen: ((): (() => ReturnType<typeof logEntryId>) => {
+        let n = 0;
+        return () => logEntryId(`d-${++n}`);
+      })(),
+    });
+    store.getState().initGame(deck('p'), deck('o'));
+    const handBefore = store.getState().player.hand;
+    const deckBefore = store.getState().player.deck;
+    expect(deckBefore.length).toBeGreaterThan(0);
+
+    store.getState().drawCard('player');
+
+    const handAfter = store.getState().player.hand;
+    const deckAfter = store.getState().player.deck;
+    // Hand grew by exactly one entry, deck shrank by one, and the
+    // newly-drawn card is the previous deck head appended to hand.
+    expect(handAfter.length).toBe(handBefore.length + 1);
+    expect(deckAfter.length).toBe(deckBefore.length - 1);
+    expect(handAfter[handAfter.length - 1]?.id).toBe(deckBefore[0]?.id);
+  });
+
+  it('drawCard("opponent") moves a card on the opponent side too', () => {
+    const store = createGameStore({
+      clock: () => 0,
+      idGen: ((): (() => ReturnType<typeof logEntryId>) => {
+        let n = 0;
+        return () => logEntryId(`do-${++n}`);
+      })(),
+    });
+    store.getState().initGame(deck('p'), deck('o'));
+    const handBefore = store.getState().opponent.hand.length;
+    const deckBefore = store.getState().opponent.deck.length;
+    store.getState().drawCard('opponent');
+    expect(store.getState().opponent.hand.length).toBe(handBefore + 1);
+    expect(store.getState().opponent.deck.length).toBe(deckBefore - 1);
+  });
 });
