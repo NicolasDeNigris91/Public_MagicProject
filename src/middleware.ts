@@ -13,18 +13,17 @@ import { NextResponse, type NextRequest } from 'next/server';
  *
  * `'strict-dynamic'` lets nonced scripts load further child scripts
  * (Next.js's chunk loader does this) without needing each chunk to
- * carry a nonce. style-src keeps `'unsafe-inline'` because the
- * combat overlay positions damage numbers and flight clones via
- * inline `style="..."` set from getBoundingClientRect at runtime —
- * those coordinates can't be hoisted to a stylesheet, and CSP3 does
- * not provide a `'strict-dynamic'` analogue for styles.
+ * carry a nonce. style-src is now `'self'` only — the combat overlay
+ * was the last consumer of inline `style=""` and now positions clones
+ * via setProperty on CSS variables instead (see CombatLayer.tsx +
+ * ADR 0005). Authored stylesheets are the only allowed style source.
  */
 export function middleware(request: NextRequest) {
   const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
   const csp = [
     "default-src 'self'",
     `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'`,
-    "style-src 'self' 'unsafe-inline'",
+    "style-src 'self'",
     "img-src 'self' data: https://cards.scryfall.io https://c1.scryfall.com",
     "font-src 'self' data:",
     "connect-src 'self' https://api.scryfall.com",

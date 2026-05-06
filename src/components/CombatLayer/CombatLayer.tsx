@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { DAMAGE_FLOAT_MS, TRAVEL_MS } from '@/constants/timings';
 import { useCombatStore } from '@/store/useCombatStore';
@@ -10,10 +10,12 @@ import styles from './CombatLayer.module.css';
  * game surface. Decorative only - aria-hidden throughout. Narration
  * flows through the existing live regions driven by useGameStore.
  *
- * The combat-* keyframes referenced below live in globals.css, so no
- * runtime <style> injection is needed and CSP doesn't have to allow
- * it. Per-frame positioning still uses inline style — that's the
- * single remaining `style-src 'unsafe-inline'` consumer.
+ * Per-frame positioning lives in CSS variables set via
+ * element.style.setProperty(), which is a CSS-OM mutation rather than
+ * an authored `style=""` attribute. With no inline-style consumer left
+ * in the rendered tree the CSP can drop `style-src 'unsafe-inline'`
+ * (see middleware.ts + ADR 0005). The combat-* keyframes referenced
+ * here live in globals.css.
  */
 export function CombatLayer() {
   const flight = useCombatStore((s) => s.flight);
@@ -37,38 +39,33 @@ export function CombatLayer() {
 }
 
 function DamageNumber({ anchorId, value }: { anchorId: string; value: number }) {
-  const [rect, setRect] = useState<DOMRect | null>(null);
+  const ref = useRef<HTMLSpanElement>(null);
+  const [ready, setReady] = useState(false);
 
   // The bounding rect is captured once on mount. If the viewport
-  // scrolls or resizes during the 600ms float animation the damage
-  // number will be pinned to the original (stale) coordinate. In
-  // practice this is fine - the animation is short, input is blocked
-  // during combat (Task 12), and the board fits the viewport.
+  // scrolls or resizes during the float animation the damage number
+  // stays at its original (stale) coordinate; in practice this is
+  // fine — the animation is short, input is blocked during combat,
+  // and the board fits the viewport.
   useEffect(() => {
     const el = document.querySelector<HTMLElement>(
       `[data-card-id="${anchorId}"], [data-life-anchor="${anchorId}"]`,
     );
-    if (el) setRect(el.getBoundingClientRect());
+    if (!el || !ref.current) return;
+    const rect = el.getBoundingClientRect();
+    ref.current.style.setProperty('--combat-x', `${rect.left + rect.width / 2}px`);
+    ref.current.style.setProperty('--combat-y', `${rect.top + rect.height / 2}px`);
+    ref.current.style.setProperty('--combat-float-ms', `${DAMAGE_FLOAT_MS}ms`);
+    setReady(true);
   }, [anchorId]);
 
-  if (!rect) return null;
-  // Coordinates come from getBoundingClientRect at runtime so they
-  // can't live in a stylesheet — this is the inline-style holdout
-  // that keeps `style-src 'unsafe-inline'` necessary.
+  // Render the element invisibly (display:none via inline class swap)
+  // until the rect is captured. We could conditionally not render at
+  // all, but then the ref wouldn't attach until the next render — chicken-
+  // and-egg with the effect. Instead, render with hidden attribute so
+  // the ref is live but the unpositioned span never flashes.
   return (
-    <span
-      style={{
-        position: 'fixed',
-        left: rect.left + rect.width / 2,
-        top: rect.top + rect.height / 2,
-        transform: 'translate(-50%, -50%)',
-        color: '#ef5350',
-        fontSize: 28,
-        fontWeight: 900,
-        textShadow: '0 2px 6px rgba(0,0,0,0.9)',
-        animation: `combat-float ${DAMAGE_FLOAT_MS}ms ease-out forwards`,
-      }}
-    >
+    <span ref={ref} hidden={!ready} className={styles.damageNumber}>
       -{value}
     </span>
   );
@@ -79,7 +76,8 @@ function FlightClone({
 }: {
   flight: NonNullable<ReturnType<typeof useCombatStore.getState>['flight']>;
 }) {
-  const [rects, setRects] = useState<{ from: DOMRect; to: DOMRect } | null>(null);
+  const ref = useRef<HTMLDivElement>(null);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     const src = document.querySelector<HTMLElement>(`[data-card-id="${flight.attackerId}"]`);
@@ -88,31 +86,21 @@ function FlightClone({
         ? `[data-card-id="${flight.targetId}"]`
         : `[data-life-anchor="${flight.targetId}"]`,
     );
-    if (src && dst)
-      setRects({ from: src.getBoundingClientRect(), to: dst.getBoundingClientRect() });
+    if (!src || !dst || !ref.current) return;
+    const from = src.getBoundingClientRect();
+    const to = dst.getBoundingClientRect();
+    const dx = to.left + to.width / 2 - (from.left + from.width / 2);
+    const dy = to.top + to.height / 2 - (from.top + from.height / 2);
+    const el = ref.current;
+    el.style.setProperty('--combat-x', `${from.left}px`);
+    el.style.setProperty('--combat-y', `${from.top}px`);
+    el.style.setProperty('--combat-w', `${from.width}px`);
+    el.style.setProperty('--combat-h', `${from.height}px`);
+    el.style.setProperty('--tx', `${dx}px`);
+    el.style.setProperty('--ty', `${dy}px`);
+    el.style.setProperty('--combat-travel-ms', `${TRAVEL_MS}ms`);
+    setReady(true);
   }, [flight]);
 
-  if (!rects) return null;
-  const dx = rects.to.left + rects.to.width / 2 - (rects.from.left + rects.from.width / 2);
-  const dy = rects.to.top + rects.to.height / 2 - (rects.from.top + rects.from.height / 2);
-
-  return (
-    <div
-      data-combat-clone
-      style={{
-        position: 'fixed',
-        left: rects.from.left,
-        top: rects.from.top,
-        width: rects.from.width,
-        height: rects.from.height,
-        background: 'rgba(69, 90, 100, 0.95)',
-        border: '1px solid #90a4ae',
-        borderRadius: 8,
-        pointerEvents: 'none',
-        animation: `combat-travel ${TRAVEL_MS}ms cubic-bezier(0.4, 0, 0.2, 1) forwards`,
-        ['--tx' as string]: `${dx}px`,
-        ['--ty' as string]: `${dy}px`,
-      }}
-    />
-  );
+  return <div ref={ref} hidden={!ready} data-combat-clone className={styles.flightClone} />;
 }
