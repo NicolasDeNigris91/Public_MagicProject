@@ -1,0 +1,48 @@
+.gameOver {
+  padding: 12px;
+  border-radius: 12px;
+  border: 2px solid #66bb6a;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.gameOverDefeat {
+  border-color: #ef5350;
+}
+
+.gameOverTitle {
+  font-size: 16px;
+}
+
+.gameOverActions {
+  display: flex;
+  gap: 8px;
+}
+
+.control {
+  padding: 10px 18px;
+  background: #263238;
+  border: 1px solid #455a64;
+  border-radius: 8px;
+  color: #eceff1;
+  cursor: pointer;
+}
+
+/* Forced-colors fallback. The green/red border is the only signal of
+ * outcome at a glance; under HCM hex values vanish, so re-state via
+ * Highlight/Mark and the action buttons via system surfaces. */
+@media (forced-colors: active) {
+  .gameOver {
+    border-color: Highlight;
+  }
+  .gameOverDefeat {
+    border-color: Mark;
+  }
+  .control {
+    background: ButtonFace;
+    color: ButtonText;
+    border: 1px solid ButtonText;
+  }
+}

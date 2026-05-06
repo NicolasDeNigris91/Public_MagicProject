@@ -6,6 +6,7 @@ import { ColorSelection } from '@/components/ColorSelection';
 import { CombatLogToggle } from '@/components/CombatLogToggle';
 import { ControlBar } from '@/components/ControlBar';
 import { Footer } from '@/components/Footer';
+import { GameOverDialog } from '@/components/GameOverDialog/GameOverDialog';
 import { GameSkeleton } from '@/components/GameSkeleton';
 import { Hand } from '@/components/Hand';
 import { LangToggle } from '@/components/LangToggle';
@@ -78,14 +79,17 @@ export default function GamePage() {
   useAIOrchestrator();
 
   const mainRef = useRef<HTMLElement>(null);
-  const gameOverRef = useRef<HTMLDivElement>(null);
+  const playAreaRef = useRef<HTMLDivElement>(null);
   const loadingRef = useRef<HTMLElement>(null);
   useInertWhile(mainRef, inspected !== null);
+  // Inert the play zones (battlefields, hand, control bar) once a
+  // winner is set so keyboard focus stays trapped in GameOverDialog.
+  // Header (log/lang toggles) and the dialog itself stay reachable.
+  useInertWhile(playAreaRef, !!winner);
 
   useEffect(() => {
     if (!winner) return;
     clearInspector();
-    gameOverRef.current?.focus();
   }, [winner, clearInspector]);
 
   useEffect(() => {
@@ -213,88 +217,80 @@ export default function GamePage() {
         </header>
 
         {winner && (
-          <div
-            ref={gameOverRef}
-            tabIndex={-1}
-            aria-labelledby="game-over-title"
-            className={`${styles.gameOver}${winner === 'opponent' ? ` ${styles.gameOverDefeat}` : ''}`}
-          >
-            <strong id="game-over-title" className={styles.gameOverTitle}>
-              {winner === 'player' ? t('game.victory') : t('game.defeat')}
-            </strong>
-            <div className={styles.gameOverActions}>
-              <button onClick={onPlayAgain} className={styles.control}>
-                {t('game.playAgain', { color: t(`color.${playerColor}.name`) })}
-              </button>
-              <button onClick={handleChangeColor} className={styles.control}>
-                {t('game.changeColor')}
-              </button>
-            </div>
-          </div>
+          <GameOverDialog
+            outcome={winner === 'player' ? 'win' : 'loss'}
+            title={winner === 'player' ? t('game.victory') : t('game.defeat')}
+            playAgainLabel={t('game.playAgain', { color: t(`color.${playerColor}.name`) })}
+            changeColorLabel={t('game.changeColor')}
+            onPlayAgain={onPlayAgain}
+            onChangeColor={handleChangeColor}
+          />
         )}
 
-        <section aria-label={t('player.opponent')} className={styles.zone}>
-          <PlayerHeader
-            label={t('player.opponent')}
-            color={opponentColor}
-            life={opponent.life}
-            handCount={opponent.hand.length}
-            pulsing={lifePulse === 'opponent'}
-            lifeAnchor="opponent-life"
-            manaAvailable={opponent.manaAvailable}
-            manaMax={opponent.manaMax}
-          />
-          <Hand
-            hand={opponent.hand}
-            label={t('hand.opponent')}
-            onActivate={() => undefined}
-            hidden
-            compact
-          />
-          <Battlefield
-            label={t('battlefield.opponentLabel')}
-            variant="opponent"
-            cards={opponent.battlefield}
-            onCardActivate={handleBattlefieldActivate}
-            onCardInspect={(card) => openInspector(card, 'opponent-field')}
-          />
-        </section>
+        <div ref={playAreaRef} className={styles.playArea}>
+          <section aria-label={t('player.opponent')} className={styles.zone}>
+            <PlayerHeader
+              label={t('player.opponent')}
+              color={opponentColor}
+              life={opponent.life}
+              handCount={opponent.hand.length}
+              pulsing={lifePulse === 'opponent'}
+              lifeAnchor="opponent-life"
+              manaAvailable={opponent.manaAvailable}
+              manaMax={opponent.manaMax}
+            />
+            <Hand
+              hand={opponent.hand}
+              label={t('hand.opponent')}
+              onActivate={() => undefined}
+              hidden
+              compact
+            />
+            <Battlefield
+              label={t('battlefield.opponentLabel')}
+              variant="opponent"
+              cards={opponent.battlefield}
+              onCardActivate={handleBattlefieldActivate}
+              onCardInspect={(card) => openInspector(card, 'opponent-field')}
+            />
+          </section>
 
-        <ControlBar
-          turn={turn}
-          winner={winner}
-          isAnimating={isAnimating}
-          selectedAttacker={selectedAttacker}
-          opponentCreatureCount={opponent.battlefield.length}
-          onAttackDirectly={attackDirectly}
-          onEndTurn={endTurn}
-        />
+          <ControlBar
+            turn={turn}
+            winner={winner}
+            isAnimating={isAnimating}
+            selectedAttacker={selectedAttacker}
+            opponentCreatureCount={opponent.battlefield.length}
+            onAttackDirectly={attackDirectly}
+            onEndTurn={endTurn}
+          />
 
-        <section aria-label={t('player.you')} className={styles.zone}>
-          <PlayerHeader
-            label={t('player.you')}
-            color={playerColor}
-            life={player.life}
-            handCount={player.hand.length}
-            pulsing={lifePulse === 'player'}
-            lifeAnchor="player-life"
-            manaAvailable={player.manaAvailable}
-            manaMax={player.manaMax}
-          />
-          <Battlefield
-            label={t('battlefield.yourLabel')}
-            variant="player"
-            cards={player.battlefield}
-            onCardActivate={handleBattlefieldActivate}
-            onCardInspect={(card) => openInspector(card, 'own-field')}
-            selectedId={selectedAttacker}
-          />
-          <Hand
-            hand={player.hand}
-            label={t('hand.your')}
-            onActivate={(card) => openInspector(card, 'hand')}
-          />
-        </section>
+          <section aria-label={t('player.you')} className={styles.zone}>
+            <PlayerHeader
+              label={t('player.you')}
+              color={playerColor}
+              life={player.life}
+              handCount={player.hand.length}
+              pulsing={lifePulse === 'player'}
+              lifeAnchor="player-life"
+              manaAvailable={player.manaAvailable}
+              manaMax={player.manaMax}
+            />
+            <Battlefield
+              label={t('battlefield.yourLabel')}
+              variant="player"
+              cards={player.battlefield}
+              onCardActivate={handleBattlefieldActivate}
+              onCardInspect={(card) => openInspector(card, 'own-field')}
+              selectedId={selectedAttacker}
+            />
+            <Hand
+              hand={player.hand}
+              label={t('hand.your')}
+              onActivate={(card) => openInspector(card, 'hand')}
+            />
+          </section>
+        </div>
       </main>
 
       <CombatLayer />
