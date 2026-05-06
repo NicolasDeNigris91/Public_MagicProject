@@ -58,4 +58,23 @@ describe('ColorSelection', () => {
     await user.keyboard('{Enter}');
     expect(onSelect).toHaveBeenCalledWith('U');
   });
+
+  it('ArrowLeft from the first color wraps to the last (Green)', async () => {
+    const user = userEvent.setup();
+    render(<ColorSelection onSelect={() => {}} />);
+    const first = screen.getByRole('button', { name: /Branco/i });
+    first.focus();
+    await user.keyboard('{ArrowLeft}');
+    // COLORS = ['W','U','B','R','G']. Wrapping from W (idx 0) -> G (idx 4).
+    expect(document.activeElement).toBe(screen.getByRole('button', { name: /Verde/i }));
+  });
+
+  it('non-arrow key on a color button is a no-op (focus stays)', async () => {
+    const user = userEvent.setup();
+    render(<ColorSelection onSelect={() => {}} />);
+    const black = screen.getByRole('button', { name: /Preto/i });
+    black.focus();
+    await user.keyboard('a'); // letter — neither ArrowLeft nor ArrowRight
+    expect(document.activeElement).toBe(black);
+  });
 });
