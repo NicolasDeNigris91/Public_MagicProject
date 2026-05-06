@@ -32,14 +32,20 @@ export default defineConfig({
       // any regression below them fails CI.
       thresholds: {
         // Ratcheted upward after engine/actions.ts extraction + pure
-        // tests for it. Current per-file engine coverage is 100/93+
-        // for rules/ai/color and 100/95+ for actions, so 99/93/100/99
-        // is a guardrail just below current that prevents regression
-        // without flagging routine refactors.
-        'src/engine/**': { lines: 99, branches: 93, functions: 100, statements: 99 },
+        // tests for it. Current 100/95+ across the dir; floor sits a
+        // hair below current to absorb routine refactors but trip on
+        // any real regression.
+        'src/engine/**': { lines: 99, branches: 95, functions: 100, statements: 99 },
         'src/utils/**': { lines: 90, branches: 80, functions: 95, statements: 90 },
         'src/adapters/**': { lines: 85, branches: 80, functions: 90, statements: 85 },
-        'src/services/fallback-deck.ts': { lines: 95, branches: 95, functions: 95, statements: 95 },
+        // Services ratcheted after scryfall envelope + fetchColorArt
+        // tests. Current 99.68/91 across the dir.
+        'src/services/**': { lines: 95, branches: 88, functions: 95, statements: 95 },
+        // Components dir crossed 100/85 once Footer + GameSkeleton +
+        // LiveRegion + LangToggle + ErrorBoundary got direct tests.
+        // Floor below current absorbs new components added without
+        // tests in the same commit but catches removal of coverage.
+        'src/components/**': { lines: 95, branches: 82, functions: 95, statements: 95 },
         // Hooks ratcheted after useAttackerSelection branch coverage
         // pass. Current floor is 93/85 lines/branches; the threshold
         // sits a hair below to absorb routine refactors but trip on
