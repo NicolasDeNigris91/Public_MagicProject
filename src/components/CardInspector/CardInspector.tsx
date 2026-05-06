@@ -1,14 +1,12 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { useFocusTrap } from '@/hooks/useFocusTrap';
 import { useI18n } from '@/i18n/I18nProvider';
 import { CardFallback } from '../Card/CardFallback';
 import styles from './CardInspector.module.css';
 import type { ICard } from '@/engine/types';
 import type { InspectorAction } from '@/utils/buildInspectorActions';
-
-const focusableSelector =
-  'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
 const MANA_SYMBOLS: Record<string, string> = {
   W: 'white',
@@ -62,43 +60,7 @@ export function CardInspector({ card, actions, onClose }: CardInspectorProps) {
   const { t } = useI18n();
 
   const dialogRef = useRef<HTMLDivElement>(null);
-
-  // Initial focus: primary action (first focusable).
-  useEffect(() => {
-    const first = dialogRef.current?.querySelector<HTMLElement>(focusableSelector);
-    first?.focus();
-  }, []);
-
-  // Manual focus trap: Tab / Shift+Tab cycles within the dialog.
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key !== 'Tab') return;
-      const root = dialogRef.current;
-      if (!root) return;
-      const items = Array.from(root.querySelectorAll<HTMLElement>(focusableSelector)).filter(
-        (el) => !el.hasAttribute('disabled'),
-      );
-      if (items.length === 0) return;
-      const first = items[0]!;
-      const last = items[items.length - 1]!;
-      const active = document.activeElement as HTMLElement | null;
-      const isInside = !!active && root.contains(active);
-      if (!isInside) {
-        e.preventDefault();
-        first.focus();
-        return;
-      }
-      if (e.shiftKey && active === first) {
-        e.preventDefault();
-        last.focus();
-      } else if (!e.shiftKey && active === last) {
-        e.preventDefault();
-        first.focus();
-      }
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, []);
+  useFocusTrap(dialogRef);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {

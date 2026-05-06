@@ -1,9 +1,7 @@
 'use client';
-import { useEffect, useRef } from 'react';
+import { useRef } from 'react';
+import { useFocusTrap } from '@/hooks/useFocusTrap';
 import styles from './GameOverDialog.module.css';
-
-const focusableSelector =
-  'button:not([disabled]), [href], input:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
 export interface GameOverDialogProps {
   outcome: 'win' | 'loss';
@@ -37,39 +35,7 @@ export function GameOverDialog({
   onChangeColor,
 }: GameOverDialogProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const first = dialogRef.current?.querySelector<HTMLElement>(focusableSelector);
-    first?.focus();
-  }, []);
-
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key !== 'Tab') return;
-      const root = dialogRef.current;
-      if (!root) return;
-      const items = Array.from(root.querySelectorAll<HTMLElement>(focusableSelector));
-      if (items.length === 0) return;
-      const first = items[0]!;
-      const last = items[items.length - 1]!;
-      const active = document.activeElement as HTMLElement | null;
-      const isInside = !!active && root.contains(active);
-      if (!isInside) {
-        e.preventDefault();
-        first.focus();
-        return;
-      }
-      if (e.shiftKey && active === first) {
-        e.preventDefault();
-        last.focus();
-      } else if (!e.shiftKey && active === last) {
-        e.preventDefault();
-        first.focus();
-      }
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, []);
+  useFocusTrap(dialogRef);
 
   return (
     <div
