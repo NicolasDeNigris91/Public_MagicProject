@@ -7,6 +7,10 @@ node_modules
 coverage/
 .lighthouseci/
 
+# Stryker mutation testing artifacts
+.stryker-tmp/
+reports/
+
 # Playwright
 test-results/
 playwright-report/
