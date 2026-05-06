@@ -76,7 +76,7 @@ src/
 
 `engine/` doesn't import from anywhere else in the tree, so swapping Scryfall for Lorcana, Pokemon TCG or a homebrew JSON only means rewriting `adapters/`.
 
-For the long-form layered diagram, hard invariants, and design decisions, see [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md). Permanent design choices (no undo, CSP enforcement, focus management, mutation cadence, the planned next@16 migration) are recorded as ADRs under [`docs/adr/`](./docs/adr/).
+For the long-form layered diagram, hard invariants, and design decisions, see [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md). Permanent design choices (no undo, CSP enforcement, focus management, mutation cadence, the planned next@16 migration) are recorded as ADRs under [`docs/adr/`](./docs/adr/). The bundle budgets and Lighthouse SLOs are explained in [`docs/PERFORMANCE.md`](./docs/PERFORMANCE.md).
 
 ## Accessibility
 
