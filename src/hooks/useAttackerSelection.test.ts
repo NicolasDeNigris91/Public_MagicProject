@@ -101,4 +101,85 @@ describe('useAttackerSelection', () => {
     const { result } = renderHook(() => useAttackerSelection());
     expect(typeof result.current.handleBattlefieldActivate).toBe('function');
   });
+
+  it('attackDirectly with a selected attacker forwards a face intent to playCombat', async () => {
+    vi.useRealTimers();
+    const deck = Array.from({ length: 20 }, (_, i) => makeCard(`d${i}`));
+    useGameStore.getState().initGame(deck, deck);
+
+    const attacker = { ...makeCard('att-face', 4, 4), summoningSick: false };
+    useGameStore.setState((s) => ({
+      player: { ...s.player, battlefield: [attacker] },
+      opponent: { ...s.opponent, battlefield: [] },
+    }));
+
+    const spy = vi
+      .spyOn(useCombatStore.getState(), 'playCombat')
+      .mockImplementation(() => Promise.resolve());
+
+    const { result } = renderHook(() => useAttackerSelection());
+    act(() => result.current.select(attacker));
+    act(() => result.current.attackDirectly());
+
+    await vi.waitFor(() => expect(spy).toHaveBeenCalledTimes(1));
+    expect(spy.mock.calls[0]![0]).toMatchObject({
+      attackerId: 'att-face',
+      targetId: 'opponent-life',
+      targetKind: 'face',
+      faceDamage: 4,
+    });
+    expect(result.current.selected).toBeNull();
+    spy.mockRestore();
+  });
+
+  it('attackDirectly with no selected attacker is a no-op', () => {
+    const deck = Array.from({ length: 20 }, (_, i) => makeCard(`d${i}`));
+    useGameStore.getState().initGame(deck, deck);
+
+    const spy = vi.spyOn(useCombatStore.getState(), 'playCombat');
+    const { result } = renderHook(() => useAttackerSelection());
+
+    act(() => result.current.attackDirectly());
+
+    expect(spy).not.toHaveBeenCalled();
+    expect(result.current.selected).toBeNull();
+    spy.mockRestore();
+  });
+
+  it('deselect clears selected and announces deselection', () => {
+    const deck = Array.from({ length: 20 }, (_, i) => makeCard(`d${i}`));
+    useGameStore.getState().initGame(deck, deck);
+
+    const attacker = makeCard('att-x');
+    const { result } = renderHook(() => useAttackerSelection());
+
+    act(() => result.current.select(attacker));
+    expect(result.current.selected).toBe(attacker.id);
+
+    const before = useGameStore.getState().gameLog.length;
+    act(() => result.current.deselect(attacker));
+
+    expect(result.current.selected).toBeNull();
+    const after = useGameStore.getState().gameLog;
+    expect(after.length).toBe(before + 1);
+    expect(after[after.length - 1]?.message).toMatch(/deselected/i);
+  });
+
+  it('handleBattlefieldActivate on own creature toggles selection (re-activate deselects)', () => {
+    const deck = Array.from({ length: 20 }, (_, i) => makeCard(`d${i}`));
+    useGameStore.getState().initGame(deck, deck);
+
+    const mine = { ...makeCard('mine-1'), summoningSick: false };
+    useGameStore.setState((s) => ({
+      player: { ...s.player, battlefield: [mine] },
+    }));
+
+    const { result } = renderHook(() => useAttackerSelection());
+
+    act(() => result.current.handleBattlefieldActivate(mine));
+    expect(result.current.selected).toBe(mine.id);
+
+    act(() => result.current.handleBattlefieldActivate(mine));
+    expect(result.current.selected).toBeNull();
+  });
 });

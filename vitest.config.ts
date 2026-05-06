@@ -40,11 +40,11 @@ export default defineConfig({
         'src/utils/**': { lines: 90, branches: 80, functions: 95, statements: 90 },
         'src/adapters/**': { lines: 85, branches: 80, functions: 90, statements: 85 },
         'src/services/fallback-deck.ts': { lines: 95, branches: 95, functions: 95, statements: 95 },
-        // Hooks are now fully covered. Floor sits a bit below current
-        // (85/82/100/85) so a passing test stays passing across small
-        // refactors, but a real regression on a hook drops below floor
-        // and trips CI.
-        'src/hooks/**': { lines: 80, branches: 78, functions: 95, statements: 80 },
+        // Hooks ratcheted after useAttackerSelection branch coverage
+        // pass. Current floor is 93/85 lines/branches; the threshold
+        // sits a hair below to absorb routine refactors but trip on
+        // any real regression.
+        'src/hooks/**': { lines: 90, branches: 82, functions: 95, statements: 90 },
       },
     },
   },
