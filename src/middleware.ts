@@ -24,7 +24,14 @@ export function middleware(request: NextRequest) {
     "default-src 'self'",
     `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'`,
     "style-src 'self'",
-    "img-src 'self' data: https://cards.scryfall.io https://c1.scryfall.com",
+    // Three Scryfall hosts in img-src:
+    //   cards.scryfall.io    — card art_crop / normal image PNGs
+    //   c1.scryfall.com      — legacy card image CDN (still served on
+    //                          some endpoints)
+    //   svgs.scryfall.io     — WUBRG mana symbols + other card-symbol
+    //                          SVGs used in the color picker and the
+    //                          inspector mana cost line
+    "img-src 'self' data: https://cards.scryfall.io https://c1.scryfall.com https://svgs.scryfall.io",
     "font-src 'self' data:",
     "connect-src 'self' https://api.scryfall.com",
     "frame-ancestors 'none'",
