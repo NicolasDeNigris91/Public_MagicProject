@@ -91,7 +91,10 @@ jobs:
           cache: npm
       - run: npm ci
       - name: Install Playwright browsers
-        run: npx playwright install --with-deps chromium
+        # All three desktop engines plus the mobile emulations rely on
+        # chromium and webkit (firefox is its own bin). Skipping any
+        # would silently drop projects from playwright.config.ts.
+        run: npx playwright install --with-deps chromium firefox webkit
       - run: npm run test:e2e
       - name: Upload Playwright report
         if: failure()

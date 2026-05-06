@@ -34,9 +34,11 @@ test.describe('smoke', () => {
     // physical L key on the iPhone 13 / Pixel 5 emulations and the
     // virtual keyboard isn't surfaced for non-input contexts. The
     // touch path opens the log via the toggle button instead and is
-    // covered by the click-driven flow.
+    // covered by the click-driven flow. Desktop firefox/webkit DO
+    // run this so we catch Gecko/WebKit-specific keydown dispatch
+    // differences.
     test.skip(
-      testInfo.project.name !== 'chromium',
+      testInfo.project.name.startsWith('mobile-'),
       'Keyboard shortcut not part of the mobile contract',
     );
     await page.goto('/');

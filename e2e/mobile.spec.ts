@@ -15,11 +15,11 @@ import { expect, test, type Page } from '@playwright/test';
  */
 
 test.describe('mobile', () => {
-  // Skip on desktop chromium — these tests are about touch + viewport,
-  // not behavior that desktop projects can usefully verify.
+  // Skip on every desktop project — these tests are about touch +
+  // viewport, not behavior that desktop projects can usefully verify.
   test.beforeEach(async ({}, testInfo) => {
     test.skip(
-      testInfo.project.name === 'chromium',
+      !testInfo.project.name.startsWith('mobile-'),
       'Mobile flow runs on mobile-safari / mobile-chrome only',
     );
   });

@@ -3,14 +3,17 @@ import { defineConfig, devices } from '@playwright/test';
 /**
  * End-to-end smoke + axe sweep against the production build.
  *
- * Three projects: desktop chromium plus two mobile emulations
- * (iPhone 13 / WebKit and Pixel 5 / Chromium). Mobile coverage exists
- * to catch viewport-driven regressions the desktop run can't see —
- * touch activation on color buttons, virtual-keyboard reflow, and
- * the small-screen tap-target audit through axe. Engine logic is
- * already covered by 280+ unit/property tests, so e2e is reserved
- * for integration failures (route/CSP/hydration) and the kinds of
- * a11y violations the JSDOM-based axe sweep can't see (focus order,
+ * Five projects: desktop chromium / firefox / webkit, plus two mobile
+ * emulations (iPhone 13 / WebKit and Pixel 5 / Chromium). Mobile
+ * coverage exists to catch viewport-driven regressions the desktop
+ * runs can't see — touch activation on color buttons, virtual-keyboard
+ * reflow, and the small-screen tap-target audit through axe. Desktop
+ * Firefox and WebKit catch engine-specific layout/keyboard quirks
+ * (event.key vs event.code dispatch, flexbox subgrid edge cases,
+ * forced-colors emulation differences). Engine logic is already
+ * covered by 360+ unit/property tests, so e2e is reserved for
+ * integration failures (route/CSP/hydration) and the kinds of a11y
+ * violations the JSDOM-based axe sweep can't see (focus order,
  * computed contrast, real ARIA tree).
  *
  * `webServer` builds and serves the app the same way prod does so we
@@ -36,6 +39,19 @@ export default defineConfig({
   },
   projects: [
     { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
+    // Desktop firefox catches Gecko-specific keyboard event quirks
+    // (event.key dispatch order, focus-visible heuristics) and
+    // layout differences (flexbox flex-basis 0 vs auto resolution
+    // is historically wobbly here).
+    { name: 'firefox', use: { ...devices['Desktop Firefox'] } },
+    // Desktop webkit (Safari engine) catches Apple-only layout and
+    // a11y bugs the chromium pass can't see — most painful in the
+    // past: aria-modal focus trap behavior, dialog backdrop click
+    // handling, and forced-colors emulation never quite matching
+    // Chromium's. We do NOT skip the forced-colors spec here even
+    // though webkit ignores the emulation flag — that spec is
+    // chromium-only via test.skip; the rest of the smoke runs.
+    { name: 'webkit', use: { ...devices['Desktop Safari'] } },
     // Mobile emulations. hasTouch=true is what flips Playwright into
     // tap-style input; the device profiles set it but we surface the
     // intent here too.
