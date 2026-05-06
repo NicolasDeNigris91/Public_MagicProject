@@ -168,6 +168,30 @@ describe('fetchDeckForColor', () => {
     expect(result.cards.map((c) => c.id)).toEqual(fallbackDecks.W.map((c) => c.id));
   });
 
+  it('honors prefers-reduced-data: skips the search and returns the seed deck', async () => {
+    const spy = vi.spyOn(window, 'matchMedia').mockImplementation(
+      (q) =>
+        ({
+          matches: q === '(prefers-reduced-data: reduce)',
+          media: q,
+          addEventListener: vi.fn(),
+          removeEventListener: vi.fn(),
+        }) as unknown as MediaQueryList,
+    );
+    try {
+      const result = await fetchDeckForColor('R');
+      expect(result.source).toBe('fallback');
+      expect(result.error).toBeUndefined();
+      expect(mockedGet).not.toHaveBeenCalled();
+      expect(result.cards).toEqual(fallbackDecks.R);
+      // Seed cards have empty imageUrls so battlefield/hand will
+      // render the local fallback artwork without HTTP image loads.
+      expect(result.cards.every((c) => c.imageUrl === '')).toBe(true);
+    } finally {
+      spy.mockRestore();
+    }
+  });
+
   it('empty candidates after filter falls back with error=Empty response', async () => {
     // Returns a card whose color filter knocks it out — leaves the
     // candidates array empty and trips the second guard.
@@ -243,6 +267,25 @@ describe('fetchColorArt', () => {
     expect(result.W).toBeUndefined();
     expect(result.B).toBeUndefined();
     expect(result.G).toBeUndefined();
+  });
+
+  it('honors prefers-reduced-data: returns {} without issuing any network requests', async () => {
+    const spy = vi.spyOn(window, 'matchMedia').mockImplementation(
+      (q) =>
+        ({
+          matches: q === '(prefers-reduced-data: reduce)',
+          media: q,
+          addEventListener: vi.fn(),
+          removeEventListener: vi.fn(),
+        }) as unknown as MediaQueryList,
+    );
+    try {
+      const result = await fetchColorArt();
+      expect(result).toEqual({});
+      expect(mockedGet).not.toHaveBeenCalled();
+    } finally {
+      spy.mockRestore();
+    }
   });
 
   it('reads art_crop from card_faces[0].image_uris when image_uris is absent (DFC)', async () => {

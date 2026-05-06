@@ -6,6 +6,7 @@ import {
   ScryfallSearchResponseSchema,
 } from '@/adapters/scryfall.adapter';
 import { COLORS, buildDeckFromCandidates } from '@/engine/color';
+import { prefersReducedData } from '@/utils/media';
 import { fallbackDecks } from './fallback-deck';
 import type { Color } from '@/engine/color';
 import type { ICard } from '@/engine/types';
@@ -81,6 +82,10 @@ export interface FetchResult {
 export async function fetchDeckForColor(color: Color): Promise<FetchResult> {
   const seeds = fallbackDecks[color];
   if (DETERMINISTIC) return { cards: seeds, source: 'fallback' };
+  // prefers-reduced-data: skip the cards/search round-trip AND keep
+  // the imageUrl-empty seed cards so battlefield/hand renders with
+  // CardFallback instead of pulling 10 art crops from the CDN.
+  if (prefersReducedData()) return { cards: seeds, source: 'fallback' };
   try {
     const { data } = await withRetry(() =>
       http.get<unknown>('/cards/search', {
@@ -141,6 +146,9 @@ async function fetchArtCrop(exactName: string): Promise<string | null> {
  *  entries silently fall back to the solid swatches in the UI. */
 export async function fetchColorArt(): Promise<Partial<Record<Color, string>>> {
   if (DETERMINISTIC) return {};
+  // Honor prefers-reduced-data: callers degrade gracefully to the
+  // solid color swatches when the map comes back empty.
+  if (prefersReducedData()) return {};
   const entries = await Promise.all(
     COLORS.map(async (c) => [c, await fetchArtCrop(COLOR_ART_CARDS[c])] as const),
   );
