@@ -15,12 +15,18 @@ on:
     branches: [main]
 
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
 
 jobs:
   release-please:
     runs-on: ubuntu-latest
+    permissions:
+      # release-please needs write here to push the release-PR branch,
+      # tag, and create the GitHub release; pull-requests: write to
+      # open/update the release PR. Kept narrow per OpenSSF Scorecard's
+      # TokenPermissions guidance — workflow-level stays read-only.
+      contents: write
+      pull-requests: write
     steps:
       - uses: googleapis/release-please-action@5c625bfb5d1ff62eadeeb3772007f7f66fdcf071 # v4
         with:
