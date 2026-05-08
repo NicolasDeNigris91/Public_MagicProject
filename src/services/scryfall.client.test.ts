@@ -8,6 +8,20 @@ const mockedFetch = vi.fn();
 beforeEach(() => {
   vi.stubGlobal('fetch', mockedFetch);
   mockedFetch.mockReset();
+  // jsdom doesn't ship `matchMedia`; vitest 4's `vi.spyOn` requires the
+  // property to be an existing function before it can wrap it. Default
+  // return matches=false so callers like prefersReducedData() that don't
+  // explicitly stub matchMedia just see a non-matching query.
+  Object.defineProperty(window, 'matchMedia', {
+    configurable: true,
+    writable: true,
+    value: vi.fn(() => ({
+      matches: false,
+      media: '',
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    })),
+  });
 });
 
 afterEach(() => {

@@ -30,7 +30,10 @@ export interface UseFocusTrapOptions {
  * keeps focus inside, inert keeps focus from being able to leave by
  * other means (mouse click on a sibling, programmatic focus()).
  */
-export function useFocusTrap(ref: RefObject<HTMLElement>, options: UseFocusTrapOptions = {}): void {
+export function useFocusTrap(
+  ref: RefObject<HTMLElement | null>,
+  options: UseFocusTrapOptions = {},
+): void {
   const { autoFocus = true } = options;
 
   useEffect(() => {

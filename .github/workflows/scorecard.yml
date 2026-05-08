@@ -12,12 +12,14 @@ on:
     - cron: '23 5 * * 1'
   push:
     branches: [main]
+  pull_request:
+    branches: [main]
 
 permissions: read-all
 
 jobs:
   analysis:
-    name: Scorecard analysis
+    name: OpenSSF Scorecard analysis
     runs-on: ubuntu-latest
     permissions:
       # Needed by the action to upload SARIF results to code-scanning.
