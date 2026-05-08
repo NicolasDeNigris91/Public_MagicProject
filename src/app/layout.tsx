@@ -27,14 +27,14 @@ export const viewport = {
   initialScale: 1,
 };
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default async function RootLayout({ children }: { children: ReactNode }) {
   // Reading x-nonce here opts the route into dynamic rendering and
   // signals Next.js to propagate the nonce onto every framework
   // <script> it injects (chunk loader, RSC payload, hydration). The
   // <Script id="csp-nonce-anchor"> below carries the nonce explicitly
   // so 'strict-dynamic' has a trusted seed even on routes that
   // don't author their own scripts.
-  const nonce = headers().get('x-nonce') ?? undefined;
+  const nonce = (await headers()).get('x-nonce') ?? undefined;
   return (
     <html lang="en">
       <body>

@@ -16,7 +16,7 @@ afterEach(() => {
   consoleErrorSpy.mockRestore();
 });
 
-function Boom({ message = 'kaboom' }: { message?: string }): JSX.Element {
+function Boom({ message = 'kaboom' }: { message?: string }): never {
   throw new Error(message);
 }
 
@@ -74,8 +74,8 @@ describe('ErrorBoundary', () => {
       </ErrorBoundary>,
     );
     // At least one console.error call carried our boundary's tag.
-    const sawBoundaryLog = consoleErrorSpy.mock.calls.some((args) =>
-      args.some((arg) => typeof arg === 'string' && arg.includes('[ErrorBoundary]')),
+    const sawBoundaryLog = consoleErrorSpy.mock.calls.some((args: unknown[]) =>
+      args.some((arg: unknown) => typeof arg === 'string' && arg.includes('[ErrorBoundary]')),
     );
     expect(sawBoundaryLog).toBe(true);
   });

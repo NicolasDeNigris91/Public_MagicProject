@@ -75,93 +75,89 @@ function freshStore() {
 }
 
 describe('useGameStore — long-session invariants', () => {
-  it(
-    'state invariants hold across 30–80 random store actions',
-    () => {
-      fc.assert(
-        fc.property(fc.array(actionArb, { minLength: 30, maxLength: 80 }), (actions) => {
-          const store = freshStore();
-          let prevLogLen = store.getState().gameLog.length;
-          let prevTurnNumber = store.getState().turnNumber;
-          let prevPlayerManaMax = store.getState().player.manaMax;
-          let prevOpponentManaMax = store.getState().opponent.manaMax;
+  it('state invariants hold across 30–80 random store actions', { timeout: 30_000 }, () => {
+    fc.assert(
+      fc.property(fc.array(actionArb, { minLength: 30, maxLength: 80 }), (actions) => {
+        const store = freshStore();
+        let prevLogLen = store.getState().gameLog.length;
+        let prevTurnNumber = store.getState().turnNumber;
+        let prevPlayerManaMax = store.getState().player.manaMax;
+        let prevOpponentManaMax = store.getState().opponent.manaMax;
 
-          for (const action of actions as Action[]) {
-            const before = store.getState();
-            const side = before.turn;
-            const me = before[side];
-            const them = side === 'player' ? before.opponent : before.player;
+        for (const action of actions as Action[]) {
+          const before = store.getState();
+          const side = before.turn;
+          const me = before[side];
+          const them = side === 'player' ? before.opponent : before.player;
 
-            switch (action.kind) {
-              case 'play': {
-                const card = me.hand[0];
-                if (card) store.getState().playCardToField(side, card.id);
-                break;
-              }
-              case 'attack-face': {
-                const att = me.battlefield.find((c) => !c.summoningSick && !c.attackedThisTurn);
-                if (att) store.getState().attack(att.id, null);
-                break;
-              }
-              case 'attack-blocker': {
-                const att = me.battlefield.find((c) => !c.summoningSick && !c.attackedThisTurn);
-                const blk = them.battlefield[0];
-                if (att) store.getState().attack(att.id, blk?.id ?? null);
-                break;
-              }
-              case 'end-turn':
-                store.getState().endTurn();
-                break;
+          switch (action.kind) {
+            case 'play': {
+              const card = me.hand[0];
+              if (card) store.getState().playCardToField(side, card.id);
+              break;
             }
-
-            const s = store.getState();
-
-            // Life is bounded below.
-            expect(s.player.life).toBeGreaterThanOrEqual(0);
-            expect(s.opponent.life).toBeGreaterThanOrEqual(0);
-
-            // Mana invariants on both sides.
-            expect(s.player.manaAvailable).toBeGreaterThanOrEqual(0);
-            expect(s.opponent.manaAvailable).toBeGreaterThanOrEqual(0);
-            expect(s.player.manaAvailable).toBeLessThanOrEqual(s.player.manaMax);
-            expect(s.opponent.manaAvailable).toBeLessThanOrEqual(s.opponent.manaMax);
-
-            // manaMax never goes down.
-            expect(s.player.manaMax).toBeGreaterThanOrEqual(prevPlayerManaMax);
-            expect(s.opponent.manaMax).toBeGreaterThanOrEqual(prevOpponentManaMax);
-            prevPlayerManaMax = s.player.manaMax;
-            prevOpponentManaMax = s.opponent.manaMax;
-
-            // Turn counter never decreases.
-            expect(s.turnNumber).toBeGreaterThanOrEqual(prevTurnNumber);
-            prevTurnNumber = s.turnNumber;
-
-            // gameLog never shrinks (front-truncation at MAX_LOG keeps
-            // length steady but doesn't drop entries below the cap).
-            expect(s.gameLog.length).toBeGreaterThanOrEqual(prevLogLen);
-            prevLogLen = s.gameLog.length;
-
-            // Card-id uniqueness within each player's three zones.
-            const playerIds = [...s.player.hand, ...s.player.battlefield, ...s.player.deck].map(
-              (c) => c.id,
-            );
-            expect(new Set(playerIds).size).toBe(playerIds.length);
-            const oppIds = [...s.opponent.hand, ...s.opponent.battlefield, ...s.opponent.deck].map(
-              (c) => c.id,
-            );
-            expect(new Set(oppIds).size).toBe(oppIds.length);
-
-            // No card ever crosses sides — the engine shouldn't ever
-            // mutate one player's battlefield from another's input.
-            const intersection = playerIds.filter((id) => oppIds.includes(id));
-            expect(intersection).toEqual([]);
+            case 'attack-face': {
+              const att = me.battlefield.find((c) => !c.summoningSick && !c.attackedThisTurn);
+              if (att) store.getState().attack(att.id, null);
+              break;
+            }
+            case 'attack-blocker': {
+              const att = me.battlefield.find((c) => !c.summoningSick && !c.attackedThisTurn);
+              const blk = them.battlefield[0];
+              if (att) store.getState().attack(att.id, blk?.id ?? null);
+              break;
+            }
+            case 'end-turn':
+              store.getState().endTurn();
+              break;
           }
-        }),
-        { numRuns: 50 },
-      );
-    },
-    { timeout: 30_000 },
-  );
+
+          const s = store.getState();
+
+          // Life is bounded below.
+          expect(s.player.life).toBeGreaterThanOrEqual(0);
+          expect(s.opponent.life).toBeGreaterThanOrEqual(0);
+
+          // Mana invariants on both sides.
+          expect(s.player.manaAvailable).toBeGreaterThanOrEqual(0);
+          expect(s.opponent.manaAvailable).toBeGreaterThanOrEqual(0);
+          expect(s.player.manaAvailable).toBeLessThanOrEqual(s.player.manaMax);
+          expect(s.opponent.manaAvailable).toBeLessThanOrEqual(s.opponent.manaMax);
+
+          // manaMax never goes down.
+          expect(s.player.manaMax).toBeGreaterThanOrEqual(prevPlayerManaMax);
+          expect(s.opponent.manaMax).toBeGreaterThanOrEqual(prevOpponentManaMax);
+          prevPlayerManaMax = s.player.manaMax;
+          prevOpponentManaMax = s.opponent.manaMax;
+
+          // Turn counter never decreases.
+          expect(s.turnNumber).toBeGreaterThanOrEqual(prevTurnNumber);
+          prevTurnNumber = s.turnNumber;
+
+          // gameLog never shrinks (front-truncation at MAX_LOG keeps
+          // length steady but doesn't drop entries below the cap).
+          expect(s.gameLog.length).toBeGreaterThanOrEqual(prevLogLen);
+          prevLogLen = s.gameLog.length;
+
+          // Card-id uniqueness within each player's three zones.
+          const playerIds = [...s.player.hand, ...s.player.battlefield, ...s.player.deck].map(
+            (c) => c.id,
+          );
+          expect(new Set(playerIds).size).toBe(playerIds.length);
+          const oppIds = [...s.opponent.hand, ...s.opponent.battlefield, ...s.opponent.deck].map(
+            (c) => c.id,
+          );
+          expect(new Set(oppIds).size).toBe(oppIds.length);
+
+          // No card ever crosses sides — the engine shouldn't ever
+          // mutate one player's battlefield from another's input.
+          const intersection = playerIds.filter((id) => oppIds.includes(id));
+          expect(intersection).toEqual([]);
+        }
+      }),
+      { numRuns: 50 },
+    );
+  });
 
   it('once winner flips, neither life value moves on subsequent actions', () => {
     fc.assert(

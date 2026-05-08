@@ -1,7 +1,23 @@
-import { describe, it, expect, vi, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { prefersReducedData } from './media';
 
 describe('prefersReducedData', () => {
+  // jsdom doesn't ship `matchMedia`; vitest 4's `vi.spyOn` requires the
+  // property to be an existing function before it can wrap it. Default
+  // return matches=false so callers that don't explicitly stub it just
+  // see a non-matching query.
+  beforeEach(() => {
+    Object.defineProperty(window, 'matchMedia', {
+      configurable: true,
+      writable: true,
+      value: vi.fn(() => ({
+        matches: false,
+        media: '',
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+      })),
+    });
+  });
   afterEach(() => vi.restoreAllMocks());
 
   it('returns true when the media query matches', () => {

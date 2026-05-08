@@ -7,7 +7,7 @@ import { useEffect, type RefObject } from 'react';
  * prop, because React 18 warns on unknown DOM attributes - `inert`
  * isn't first-class until React 19.
  */
-export function useInertWhile(ref: RefObject<HTMLElement>, active: boolean) {
+export function useInertWhile(ref: RefObject<HTMLElement | null>, active: boolean) {
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
