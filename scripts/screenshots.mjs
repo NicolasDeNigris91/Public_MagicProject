@@ -41,8 +41,6 @@ const playerHand = () =>
   page.locator('section[aria-label^="Your hand"] button[aria-label*="mana cost"]');
 const playerField = () =>
   page.locator('[aria-label="Your battlefield"] button[aria-label*="mana cost"]');
-const opponentField = () =>
-  page.locator('[aria-label="Opponent battlefield"] button[aria-label*="mana cost"]');
 
 async function playCardFromHand() {
   const cards = playerHand();
