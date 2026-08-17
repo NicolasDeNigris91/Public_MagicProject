@@ -39,7 +39,7 @@
   "dependencies": {
     "@sentry/browser": "^10.69.0",
     "framer-motion": "^11.11.0",
-    "next": "^15.5.21",
+    "next": "^16.3.1",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "web-vitals": "^5.2.0",
