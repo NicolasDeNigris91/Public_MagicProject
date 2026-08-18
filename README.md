@@ -32,7 +32,7 @@ A keyboard-first, screen-reader-first TCG demo built on the [Scryfall API](https
 
 | Concern    | Choice                                                                                                                                |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| Framework  | Next.js 14 (App Router) + TypeScript (strict, `exactOptionalPropertyTypes`)                                                           |
+| Framework  | Next.js 15 (App Router) + TypeScript (strict, `exactOptionalPropertyTypes`)                                                           |
 | State      | Zustand factory `createGameStore({ clock, idGen, getLang })` for determinism                                                          |
 | Animation  | Framer Motion + CSS keyframes (with `prefers-reduced-motion` honored)                                                                 |
 | Data       | Scryfall REST via native `fetch` + `AbortController` timeout + Zod schemas at the boundary, retry-with-backoff, offline fallback deck |
